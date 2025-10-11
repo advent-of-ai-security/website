@@ -1,0 +1,159 @@
+---
+import '../styles/global.css';
+import { Font } from 'astro:assets';
+const title = 'Advent of AI Security 2025 — Coming Soon';
+const description = '25 days • 25 AI security puzzles • Launches December 1, 2025';
+export const prerender = true;
+---
+
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary" />
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
+		<meta id="theme-color" name="theme-color" content="#ffffff" />
+		<script is:inline>
+			// Apply stored theme early to avoid flash
+			(() => {
+				try {
+					const STORAGE_KEY = 'theme';
+					const t = localStorage.getItem(STORAGE_KEY) || 'system';
+					const m = window.matchMedia('(prefers-color-scheme: dark)');
+					const scheme = t === 'system' ? (m.matches ? 'dark' : 'light') : t;
+					document.documentElement.dataset.theme = scheme;
+					document.getElementById('theme-color')?.setAttribute('content', scheme === 'dark' ? '#0a0a0a' : '#ffffff');
+				} catch {}
+			})();
+		</script>
+		<Font cssVariable="--font-plex-mono" preload />
+		<style is:global>
+			:root { 
+				--font-body: var(--font-plex-mono);
+				--bg: #ffffff; 
+				--fg: #111827; 
+				--muted: #6b7280; 
+				--accent: #059669;
+				--selection: rgba(16,185,129,0.10);
+				color-scheme: light;
+			}
+			:root[data-theme='dark'] {
+				--bg: #0a0a0a; 
+				--fg: #e5e7eb; 
+				--muted: #9ca3af; 
+				--accent: #34d399;
+				--selection: rgba(16,185,129,0.20);
+				color-scheme: dark;
+			}
+			body { font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+			::selection { background: var(--selection); }
+		</style>
+		<!-- Uncomment to avoid indexing before launch
+		<meta name="robots" content="noindex, nofollow" />
+		-->
+	</head>
+	<body class="min-h-dvh bg-[var(--bg)] text-[var(--fg)] antialiased">
+		<main class="relative min-h-dvh w-full p-3 sm:p-4 md:p-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+			<button id="theme-toggle" class="fixed right-2 top-2 sm:right-3 sm:top-3 inline-flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center text-[var(--fg)] opacity-80 hover:opacity-100 z-10 touch-manipulation" aria-label="Toggle theme" title="Toggle theme">
+				<!-- Lucide Sun -->
+				<svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<circle cx="12" cy="12" r="4" />
+					<line x1="12" y1="2" x2="12" y2="4" />
+					<line x1="12" y1="20" x2="12" y2="22" />
+					<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+					<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+					<line x1="2" y1="12" x2="4" y2="12" />
+					<line x1="20" y1="12" x2="22" y2="12" />
+					<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+					<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+				</svg>
+				<!-- Lucide Moon -->
+				<svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+				</svg>
+				<!-- Lucide Laptop (system) -->
+				<svg id="icon-system" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<rect x="3" y="4" width="18" height="12" rx="2" />
+					<line x1="2" y1="20" x2="22" y2="20" />
+				</svg>
+			</button>
+			<section class="w-full max-w-full">
+				<h1 class="sr-only">Advent of AI Security 2025</h1>
+					<div class="text-base sm:text-lg"><span class="text-[var(--accent)]">$</span> <span class="text-[var(--fg)]">advent-of-ai-security</span></div>
+					<div class="mt-2 overflow-x-auto">
+						<div class="grid grid-cols-[9ch_1fr] sm:grid-cols-[10ch_1fr] gap-x-2 sm:gap-x-3 leading-6 sm:leading-7 text-sm sm:text-base">
+							<div class="text-[var(--muted)]">title:</div><div class="text-[var(--fg)] min-w-0 break-words">Advent of AI Security 2025</div>
+							<div class="text-[var(--muted)]">launch:</div><div class="text-[var(--fg)] min-w-0 break-words"><time datetime="2025-12-01">December 1, 2025</time></div>
+							<div class="text-[var(--muted)]">countdown:</div><div class="tabular-nums text-[var(--fg)] min-w-0"><time id="cd" class="whitespace-nowrap tracking-[0.02em] text-[0.95rem] sm:text-[1.05rem]" datetime="P0DT00H00M00S">—</time></div>
+						</div>
+					</div>
+			</section>
+		</main>
+
+		<script>
+			// Theme handling (light | dark | system)
+			const STORAGE_KEY = 'theme';
+			const media = window.matchMedia('(prefers-color-scheme: dark)');
+			const root = document.documentElement;
+			const btn = document.getElementById('theme-toggle');
+			const iconSun = document.getElementById('icon-sun');
+			const iconMoon = document.getElementById('icon-moon');
+			const iconSystem = document.getElementById('icon-system');
+
+			function applyTheme(mode) {
+				const scheme = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
+				root.dataset.theme = scheme;
+				document.getElementById('theme-color')?.setAttribute('content', scheme === 'dark' ? '#0a0a0a' : '#ffffff');
+				iconSun.classList.add('hidden');
+				iconMoon.classList.add('hidden');
+				iconSystem.classList.add('hidden');
+				if (mode === 'light') iconSun.classList.remove('hidden');
+				else if (mode === 'dark') iconMoon.classList.remove('hidden');
+				else iconSystem.classList.remove('hidden');
+				btn?.setAttribute('aria-label', `Theme: ${mode}. Click to change`);
+			}
+
+			function getNext(mode) {
+				return mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light';
+			}
+
+			let theme = localStorage.getItem(STORAGE_KEY) || 'system';
+			applyTheme(theme);
+			media.addEventListener('change', () => {
+				if (theme === 'system') applyTheme(theme);
+			});
+			btn?.addEventListener('click', () => {
+				theme = getNext(theme);
+				localStorage.setItem(STORAGE_KEY, theme);
+				applyTheme(theme);
+			});
+			const target = Date.parse('2025-12-01T00:00:00Z');
+			const cd = document.getElementById('cd');
+			function tick() {
+				const now = Date.now();
+				let diff = Math.max(0, target - now);
+				const days = Math.floor(diff / 86_400_000);
+				diff -= days * 86_400_000;
+				const hours = Math.floor(diff / 3_600_000);
+				diff -= hours * 3_600_000;
+				const mins = Math.floor(diff / 60_000);
+				diff -= mins * 60_000;
+				const secs = Math.floor(diff / 1_000);
+				const iso = `P${String(days)}DT${String(hours).padStart(2, '0')}H${String(mins).padStart(2, '0')}M${String(secs).padStart(2, '0')}S`;
+				const display = `${String(days)}D\u2009${String(hours).padStart(2, '0')}H\u2009${String(mins).padStart(2, '0')}M\u2009${String(secs).padStart(2, '0')}S`;
+				cd.textContent = display;
+				cd.setAttribute('datetime', iso);
+			}
+			tick();
+			setInterval(tick, 1000);
+		</script>
+	</body>
+	</html>
