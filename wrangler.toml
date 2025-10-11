@@ -1,4 +1,4 @@
-name = "website"
+name = "advent-of-ai-security-website"
 main = "./dist/_worker.js"
 compatibility_date = "2025-10-11"
 
