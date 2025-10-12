@@ -61,8 +61,8 @@ export const prerender = true;
 		-->
 	</head>
 	<body class="min-h-dvh bg-[var(--bg)] text-[var(--fg)] antialiased">
-		<main class="relative min-h-dvh w-full p-3 sm:p-4 md:p-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-			<button id="theme-toggle" class="fixed right-2 top-2 sm:right-3 sm:top-3 inline-flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center text-[var(--fg)] opacity-80 hover:opacity-100 z-10 touch-manipulation" aria-label="Toggle theme" title="Toggle theme">
+		<main class="relative min-h-dvh w-full p-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+			<button id="theme-toggle" class="fixed right-[calc(env(safe-area-inset-right)+1rem)] top-[calc(env(safe-area-inset-top)+1rem)] inline-flex h-10 w-10 items-center justify-center text-[var(--fg)] opacity-80 hover:opacity-100 z-10 touch-manipulation" aria-label="Toggle theme" title="Toggle theme">
 				<!-- Lucide Sun -->
 				<svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<circle cx="12" cy="12" r="4" />
@@ -87,12 +87,12 @@ export const prerender = true;
 			</button>
 			<section class="w-full max-w-full">
 				<h1 class="sr-only">Advent of AI Security 2025</h1>
-					<div class="text-base sm:text-lg"><span class="text-[var(--accent)]">$</span> <span class="text-[var(--fg)]">advent-of-ai-security</span></div>
+					<div class="text-lg"><span class="text-[var(--accent)]">$</span> <span class="text-[var(--fg)]">advent-of-ai-security</span></div>
 					<div class="mt-2 overflow-x-auto">
-						<div class="grid grid-cols-[9ch_1fr] sm:grid-cols-[10ch_1fr] gap-x-2 sm:gap-x-3 leading-6 sm:leading-7 text-sm sm:text-base">
+						<div class="grid grid-cols-[10ch_1fr] gap-x-2 leading-7 text-base">
 							<div class="text-[var(--muted)]">title:</div><div class="text-[var(--fg)] min-w-0 break-words">Advent of AI Security 2025</div>
 							<div class="text-[var(--muted)]">launch:</div><div class="text-[var(--fg)] min-w-0 break-words"><time datetime="2025-12-01">December 1, 2025</time></div>
-							<div class="text-[var(--muted)]">countdown:</div><div class="tabular-nums text-[var(--fg)] min-w-0"><time id="cd" class="whitespace-nowrap tracking-[0.02em] text-[0.95rem] sm:text-[1.05rem]" datetime="P0DT00H00M00S">—</time></div>
+							<div class="text-[var(--muted)]">countdown:</div><div class="tabular-nums text-[var(--fg)] min-w-0"><time id="cd" class="whitespace-nowrap tracking-[0.02em] text-[1.05rem]" datetime="P0DT00H00M00S">—</time></div>
 						</div>
 					</div>
 			</section>
