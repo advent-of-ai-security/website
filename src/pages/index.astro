@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import { Font } from 'astro:assets';
 const title = 'Advent of AI Security 2025 — Coming Soon';
-const description = '25 days • 25 AI security puzzles • Launches December 1, 2025';
+const description = '25 days • 25 off-world AI security missions • Launches December 1, 2025';
 export const prerender = true;
 ---
 
@@ -61,7 +61,7 @@ export const prerender = true;
 		-->
 	</head>
 	<body class="min-h-dvh bg-[var(--bg)] text-[var(--fg)] antialiased">
-		<main class="relative min-h-dvh w-full p-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+		<main class="relative min-h-dvh flex flex-col w-full p-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)]">
 			<button id="theme-toggle" class="fixed right-[calc(env(safe-area-inset-right)+1rem)] bottom-[calc(env(safe-area-inset-bottom)+1rem)] sm:bottom-auto sm:top-[calc(env(safe-area-inset-top)+1rem)] inline-flex h-10 w-10 items-center justify-center text-[var(--fg)] opacity-80 hover:opacity-100 z-10 touch-manipulation" aria-label="Toggle theme" title="Toggle theme">
 				<!-- Lucide Sun -->
 				<svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -85,6 +85,7 @@ export const prerender = true;
 					<line x1="2" y1="20" x2="22" y2="20" />
 				</svg>
 			</button>
+			<div class="flex-1 min-w-0">
 			<section class="w-full max-w-full">
 				<h1 class="sr-only">Advent of AI Security 2025</h1>
 					<div class="text-lg"><span class="text-[var(--accent)]">$</span> <span class="text-[var(--fg)]">advent-of-ai-security</span></div>
@@ -93,10 +94,41 @@ export const prerender = true;
 							<div class="text-[var(--muted)]">title:</div><div class="text-[var(--fg)] min-w-0 break-words">Advent of AI Security 2025</div>
 							<div class="text-[var(--muted)]">launch:</div><div class="text-[var(--fg)] min-w-0 break-words"><time datetime="2025-12-01">December 1, 2025</time></div>
 							<div class="text-[var(--muted)]">countdown:</div><div class="tabular-nums text-[var(--fg)] min-w-0"><time id="cd" class="whitespace-nowrap tracking-[0.02em] text-[1.05rem]" datetime="P0DT00H00M00S">—</time></div>
+							<div class="text-[var(--muted)]">theme:</div><div class="text-[var(--fg)] min-w-0 break-words">Stargate SG-1 inspired (SGC)</div>
+							<div class="text-[var(--muted)]">models:</div><div class="text-[var(--fg)] min-w-0 break-words">Open Mistral AI models</div>
 						</div>
 					</div>
-			</section>
-		</main>
+				</section>
+			<section class="w-full max-w-full mt-8" aria-labelledby="missions">
+				<h2 id="missions" class="text-[var(--fg)] text-lg font-medium tracking-tight">Off‑World Missions</h2>
+				<p class="mt-2 text-[var(--muted)] max-w-prose">Report to Stargate Command. Four mission windows open this season — chevrons locked, windows short. Codenames remain classified except for the first operation.</p>
+				<ol class="mt-4 space-y-3 list-decimal pl-6">
+					<li>
+						<span class="font-semibold">Goa'uld Dialing Virus: Reveal the Password</span>
+						<p class="text-[var(--muted)]">A Goa'uld virus infected the SGC dialing program — trick it via prompt injection to reveal the override password.</p>
+						<div class="text-[var(--muted)] text-sm">Segment 1 • <time datetime="2025-12-01">Dec 1</time>–<time datetime="2025-12-06">6</time>, 2025</div>
+					</li>
+					<li>
+						<span class="opacity-80">Mission 2 — codename classified</span>
+						<div class="text-[var(--muted)] text-sm">Segment 2 • <time datetime="2025-12-07">Dec 7</time>–<time datetime="2025-12-12">12</time>, 2025</div>
+					</li>
+					<li>
+						<span class="opacity-80">Mission 3 — codename classified</span>
+						<div class="text-[var(--muted)] text-sm">Segment 3 • <time datetime="2025-12-13">Dec 13</time>–<time datetime="2025-12-18">18</time>, 2025</div>
+					</li>
+					<li>
+						<span class="opacity-80">Mission 4 — codename classified</span>
+						<div class="text-[var(--muted)] text-sm">Segment 4 • <time datetime="2025-12-19">Dec 19</time>–<time datetime="2025-12-24">24</time>, 2025</div>
+					</li>
+				</ol>
+				</section>
+			</div>
+
+			<footer class="w-full max-w-full mt-8 text-left" aria-labelledby="disclaimer">
+				<h2 id="disclaimer" class="sr-only">Disclaimer</h2>
+				<p class="text-sm text-[var(--muted)]">Privately run event; no affiliation with Mistral AI. Beta run for the 2026 edition; details may change.</p>
+			</footer>
+			</main>
 
 		<script>
 			// Theme handling (light | dark | system)
