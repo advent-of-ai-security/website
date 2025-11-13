@@ -2,7 +2,12 @@ import type { ReactNode } from 'react';
 import ShellSection from './ShellSection';
 import { anchorize } from '@/utils/anchorize';
 
-export default function TLDR({ children, className }: { children: ReactNode; className?: string }) {
+interface TLDRProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function TLDR({ children, className }: TLDRProps) {
   const anchorId = anchorize('TLDR');
   return (
     <ShellSection

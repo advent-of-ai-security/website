@@ -5,6 +5,10 @@ import astroD2 from 'astro-d2';
 
 import tailwindcss from '@tailwindcss/vite';
 
+interface VitePluginLike {
+  name: string;
+}
+
 import react from '@astrojs/react';
 
 import mdx from '@astrojs/mdx';
@@ -52,7 +56,7 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss() as any],
+    plugins: tailwindcss() as VitePluginLike[],
     build: {
       chunkSizeWarningLimit: 1500,
       rollupOptions: {

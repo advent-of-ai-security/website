@@ -2,17 +2,19 @@ import type { ReactNode } from 'react';
 import ShellSection from './ShellSection';
 import { anchorize } from '@/utils/anchorize';
 
+interface SectionProps {
+  title: string;
+  meta?: string;
+  className?: string;
+  children: ReactNode;
+}
+
 export default function Section({
   title,
   meta,
   className,
   children,
-}: {
-  title: string;
-  meta?: string;
-  className?: string;
-  children: ReactNode;
-}) {
+}: SectionProps) {
   const anchorId = anchorize(title);
   return (
     <ShellSection

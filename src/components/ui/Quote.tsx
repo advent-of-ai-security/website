@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react';
 
-export default function Quote({ children, source, href, minimal = false }: { children: ReactNode; source: string; href: string; minimal?: boolean }) {
+interface QuoteProps {
+  children: ReactNode;
+  source: string;
+  href: string;
+  minimal?: boolean;
+}
+
+export default function Quote({ children, source, href, minimal = false }: QuoteProps) {
   if (minimal) {
     return (
       <figure className="not-prose m-0">

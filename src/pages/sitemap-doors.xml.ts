@@ -9,9 +9,12 @@ export const GET: APIRoute = async ({ site, url }) => {
   const today = startOfDayUTC(new Date());
 
   const doors = entries
-    .filter((e) => e.data.date instanceof Date)
-    .map((e) => ({ slug: e.slug, date: e.data.date as Date }))
-    .filter((e) => startOfDayUTC(e.date) <= today)
+    .flatMap((entry) => {
+      const date = entry.data.date;
+      if (!(date instanceof Date)) return [];
+      return [{ slug: entry.slug, date }];
+    })
+    .filter((door) => startOfDayUTC(door.date) <= today)
     .sort((a, b) => slugCollator.compare(a.slug, b.slug));
 
   const base = site ?? new URL('/', url);
@@ -34,4 +37,3 @@ export const GET: APIRoute = async ({ site, url }) => {
     },
   });
 };
-

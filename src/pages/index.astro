@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css';
 import MonoAdvent from '@/components/MonoAdvent.tsx';
+import type { DoorDocument, DoorState } from '@/components/MonoAdvent.tsx';
 import SEO from '@/components/SEO.astro';
 import { Font } from 'astro:assets';
 import { UNLOCK_ALL_DOORS } from 'astro:env/server';
@@ -12,19 +13,19 @@ const description = 'A friendly, step-by-step Advent calendar of AI security ris
 const doorsCollection = await getCollection('doors');
 const todayUTC = startOfDayUTC(new Date());
 
-const doors = doorsCollection
+const doors: DoorDocument[] = doorsCollection
   .map((entry) => ({
     slug: entry.slug,
     title: entry.data.title,
     description: entry.data.description,
-    date: entry.data.date as Date | undefined,
+    date: entry.data.date,
   }))
   .filter((d): d is { slug: string; title: string; description: string | undefined; date: Date } => {
     return d.date instanceof Date && !Number.isNaN(d.date.getTime());
   })
-  .map((d) => {
+  .map((d): DoorDocument => {
     const dateMidnight = startOfDayUTC(d.date);
-    let state: 'open' | 'today' | 'locked';
+    let state: DoorState;
     if (UNLOCK_ALL_DOORS) state = 'open';
     else if (dateMidnight < todayUTC) state = 'open';
     else if (dateMidnight.getTime() === todayUTC.getTime()) state = 'today';
@@ -41,7 +42,7 @@ const doors = doorsCollection
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -67,6 +68,7 @@ const doors = doorsCollection
     />
   </head>
   <body>
+    <div id="top"></div>
     <MonoAdvent client:only="react" unlockAll={UNLOCK_ALL_DOORS} doors={doors} />
   </body>
 </html>

@@ -1,4 +1,4 @@
-export function anchorize(input: string, prefix = 'section') {
+export function anchorize(input: string, prefix = 'section'): string {
   const normalized = input
     .toLowerCase()
     .normalize('NFKD')

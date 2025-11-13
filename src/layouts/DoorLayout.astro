@@ -3,12 +3,19 @@ import '@/styles/global.css';
 import MetaBar from '@/components/ui/MetaBar.tsx';
 import FooterLinks from '@/components/FooterLinks.tsx';
 
-const { title, meta = [] } = Astro.props as { title: string; description?: string; meta?: string[] };
+export interface Props {
+  title: string;
+  description?: string;
+  meta?: string[];
+}
+
+const { title, meta = [] } = Astro.props as Props;
 ---
 
-<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col" style="gap: calc(var(--shell-gap) * 1.5);">
-  <div class="flex flex-col" style="gap: var(--shell-gap);">
-    <header class="grid" style="gap: var(--shell-gap);">
+<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[calc(var(--shell-gap)*1.5)]">
+  <div id="top"></div>
+  <div class="flex flex-col gap-[var(--shell-gap)]">
+    <header class="grid gap-[var(--shell-gap)]">
       <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">{title}</h1>
     </header>
     <div class="flex flex-wrap items-center gap-3">
@@ -22,7 +29,7 @@ const { title, meta = [] } = Astro.props as { title: string; description?: strin
     </div>
     <section class="shell-grid grid">
       <slot />
-      <section class="grid" style="gap: calc(var(--shell-gap) / 2);">
+      <section class="grid gap-[calc(var(--shell-gap)/2)]">
         <FooterLinks />
       </section>
     </section>

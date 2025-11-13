@@ -1,14 +1,18 @@
 ---
 import '@/styles/global.css';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import { UNLOCK_ALL_DOORS } from 'astro:env/server';
 import DoorLayout from '@/layouts/DoorLayout.astro';
 import { startOfDayUTC } from '@/utils/dates';
 import SEO from '@/components/SEO.astro';
 
-const { slug } = Astro.params as { slug: string };
+const slugParam = Astro.params.slug;
+if (!slugParam) {
+  return Astro.redirect('/', 302);
+}
+const slug = slugParam;
 const entries = await getCollection('doors');
-const entry = entries.find((e) => e.slug === slug) as CollectionEntry<'doors'> | undefined;
+const entry = entries.find((e) => e.slug === slug);
 
 if (!entry) {
   return Astro.redirect('/', 302);
@@ -57,7 +61,11 @@ const { data } = entry;
     />
   </head>
   <body>
-    <DoorLayout title={data.title} description={data.description} meta={data.meta ?? []}>
+    <DoorLayout
+      title={data.title}
+      meta={data.meta ?? []}
+      {...(data.description !== undefined ? { description: data.description } : {})}
+    >
       <Content />
     </DoorLayout>
   </body>

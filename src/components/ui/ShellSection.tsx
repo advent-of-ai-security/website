@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { IconArrowUp } from '@tabler/icons-react';
 
 type Props = {
   title: string;
@@ -22,7 +23,7 @@ export default function ShellSection({ title, meta, children, className, anchorI
         .join(' ')}
     >
       <div className="shell-section__card">
-        <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black/20 text-[0.75rem] uppercase tracking-[0.25em]">
+        <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black/20 text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
           {anchorId ? (
             <a href={`#${anchorId}`} className="no-underline text-current hover:text-black">
               {title}
@@ -30,7 +31,23 @@ export default function ShellSection({ title, meta, children, className, anchorI
           ) : (
             <span>{title}</span>
           )}
-          {meta && <span className="text-black/50 text-[0.6rem] tracking-[0.4em]">{meta}</span>}
+          <div className="flex items-center gap-2">
+            {meta && (
+              <span className="text-black/50 text-[0.6rem] tracking-[0.4em]">{meta}</span>
+            )}
+            <a
+              href="#top"
+              title="Back to top"
+              aria-label="Scroll back to top"
+              className="inline-flex items-center justify-center text-black/40 hover:text-black transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              <IconArrowUp size={18} aria-hidden="true" />
+            </a>
+          </div>
         </header>
         <div className="shell-section__body text-[14px] leading-relaxed">{children}</div>
       </div>
