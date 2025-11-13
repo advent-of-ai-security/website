@@ -24,6 +24,9 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install d2
+        run: curl -fsSL https://d2lang.com/install.sh | sh -s --
+
       - name: Install deps
         run: bun install --frozen-lockfile
 

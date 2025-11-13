@@ -1,0 +1,64 @@
+---
+import '@/styles/global.css';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { UNLOCK_ALL_DOORS } from 'astro:env/server';
+import DoorLayout from '@/layouts/DoorLayout.astro';
+import { startOfDayUTC } from '@/utils/dates';
+import SEO from '@/components/SEO.astro';
+
+const { slug } = Astro.params as { slug: string };
+const entries = await getCollection('doors');
+const entry = entries.find((e) => e.slug === slug) as CollectionEntry<'doors'> | undefined;
+
+if (!entry) {
+  return Astro.redirect('/', 302);
+}
+
+const todayUTC = startOfDayUTC(new Date());
+const dateObj = entry.data.date;
+const isFuture = dateObj instanceof Date && startOfDayUTC(dateObj) > todayUTC;
+
+if (!UNLOCK_ALL_DOORS && isFuture) {
+  return Astro.redirect('/', 302);
+}
+
+const { Content } = await entry.render();
+const { data } = entry;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{data.title}</title>
+    {data.description && <meta name="description" content={data.description} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <SEO
+      title={data.title}
+      type="article"
+      canonicalPath={`/doors/${slug}`}
+      image="/favicon.svg"
+      siteName="Advent of AI Security"
+      {...(data.description !== undefined ? { description: data.description } : {})}
+      {...(dateObj instanceof Date ? { publishedTime: dateObj.toISOString() } : {})}
+      jsonLd={{
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: data.title,
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        datePublished: dateObj instanceof Date ? dateObj.toISOString() : undefined,
+        mainEntityOfPage: new URL(`/doors/${slug}`, Astro.site ?? Astro.url).toString(),
+        publisher: {
+          '@type': 'Organization',
+          name: 'Advent of AI Security'
+        }
+      }}
+    />
+  </head>
+  <body>
+    <DoorLayout title={data.title} description={data.description} meta={data.meta ?? []}>
+      <Content />
+    </DoorLayout>
+  </body>
+</html>

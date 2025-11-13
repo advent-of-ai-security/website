@@ -1,0 +1,64 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+  type?: 'website' | 'article';
+  canonicalPath?: string;
+  image?: string;
+  robots?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  locale?: string;
+  siteName?: string;
+  twitterCard?: 'summary' | 'summary_large_image';
+  jsonLd?: Record<string, any> | Record<string, any>[];
+}
+
+const {
+  title,
+  description,
+  type = 'website',
+  canonicalPath,
+  image = '/favicon.svg',
+  robots = 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1',
+  publishedTime,
+  modifiedTime,
+  locale = 'en_US',
+  siteName = 'Advent of AI Security',
+  twitterCard = 'summary_large_image',
+  jsonLd,
+} = Astro.props as Props;
+
+const siteBase = Astro.site ?? new URL('/', Astro.url);
+const url = new URL(canonicalPath ?? Astro.url.pathname, siteBase);
+const imageUrl = new URL(image, siteBase);
+const ogTitle = title;
+const ogDesc = description ?? '';
+const jsonLdData = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+---
+
+<Fragment>
+  <meta name="robots" content={robots} />
+  <link rel="canonical" href={url.toString()} />
+  <meta property="og:site_name" content={siteName} />
+  <meta property="og:type" content={type} />
+  <meta property="og:locale" content={locale} />
+  <meta property="og:title" content={ogTitle} />
+  {ogDesc && <meta property="og:description" content={ogDesc} />}
+  <meta property="og:url" content={url.toString()} />
+  <meta property="og:image" content={imageUrl.toString()} />
+  <meta property="og:image:alt" content={`${ogTitle} — ${siteName}`} />
+  <meta name="twitter:card" content={twitterCard} />
+  <meta name="twitter:title" content={ogTitle} />
+  {ogDesc && <meta name="twitter:description" content={ogDesc} />}
+  <meta name="twitter:image" content={imageUrl.toString()} />
+  {type === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+  {type === 'article' && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+  {jsonLdData.map((obj) => (
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(obj).replace(/</g, '\\u003c')}
+    />
+  ))}
+</Fragment>

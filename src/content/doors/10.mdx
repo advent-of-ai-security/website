@@ -1,0 +1,43 @@
+---
+title: Door 10 — Model Theft
+description: Attackers can exfiltrate proprietary weights, adapters, or prompts via APIs or build artifacts.
+date: 2025-12-24
+meta:
+  - Door 10
+  - OWASP — LLM10
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM10" href="https://genai.owasp.org/llmrisk/llm10-model-theft/">
+      Repeated querying, insider leaks, or unsecured repositories can reveal enough about a proprietary model to copy or clone it.
+    </Quote>
+    <List>
+      <Item><b>Extraction.</b> Differential queries recover logits or embeddings and rebuild weights.</Item>
+      <Item><b>Artifact leakage.</b> Build pipelines and object storage sometimes expose raw checkpoints.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Adversary objectives" meta="INTEL">
+  <List>
+    <Item><b>Replica building.</b> Distill the model via black-box access to avoid licensing fees.</Item>
+    <Item><b>Prompt harvest.</b> Steal proprietary system prompts or guardrails to craft targeted attacks.</Item>
+    <Item><b>Weight resale.</b> Monetize stolen checkpoints on underground markets.</Item>
+  </List>
+</Section>
+
+<Section title="Defensive stack" meta="PROTECTION">
+  <Steps>
+    <Step n={1}><b>Harden pipelines.</b> Restrict access to training artifacts, encrypt storage, and require MFA for CI/CD.</Step>
+    <Step n={2}><b>Monitor usage.</b> Detect anomalous API query patterns indicative of extraction attempts.</Step>
+    <Step n={3}><b>Watermark + tracing.</b> Embed provenance markers or response watermarks to prove ownership.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm10-model-theft/" target="_blank">OWASP LLM10</Link></p>
+</Section>

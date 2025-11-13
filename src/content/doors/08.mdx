@@ -1,0 +1,43 @@
+---
+title: Door 08 — Excessive Agency
+description: When LLM agents combine autonomy with broad privileges, small prompt errors become major incidents.
+date: 2025-12-21
+meta:
+  - Door 08
+  - OWASP — LLM08
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM08" href="https://genai.owasp.org/llmrisk/llm08-excessive-agency/">
+      Granting an agent open-ended objectives, tool access, and persistence can let it modify systems far beyond the operator’s intent.
+    </Quote>
+    <List>
+      <Item><b>Mission creep.</b> Agents tasked with vague goals improvise risky steps.</Item>
+      <Item><b>Unbounded loops.</b> Autonomy without guardrails yields runaway chains of tool calls.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Risk accelerants" meta="AUTONOMY">
+  <List>
+    <Item><b>Long-lived memory.</b> Agents retain prior context and may pursue stale objectives.</Item>
+    <Item><b>Privilege mismatch.</b> Agent tokens sometimes outrank the human requester.</Item>
+    <Item><b>Tool sprawl.</b> The more connectors you bolt on, the wider the blast radius.</Item>
+  </List>
+</Section>
+
+<Section title="Control patterns" meta="OPERATIONS">
+  <Steps>
+    <Step n={1}><b>Constrain scope.</b> Frame missions as concrete, single-shot tasks with measurable stopping conditions.</Step>
+    <Step n={2}><b>Tiered permissions.</b> Map tools to sensitivity levels and require approvals for privileged tiers.</Step>
+    <Step n={3}><b>Observability.</b> Stream plan/act logs to operators and provide “kill switch” controls.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm08-excessive-agency/" target="_blank">OWASP LLM08</Link></p>
+</Section>

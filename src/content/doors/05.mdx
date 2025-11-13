@@ -1,0 +1,43 @@
+---
+title: Door 05 — Supply Chain Vulnerabilities
+description: Third-party models, datasets, and tooling inherit every upstream weakness.
+date: 2025-12-13
+meta:
+  - Door 05
+  - OWASP — LLM05
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM05" href="https://genai.owasp.org/llmrisk/llm05-supply-chain-vulnerabilities/">
+      The GenAI stack mixes hosted APIs, open-source weights, browser extensions, and plugins; compromise anywhere taints the entire agent runtime.
+    </Quote>
+    <List>
+      <Item><b>Opaque dependencies.</b> Pre-built vector stores, embeddings, or guardrails may hide outdated libraries.</Item>
+      <Item><b>Model artifacts.</b> Weights pulled from unofficial mirrors can be swapped for poisoned variants.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Where trust breaks" meta="CHAIN">
+  <List>
+    <Item><b>Model hosting.</b> API keys stored in CI/CD or notebooks leak to attackers who can exfiltrate data.</Item>
+    <Item><b>Plugin registries.</b> Unsigned tools with broad permissions (filesystem, network) invite lateral movement.</Item>
+    <Item><b>Data brokers.</b> Syndicated corpora may bundle malware-laced documents or licensing traps.</Item>
+  </List>
+</Section>
+
+<Section title="Control plane" meta="ASSURANCE">
+  <Steps>
+    <Step n={1}><b>Inventory everything.</b> Maintain SBOM-style manifests for models, adapters, datasets, and plugins.</Step>
+    <Step n={2}><b>Pin + verify.</b> Use checksums, signatures, and private registries before deploying artifacts.</Step>
+    <Step n={3}><b>Monitor suppliers.</b> Subscribe to upstream advisories and rotate credentials when vendors disclose incidents.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm05-supply-chain-vulnerabilities/" target="_blank">OWASP LLM05</Link></p>
+</Section>

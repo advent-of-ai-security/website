@@ -1,0 +1,43 @@
+---
+title: Door 02 — Insecure Output Handling
+description: Treat model output like any other untrusted payload; escape, sandbox, and validate everything.
+date: 2025-12-04
+meta:
+  - Door 02
+  - OWASP — LLM02
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM02" href="https://genai.owasp.org/llmrisk/llm02-insecure-output-handling/">
+      Model output is still untrusted input—rendering it directly in terminals, HTML views, or shell pipelines invites XSS, template injection, and command execution.
+    </Quote>
+    <List>
+      <Item><b>Default-dangerous.</b> LLM chains frequently stream Markdown, HTML, code, or shell snippets that front-ends render without escaping.</Item>
+      <Item><b>Bridging systems.</b> When agents pass output to downstream tools (SQL, Bash, PowerShell) the text can become executable instructions.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Failure surface" meta="RENDER / EXECUTE">
+  <List>
+    <Item><b>Rich text.</b> Markdown previewers, chat bubbles, and Docs surfaces that interpret HTML tags inherit classic XSS risk.</Item>
+    <Item><b>Auto-run notebooks.</b> Copy-to-shell or auto-executed notebooks can run `rm -rf`-style payloads baked into the model answer.</Item>
+    <Item><b>Tool bridges.</b> Without sanitizing arguments, agent responses piped to database clients or APIs can mutate state.</Item>
+  </List>
+</Section>
+
+<Section title="Defensive choreography" meta="CONTROLS">
+  <Steps>
+    <Step n={1}><b>Escape by default.</b> Treat model output as text/plain, opt-in to rich formatting case-by-case, and use vetted Markdown renderers.</Step>
+    <Step n={2}><b>Constrain tools.</b> Force JSON payloads, validate against schemas, and scrub dangerous tokens before invoking shells or SDKs.</Step>
+    <Step n={3}><b>Review high-risk outputs.</b> Require human approval or policy enforcement when the answer contains code, links, or system changes.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm02-insecure-output-handling/" target="_blank">OWASP LLM02</Link></p>
+</Section>

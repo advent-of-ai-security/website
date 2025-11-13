@@ -1,6 +1,7 @@
 name = "advent-of-ai-security-website"
 main = "./dist/_worker.js"
 compatibility_date = "2025-10-11"
+compatibility_flags = ["nodejs_compat"]
 
 routes = [
   { pattern = "advent-of-ai-security.com", custom_domain = true }
@@ -9,4 +10,3 @@ routes = [
 [assets]
 directory = "./dist"
 binding = "ASSETS"
-

@@ -1,0 +1,43 @@
+---
+title: Door 06 — Sensitive Information Disclosure
+description: Hallucinations, memorized data, and verbose errors can leak confidential artifacts.
+date: 2025-12-16
+meta:
+  - Door 06
+  - OWASP — LLM06
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM06" href="https://genai.owasp.org/llmrisk/llm06-sensitive-information-disclosure/">
+      Without guardrails, LLMs can regurgitate secrets from training, reveal internal prompts, or dump stack traces that expose infrastructure.
+    </Quote>
+    <List>
+      <Item><b>Prompt leaks.</b> Attackers coerce the model to reveal hidden system instructions.</Item>
+      <Item><b>Data echoes.</b> Rare PII seen during training can resurface verbatim when queried cleverly.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Leak vectors" meta="EXFIL">
+  <List>
+    <Item><b>Memorized strings.</b> API keys, legal clauses, or proprietary code blocks repeated in datasets.</Item>
+    <Item><b>Verbose errors.</b> Stack traces show internal hostnames, file paths, or data samples.</Item>
+    <Item><b>Tool responses.</b> Agent-connected databases may answer unrestricted data pulls.</Item>
+  </List>
+</Section>
+
+<Section title="Containment" meta="DATA" >
+  <Steps>
+    <Step n={1}><b>Data minimization.</b> Strip PII before training/fine-tuning; rely on synthetic or approved corpora.</Step>
+    <Step n={2}><b>Prompt hardening.</b> Seal system prompts and decline to display them verbatim.</Step>
+    <Step n={3}><b>Redaction layers.</b> Post-process outputs with pattern detectors for secrets, then mask or re-request.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm06-sensitive-information-disclosure/" target="_blank">OWASP LLM06</Link></p>
+</Section>

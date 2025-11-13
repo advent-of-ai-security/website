@@ -1,0 +1,43 @@
+---
+title: Door 09 — Over-Reliance
+description: Blind trust in model output erodes human judgment and allows subtle errors to ship.
+date: 2025-12-23
+meta:
+  - Door 09
+  - OWASP — LLM09
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM09" href="https://genai.owasp.org/llmrisk/llm09-over-reliance/">
+      When teams treat LLM output as authoritative, hallucinations, bias, or partial context slide into production decisions.
+    </Quote>
+    <List>
+      <Item><b>Automation bias.</b> People overweight fluent answers even when wrong.</Item>
+      <Item><b>Opaque reasoning.</b> Neuro-symbolic chains rarely expose why steps were taken.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Common failure cases" meta="HUMANS">
+  <List>
+    <Item><b>Unchecked summaries.</b> Reports and emails sent without human edits.</Item>
+    <Item><b>Approval rubber-stamping.</b> Operators approve actions they do not fully understand.</Item>
+    <Item><b>Compliance drift.</b> Regulatory phrases may be fabricated yet still filed.</Item>
+  </List>
+</Section>
+
+<Section title="Restoring trust-but-verify" meta="PLAYBOOK">
+  <Steps>
+    <Step n={1}><b>Dual controls.</b> Require attestation that a human reviewed high-impact outputs.</Step>
+    <Step n={2}><b>Explainability cues.</b> Surface citations, retrieval snippets, or uncertainty scores.</Step>
+    <Step n={3}><b>Training + culture.</b> Teach operators to challenge fluent but unsupported claims.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm09-over-reliance/" target="_blank">OWASP LLM09</Link></p>
+</Section>

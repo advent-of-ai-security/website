@@ -1,0 +1,43 @@
+---
+title: Door 03 — Training Data Poisoning
+description: When adversaries taint pre-training, fine-tuning, or RAG corpora the model internalizes their intent.
+date: 2025-12-07
+meta:
+  - Door 03
+  - OWASP — LLM03
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM03" href="https://genai.owasp.org/llmrisk/llm03-training-data-poisoning/">
+      Poisoned samples embedded in training or fine-tuning data can bias the model, insert covert instructions, or leak secrets on demand.
+    </Quote>
+    <List>
+      <Item><b>Pre-train drift.</b> Open web crawls inherit whatever attackers publish; long-tail samples can still sway niche behaviors.</Item>
+      <Item><b>Alignment sabotage.</b> Fine-tuning datasets are small—dozens of poisoned items can flip safety behaviors.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Attack patterns" meta="SOURCE CONTROL">
+  <List>
+    <Item><b>Corpus pollution.</b> Malicious blog posts, repos, or knowledge-base articles seeded with backdoor triggers.</Item>
+    <Item><b>Label flips.</b> Crowdsourced RLHF tasks where attackers mislabel toxic outputs as acceptable.</Item>
+    <Item><b>RAG grafts.</b> Poisoning the retrieval index so seemingly trusted snippets carry prompt-injection style instructions.</Item>
+  </List>
+</Section>
+
+<Section title="Mitigation tracks" meta="OPS">
+  <Steps>
+    <Step n={1}><b>Vet sources.</b> Maintain allow lists, use provenance metadata, and run content moderation before indexing.</Step>
+    <Step n={2}><b>Detect anomalies.</b> Analyze token distributions, embeddings, or classifier scores to flag outliers.</Step>
+    <Step n={3}><b>Version + rollback.</b> Snapshot datasets and indexes so compromised segments can be ejected quickly.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm03-training-data-poisoning/" target="_blank">OWASP LLM03</Link></p>
+</Section>

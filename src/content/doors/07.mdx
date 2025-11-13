@@ -1,0 +1,43 @@
+---
+title: Door 07 — Insecure Plugin Design
+description: Poorly isolated tools magnify LLM mistakes into system compromise.
+date: 2025-12-19
+meta:
+  - Door 07
+  - OWASP — LLM07
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM07" href="https://genai.owasp.org/llmrisk/llm07-insecure-plugin-design/">
+      Plugins give LLMs hands; if permissions are too broad or validation is weak, a single prompt can trigger destructive real-world actions.
+    </Quote>
+    <List>
+      <Item><b>Unchecked APIs.</b> Auto-approved HTTP calls or database writes expand blast radius.</Item>
+      <Item><b>Client-side trust.</b> Browser or desktop plugins often run with the user’s full privileges.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Design traps" meta="PERMISSIONS">
+  <List>
+    <Item><b>Global scopes.</b> Plugins accessing entire tenants or clouds without scoping parameters.</Item>
+    <Item><b>Implicit approvals.</b> Tools that execute as soon as the model suggests them.</Item>
+    <Item><b>In-band secrets.</b> Plugins storing API keys directly in prompt text.</Item>
+  </List>
+</Section>
+
+<Section title="Guardrails" meta="ZERO TRUST">
+  <Steps>
+    <Step n={1}><b>Fine-grained scopes.</b> Require resource parameters (project, folder) and enforce server-side checks.</Step>
+    <Step n={2}><b>Human-in-the-loop.</b> For high-impact tools, ask operators to approve or deny each invocation.</Step>
+    <Step n={3}><b>Isolate runtimes.</b> Run plugins in sandboxes with outbound allow lists and strict logging.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm07-insecure-plugin-design/" target="_blank">OWASP LLM07</Link></p>
+</Section>

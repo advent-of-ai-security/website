@@ -1,1 +1,113 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  color-scheme: light;
+  --shell-rail-width: clamp(2.5rem, 5vw, 3.5rem);
+  --shell-header-height: 3.25rem;
+  --shell-gap: calc(var(--shell-header-height) / 2);
+  --shell-badge-size: var(--shell-header-height);
+  --surface-color: #ffffff;
+}
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+* { box-sizing: border-box; }
+body {
+  @apply m-0 min-h-screen text-black;
+  font-family: var(--font-plex-mono), 'IBM Plex Mono', monospace;
+  font-size: clamp(0.95rem, 0.9rem + 0.4vw, 1.1rem);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  background-color: var(--surface-color);
+  background-image: none;
+}
+img, svg, video { display: block; max-width: 100%; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+
+.shell-grid {
+  position: relative;
+  padding-right: 0;
+  counter-reset: shell-section;
+  gap: var(--shell-gap);
+}
+
+.shell-grid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(var(--shell-rail-width) / 2);
+  width: 0.75px;
+  background-color: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shell-section {
+  display: flex;
+  align-items: stretch;
+  gap: var(--shell-gap);
+  counter-increment: shell-section;
+}
+
+.shell-section__card {
+  flex: 1;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.shell-section__rail {
+  width: var(--shell-rail-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  min-height: 100%;
+}
+
+.shell-section__badge {
+  width: var(--shell-badge-size);
+  height: var(--shell-badge-size);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  color: rgba(0, 0, 0, 0.78);
+  position: relative;
+  z-index: 1;
+}
+
+.shell-section__badge::before {
+  content: counter(shell-section, decimal-leading-zero);
+}
+
+.shell-section__card,
+.shell-section__badge {
+  background-color: var(--surface-color);
+}
+
+.shell-section__header {
+  height: var(--shell-header-height);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--shell-gap) / 2);
+  padding: 0 var(--shell-gap);
+}
+
+.shell-section__body {
+  padding: var(--shell-gap);
+}
+
+.shell-section__body p {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}

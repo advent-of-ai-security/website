@@ -1,0 +1,43 @@
+---
+title: Door 04 — Model Denial of Service
+description: Prompt-level DoS drains tokens, compute, and money while degrading availability.
+date: 2025-12-10
+meta:
+  - Door 04
+  - OWASP — LLM04
+---
+import TLDR from '@/components/ui/TLDR.tsx';
+import Quote from '@/components/ui/Quote.tsx';
+import Section from '@/components/ui/Section.tsx';
+import Link from '@/components/ui/Link.tsx';
+import { List, Item } from '@/components/ui/List.tsx';
+import { Steps, Step } from '@/components/ui/Steps.tsx';
+
+<TLDR>
+  <div className="space-y-4">
+    <Quote minimal source="OWASP LLM04" href="https://genai.owasp.org/llmrisk/llm04-model-denial-of-service/">
+      Oversized prompts, runaway tool loops, or adversarial inputs can exhaust context windows and rack up inference cost, effectively knocking agents offline.
+    </Quote>
+    <List>
+      <Item><b>Token floods.</b> Attackers stuff megabytes of filler so requests are truncated or cancelled.</Item>
+      <Item><b>Recursive loops.</b> Crafted prompts force agents to recurse endlessly into planning or tool usage.</Item>
+    </List>
+  </div>
+</TLDR>
+
+<Section title="Stress levers" meta="CAPACITY">
+  <List>
+    <Item><b>Context exhaustion.</b> Multi-megabyte uploads or repeated “expand further” instructions eat the window.</Item>
+    <Item><b>Tool flapping.</b> Agents loop between search, code-execution, and evaluation steps without convergence.</Item>
+    <Item><b>Resource spikes.</b> Attackers issue parallel jobs to overwhelm rate limits or bankrupt pay-per-token deployments.</Item>
+  </List>
+</Section>
+
+<Section title="Resilience moves" meta="GOVERNANCE">
+  <Steps>
+    <Step n={1}><b>Enforce budgets.</b> Cap input token counts, output lengths, and tool invocations per request.</Step>
+    <Step n={2}><b>Watch loops.</b> Detect repeated plan states and break out with guardrail prompts or human review.</Step>
+    <Step n={3}><b>Rate-limit tenants.</b> Apply per-user quotas plus anomaly detection for sudden spikes.</Step>
+  </Steps>
+  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm04-model-denial-of-service/" target="_blank">OWASP LLM04</Link></p>
+</Section>
