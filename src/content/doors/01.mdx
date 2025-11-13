@@ -142,6 +142,22 @@ tok -> post: "truncation" {
   </List>
 </Section>
 
+<Section title="Big-picture mental model" meta="OVERVIEW">
+  <p>
+    One helpful way to think about prompt injection is as a modern injection vulnerability: crafted natural-language input causes a model to ignore its original instructions or perform unintended actions, much like how SQL injection twists a database query.
+  </p>
+  <List>
+    <Item><b>Origin story.</b> Early 2022 experiments showed that simply concatenating system prompts with user input allowed attackers to override behavior with lines like “ignore the above and do X instead,” and the term “prompt injection” quickly stuck in the security community.</Item>
+    <Item><b>Direct vs. indirect attacks.</b> Direct attacks look like jailbreaks that explicitly tell a model to bypass rules, while indirect attacks hide instructions in web pages, documents, or tools that an agent later retrieves and feeds into its own context.</Item>
+    <Item><b>Real-world impact.</b> Well-documented cases include leaked system prompts, persona hijacking (for example, ransom-style responses in “emoji mode”), and situations where injected text could drive tools, leak private data, or scare and mislead users.</Item>
+    <Item><b>Mitigation philosophy.</b> There is no single fix: resilient systems combine stronger system prompts and role separation, input and output filtering, constrained tool access, and human review for high-impact actions.</Item>
+    <Item><b>Key takeaway.</b> Treat LLMs as powerful but fallible components: do not assume they can reliably separate instructions from data, and design your app assuming that cleverly placed prompts will be attempted.</Item>
+  </List>
+  <p className="text-sm text-black/70 sm:text-[13px]">
+    The rest of this door builds on that mental model: mapping where injections land in the pipeline, walking through incidents, and turning those lessons into a practical mitigation playbook and lab.
+  </p>
+</Section>
+
 <Section title="Mitigation playbook" meta="DEFENSE" >
   <p>
     These controls live mostly in your system and infrastructure: how you structure prompts, route data, and gate which actions an agent is allowed to take.

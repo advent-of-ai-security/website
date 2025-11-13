@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # VS Code settings
 .vscode/
+
+# generated diagrams
+public/d2/**/*.svg
