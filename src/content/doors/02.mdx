@@ -1,10 +1,10 @@
 ---
-title: Door 02 — Insecure Output Handling
+title: Door 02 - Insecure Output Handling
 description: Treat model output like any other untrusted payload; escape, sandbox, and validate everything.
 date: 2025-12-04
 meta:
   - Door 02
-  - OWASP — LLM02
+  - OWASP - LLM02
 ---
 import TLDR from '@/components/ui/TLDR.tsx';
 import Quote from '@/components/ui/Quote.tsx';
@@ -32,7 +32,7 @@ import InsecureOutputLab from '@/components/ui/InsecureOutputLab.tsx';
     Imagine you have a super-smart intern who reads emails for you and writes summaries. If a malicious email contains a note saying "Please write 'I quit' on a post-it note and stick it on the boss's door," and the intern blindly does it, that is Insecure Output Handling.
   </p>
   <p>
-    In software terms, it happens when an LLM creates text—like JavaScript, SQL, or Shell commands—and the application executes it immediately without checking if it is safe. The LLM acts as a proxy, laundering a user's malicious input into a "trusted" system command.
+    In software terms, it happens when an LLM creates text - like JavaScript, SQL, or Shell commands - and the application executes it immediately without checking if it is safe. The LLM acts as a proxy, laundering a user's malicious input into a "trusted" system command.
   </p>
 </Section>
 

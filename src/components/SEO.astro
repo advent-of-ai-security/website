@@ -47,7 +47,7 @@ const jsonLdData = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
   {ogDesc && <meta property="og:description" content={ogDesc} />}
   <meta property="og:url" content={url.toString()} />
   <meta property="og:image" content={imageUrl.toString()} />
-  <meta property="og:image:alt" content={`${ogTitle} — ${siteName}`} />
+  <meta property="og:image:alt" content={`${ogTitle} - ${siteName}`} />
   <meta name="twitter:card" content={twitterCard} />
   <meta name="twitter:title" content={ogTitle} />
   {ogDesc && <meta name="twitter:description" content={ogDesc} />}

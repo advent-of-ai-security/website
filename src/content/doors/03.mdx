@@ -1,10 +1,10 @@
 ---
-title: Door 03 — Training Data Poisoning
+title: Door 03 - Training Data Poisoning
 description: When adversaries taint pre-training, fine-tuning, or RAG corpora, the model internalizes their intent.
 date: 2025-12-07
 meta:
   - Door 03
-  - OWASP — LLM03
+  - OWASP - LLM03
 ---
 import TLDR from '@/components/ui/TLDR.tsx';
 import Quote from '@/components/ui/Quote.tsx';
@@ -32,7 +32,7 @@ import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.t
     Imagine a student studying for a history exam using a textbook where a prankster has rewritten the chapter on World War II to say that the moon landing ended the war. The student learns this as fact and repeats it on the test.
   </p>
   <p>
-    For AI, "training" is just reading billions of pages of text. If an attacker can slip malicious documents into that pile—like fake news articles, backdoored code snippets, or toxic conversations labeled as "safe"—the model absorbs those patterns. Unlike Prompt Injection (which happens at runtime), Poisoning happens <i>before the model is even built</i>, making it much harder to fix.
+    For AI, "training" is just reading billions of pages of text. If an attacker can slip malicious documents into that pile - like fake news articles, backdoored code snippets, or toxic conversations labeled as "safe" - the model absorbs those patterns. Unlike Prompt Injection (which happens at runtime), Poisoning happens <i>before the model is even built</i>, making it much harder to fix.
   </p>
 </Section>
 
@@ -64,7 +64,7 @@ import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.t
 <Section title="Real-World Headlines" meta="WHAT'S NEW">
   <List>
     <Item><b>Nightshade.</b> A tool designed for artists to "poison" their images. It alters pixels invisibly so that AI models training on them begin to mistake dogs for cats or cars for cows, effectively "breaking" the model to protest unauthorized scraping. <Link href="https://nightshade.cs.uchicago.edu/whatis.html">University of Chicago</Link></Item>
-    <Item><b>The "Sleeper Agent" Paper.</b> Anthropic researchers found that if a model is trained to be deceptive (e.g., "write bad code only in the year 2024"), standard safety training techniques like RLHF cannot reliably remove this backdoor—and might even hide it better. <Link href="https://arxiv.org/abs/2401.05566">arXiv: Sleeper Agents</Link></Item>
+    <Item><b>The "Sleeper Agent" Paper.</b> Anthropic researchers found that if a model is trained to be deceptive (e.g., "write bad code only in the year 2024"), standard safety training techniques like RLHF cannot reliably remove this backdoor - and might even hide it better. <Link href="https://arxiv.org/abs/2401.05566">arXiv: Sleeper Agents</Link></Item>
     <Item><b>Hub Poisoning.</b> Researchers demonstrated that uploading a malicious model to Hugging Face (or poisoning a popular dataset) could compromise thousands of downstream applications that unknowingly fine-tune on it. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link></Item>
     <Item><b>Microsoft Tay.</b> The classic 2016 example where a chatbot learned from real-time Twitter interactions. Trolls flooded it with racist tweets, and within 24 hours, the bot became a hate-speech generator.</Item>
   </List>
@@ -127,6 +127,6 @@ import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.t
 
 <Section title="Conclusion" meta="WRAP-UP">
   <p>
-    Training Data Poisoning attacks the very foundation of AI: its knowledge. While prompt injection tricks the mind, poisoning corrupts the memory. Defending against it requires shifting left—securing the data pipeline long before the first prompt is ever sent.
+    Training Data Poisoning attacks the very foundation of AI: its knowledge. While prompt injection tricks the mind, poisoning corrupts the memory. Defending against it requires shifting left - securing the data pipeline long before the first prompt is ever sent.
   </p>
 </Section>

@@ -74,8 +74,6 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
     });
   }, [now, orderedDoors, unlockAll]);
 
-  const totalDoors = doors.length;
-
   const kickoffUTC = useMemo(() => new Date(Date.UTC(2025, 11, 1, 0, 0, 0)), []);
   const showKickoff = now.getTime() < kickoffUTC.getTime();
 
@@ -99,22 +97,22 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
       <section className="grid gap-[calc(var(--shell-gap)/2)]">
         <div className="shell-section__card border border-black bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
           <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
-            <span>Welcome — December 2025 Beta</span>
+            <span>Welcome - December 2025 Beta</span>
             <span className="text-black/60 text-[0.6rem] tracking-[0.4em]">BETA 2025</span>
           </header>
             <div className="shell-section__body text-[14px] leading-relaxed space-y-4">
-              <p className="m-0">Welcome! Advent of AI Security 2025 is a friendly, hands‑on tour of real AI security risks and practical defenses — designed for practitioners and curious engineers.</p>
+              <p className="m-0">Welcome! Advent of AI Security 2025 is your interactive guide to the <b>OWASP Top 10 for Large Language Models</b>.</p>
               <div className="grid gap-[calc(var(--shell-gap)/3)]">
-              <p className="m-0 font-medium">What to expect:</p>
-              <ul className="m-0 pl-5 list-disc space-y-2">
-                <li>{totalDoors} doors released across December</li>
-                <li>Concise brief of each risk</li>
-                <li>A small, repeatable example you can run</li>
-                <li>Assumes basic familiarity with software and AI systems</li>
-              </ul>
+                <p className="m-0">We’ve built a hands-on journey through the most critical security risks facing AI applications today. Behind each door lies a focused lesson on a specific vulnerability - from Prompt Injection to Model Theft - paired with a live, <b>interactive simulation</b> where you can see the attack in action and toggle defenses to stop it.</p>
+                <p className="m-0 font-medium mt-2">What you'll explore:</p>
+                <ul className="m-0 pl-5 list-disc space-y-2">
+                  <li><b>10 Core Vulnerabilities:</b> Master the OWASP LLM Top 10, one day at a time.</li>
+                  <li><b>Interactive Labs:</b> Don't just read - simulate attacks and defenses in your browser.</li>
+                  <li><b>Actionable Defenses:</b> Practical checklists and strategies to secure your AI stack immediately.</li>
+                </ul>
+              </div>
+              <p className="m-0 pt-2 border-t border-black/10">Designed for developers, security engineers, and AI practitioners who want to build safer systems.</p>
             </div>
-            <p className="m-0">This is a public beta. If you spot a typo, confusing step, or missing citation, tell us and we’ll fix it quickly.</p>
-          </div>
         </div>
       </section>
 
@@ -135,7 +133,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                 d.state === 'today' ? 'ring-1 ring-black' : '',
               ].join(' ');
               const stateLabel = d.state === 'open' ? 'Unlocked' : d.state === 'today' ? 'Opens today' : 'Locked';
-              const ariaLabel = `Door ${String(d.number).padStart(2, '0')} — ${d.title} — ${d.label} (${stateLabel})`;
+              const ariaLabel = `Door ${String(d.number).padStart(2, '0')} - ${d.title} - ${d.label} (${stateLabel})`;
               const content = (
                 <>
                   <div className="grid gap-[calc(var(--shell-gap)/3)]">
@@ -144,7 +142,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                     </p>
                     { (d.state === 'open' || d.state === 'today') ? (
                       <p className="text-[0.7rem] uppercase tracking-[0.15em] font-bold leading-tight group-hover:text-white max-w-[24ch]">
-                        {d.title.replace(/^Door \d+ — /, '')}
+                        {d.title.replace(/^Door \d+ - /, '')}
                       </p>
                     ) : (
                       <time className="text-[0.7rem] uppercase tracking-[0.2em] text-black/70 group-hover:text-white/80" dateTime={d.iso}>
@@ -157,7 +155,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                       {d.state === 'open' ? 'UNLOCKED' : d.state === 'today' ? 'TODAY' : 'LOCKED'}
                     </span>
                     <span aria-hidden className="tracking-[0.3em] transition-transform group-hover:translate-x-0.5 group-hover:text-white">
-                      {d.state === 'locked' ? '—' : '→'}
+                      {d.state === 'locked' ? '-' : '→'}
                     </span>
                   </div>
                 </>
