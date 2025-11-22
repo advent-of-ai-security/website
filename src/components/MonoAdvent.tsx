@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { startOfDayUTC, isSameUTC, formatDateLabel, slugCollator } from '@/utils/dates';
 import FooterLinks from './FooterLinks';
 import Countdown from './Countdown';
@@ -100,18 +101,28 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
             <span>Welcome - December 2025 Beta</span>
             <span className="text-black/60 text-[0.6rem] tracking-[0.4em]">BETA 2025</span>
           </header>
-            <div className="shell-section__body text-[14px] leading-relaxed space-y-4">
-              <p className="m-0">Welcome! Advent of AI Security 2025 is your interactive guide to the <b>OWASP Top 10 for Large Language Models</b>.</p>
-              <div className="grid gap-[calc(var(--shell-gap)/3)]">
+            <div className="shell-section__body text-[14px] leading-relaxed flex flex-col gap-6">
+              <div>
+                <p className="m-0 mb-4">Welcome! Advent of AI Security 2025 is your interactive guide to the <b>OWASP Top 10 for Large Language Models</b>.</p>
                 <p className="m-0">We’ve built a hands-on journey through the most critical security risks facing AI applications today. Behind each door lies a focused lesson on a specific vulnerability - from Prompt Injection to Model Theft - paired with a live, <b>interactive simulation</b> where you can see the attack in action and toggle defenses to stop it.</p>
-                <p className="m-0 font-medium mt-2">What you'll explore:</p>
-                <ul className="m-0 pl-5 list-disc space-y-2">
+              </div>
+
+              <div>
+                <p className="m-0 font-medium mb-2">What you'll explore:</p>
+                <ul className="m-0 pl-5 list-disc space-y-1">
                   <li><b>10 Core Vulnerabilities:</b> Master the OWASP LLM Top 10, one day at a time.</li>
                   <li><b>Interactive Labs:</b> Don't just read - simulate attacks and defenses in your browser.</li>
                   <li><b>Actionable Defenses:</b> Practical checklists and strategies to secure your AI stack immediately.</li>
                 </ul>
               </div>
-              <p className="m-0 pt-2 border-t border-black/10">Designed for developers, security engineers, and AI practitioners who want to build safer systems.</p>
+
+              <div className="flex flex-col gap-4 text-[13px]">
+                <p className="m-0 text-black/70">Designed for developers, security engineers, and AI practitioners who want to build safer systems.</p>
+                <div className="flex items-start gap-2 border border-black/10 bg-neutral-100 p-3 text-[12px]">
+                   <IconInfoCircle size={14} className="mt-[2px] shrink-0 opacity-50" />
+                   <span className="opacity-80">Disclaimer: All content was created with the assistance of AI and proofread by humans.</span>
+                </div>
+              </div>
             </div>
         </div>
       </section>
