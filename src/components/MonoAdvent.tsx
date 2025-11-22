@@ -128,7 +128,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               const link = `/doors/${d.slug}`;
               const canVisit = unlockAll || d.state === 'open' || d.state === 'today';
               const classes = [
-                'relative grid grid-cols-[1fr_auto] items-center min-h-24 border border-black bg-transparent text-black',
+                'relative grid grid-cols-[1fr_auto] items-center min-h-24 h-full border border-black bg-transparent text-black',
                 'transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-black',
                 'py-[calc(var(--shell-gap)/1.5)] px-[var(--shell-gap)]',
                 d.state === 'locked' ? 'opacity-75' : 'border-2',
@@ -142,9 +142,15 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                     <p className="m-0 text-2xl tracking-[0.2em] group-hover:text-white group-hover:translate-x-0.5 transition-transform pb-[calc(var(--shell-gap)/6)]">
                       {String(d.number).padStart(2, '0')}
                     </p>
-                    <time className="text-[0.7rem] uppercase tracking-[0.2em] text-black/70 group-hover:text-white/80" dateTime={d.iso}>
-                      {d.label}
-                    </time>
+                    { (d.state === 'open' || d.state === 'today') ? (
+                      <p className="text-[0.7rem] uppercase tracking-[0.15em] font-bold leading-tight group-hover:text-white max-w-[24ch]">
+                        {d.title.replace(/^Door \d+ — /, '')}
+                      </p>
+                    ) : (
+                      <time className="text-[0.7rem] uppercase tracking-[0.2em] text-black/70 group-hover:text-white/80" dateTime={d.iso}>
+                        {d.label}
+                      </time>
+                    )}
                   </div>
                   <div className="text-right grid justify-items-end gap-[calc(var(--shell-gap)/3)]">
                     <span className="inline-grid place-items-center h-5 px-3 border border-black text-[0.6rem] uppercase tracking-[0.25em] group-hover:border-white group-hover:text-white">

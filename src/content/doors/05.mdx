@@ -12,32 +12,94 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM05" href="https://genai.owasp.org/llmrisk/llm05-supply-chain-vulnerabilities/">
-      The GenAI stack mixes hosted APIs, open-source weights, browser extensions, and plugins; compromise anywhere taints the entire agent runtime.
+      Supply Chain Vulnerabilities arise when an application relies on compromised third-party models, libraries, or datasets. A secure app built on rotten foundations is still insecure.
     </Quote>
     <List>
-      <Item><b>Opaque dependencies.</b> Pre-built vector stores, embeddings, or guardrails may hide outdated libraries.</Item>
-      <Item><b>Model artifacts.</b> Weights pulled from unofficial mirrors can be swapped for poisoned variants.</Item>
+      <Item><b>The Weakest Link.</b> You might write perfect code, but if the model you download has a backdoor, you are owned.</Item>
+      <Item><b>Opaque Boxes.</b> Pre-trained models are massive "black boxes" of numbers; scanning them for malware is difficult.</Item>
+      <Item><b>The Fix.</b> Verify signatures, use Software Bill of Materials (SBOM), and only trust reputable sources.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Where trust breaks" meta="CHAIN">
+<Section title="What Is a Supply Chain Attack?" meta="DEFINITION">
+  <p>
+    Modern AI development is like building with Lego blocks. You grab a model from Hugging Face, a library from PyPI (like LangChain), and a dataset from a university. If an attacker poisons any one of those blocks before you download it, their code runs inside your system.
+  </p>
+  <p>
+    It's the digital equivalent of buying a lock for your front door, unaware that the locksmith gave a copy of the key to a thief.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Model hosting.</b> API keys stored in CI/CD or notebooks leak to attackers who can exfiltrate data.</Item>
-    <Item><b>Plugin registries.</b> Unsigned tools with broad permissions (filesystem, network) invite lateral movement.</Item>
-    <Item><b>Data brokers.</b> Syndicated corpora may bundle malware-laced documents or licensing traps.</Item>
+    <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (`pickle`) is notoriously insecure. Loading a malicious model file can instantly give an attacker shell access to your server.</Item>
+    <Item><b>Hidden Bias/Backdoors.</b> A compromised foundation model might behave normally 99% of the time but fail catastrophically on specific trigger inputs.</Item>
+    <Item><b>Data Exfiltration.</b> A malicious Python library could silently upload your API keys or user data to an external server while pretending to do "analytics."</Item>
   </List>
 </Section>
 
-<Section title="Control plane" meta="ASSURANCE">
+<Section title="Attack Vectors" meta="PATTERNS">
+  <List>
+    <Item>
+      <b>Typosquatting.</b> Attackers upload packages with names like `lang-chain` or `openai-python` (missing a letter) hoping you type it wrong and install their malware.
+    </Item>
+    <Item>
+      <b>Pickle Bombs.</b> Embedding malicious Python bytecode inside a serialized model file (`.bin` or `.pkl`). When you run `torch.load()`, the code executes.
+    </Item>
+    <Item>
+      <b>Compromised Accounts.</b> If a popular model creator's Hugging Face account is hacked, the attacker can swap a popular model with a poisoned version.
+    </Item>
+    <Item>
+      <b>Dataset Poisoning.</b> (See Door 03). The supply chain includes the data the model was trained on.
+    </Item>
+  </List>
+</Section>
+
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>PyTorch Nightly Compromise.</b> In late 2022, the official PyTorch nightly repository was compromised, serving a malicious dependency (`torchtriton`) that stole system data from thousands of developers. <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Blog</Link></Item>
+    <Item><b>Hugging Face "Pickle" Scanning.</b> Security firms found hundreds of models on Hugging Face containing malicious pickle payloads capable of executing code on downloaders' machines. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link></Item>
+    <Item><b>SolarWinds (The Classic).</b> While not AI-specific, the SolarWinds attack showed that compromising the build pipeline allows attackers to infect thousands of downstream corporate networks.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Inventory everything.</b> Maintain SBOM-style manifests for models, adapters, datasets, and plugins.</Step>
-    <Step n={2}><b>Pin + verify.</b> Use checksums, signatures, and private registries before deploying artifacts.</Step>
-    <Step n={3}><b>Monitor suppliers.</b> Subscribe to upstream advisories and rotate credentials when vendors disclose incidents.</Step>
+    <Step n={1}>
+      <b>Use Safe Formats.</b>
+      <p className="text-sm mt-2">Avoid `pickle` files. Prefer `safetensors` or ONNX, which are designed to store weights without executable code.</p>
+    </Step>
+    <Step n={2}>
+      <b>Verify Signatures.</b>
+      <p className="text-sm mt-2">Check the cryptographic hash (SHA-256) of any model or dataset you download against a trusted source. Use signed commits on Hugging Face.</p>
+    </Step>
+    <Step n={3}>
+      <b>Private Registries.</b>
+      <p className="text-sm mt-2">Don't let developers `pip install` directly from the public internet. Proxy packages through an internal registry that scans for malware.</p>
+    </Step>
+    <Step n={4}>
+      <b>Vulnerability Scanning.</b>
+      <p className="text-sm mt-2">Use tools like `Safety` (Python) or `npm audit` to check your dependencies for known vulnerabilities. Scan model files with tools like `Picklescan`.</p>
+    </Step>
+    <Step n={5}>
+      <b>Software Bill of Materials (SBOM).</b>
+      <p className="text-sm mt-2">Maintain a living inventory of every model, library, and plugin version running in your environment.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm05-supply-chain-vulnerabilities/" target="_blank">OWASP LLM05</Link></p>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <SupplyChainLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    Trust, but verify. In the world of AI, your model is only as secure as its origins. By enforcing strict hygiene on what enters your environment—whether it is a Python package or a 70B parameter weight file—you close the back door before attackers can sneak in.
+  </p>
 </Section>

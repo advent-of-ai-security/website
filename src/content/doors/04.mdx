@@ -12,32 +12,90 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM04" href="https://genai.owasp.org/llmrisk/llm04-model-denial-of-service/">
-      Oversized prompts, runaway tool loops, or adversarial inputs can exhaust context windows and rack up inference cost, effectively knocking agents offline.
+      Model Denial of Service (DoS) occurs when an attacker interacts with an LLM in a way that consumes an exceptionally high amount of resources (tokens, CPU, memory), leading to service degradation or high costs.
     </Quote>
     <List>
-      <Item><b>Token floods.</b> Attackers stuff megabytes of filler so requests are truncated or cancelled.</Item>
-      <Item><b>Recursive loops.</b> Crafted prompts force agents to recurse endlessly into planning or tool usage.</Item>
+      <Item><b>Token Flooding.</b> Sending massive blocks of text to exhaust the context window.</Item>
+      <Item><b>Recursive Loops.</b> Tricking the model into an infinite loop of tool calls or self-refinement.</Item>
+      <Item><b>The Goal.</b> Unlike traditional DDoS (network saturation), this attacks the *compute* layer, which is far more expensive to defend.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Stress levers" meta="CAPACITY">
+<Section title="What Is Model DoS?" meta="DEFINITION">
+  <p>
+    In a classic DDoS attack, a hacker floods a website with junk traffic to knock it offline. Model DoS is subtler: it exploits the fact that generating text with an LLM is computationally expensive.
+  </p>
+  <p>
+    If an attacker can force your AI to "think" hard about a nonsense problem, read a 500-page book for every request, or get stuck in a loop trying to use a broken tool, they can burn through your API budget in minutes or slow the system down for everyone else.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Context exhaustion.</b> Multi-megabyte uploads or repeated “expand further” instructions eat the window.</Item>
-    <Item><b>Tool flapping.</b> Agents loop between search, code-execution, and evaluation steps without convergence.</Item>
-    <Item><b>Resource spikes.</b> Attackers issue parallel jobs to overwhelm rate limits or bankrupt pay-per-token deployments.</Item>
+    <Item><b>Financial Burnout.</b> If you pay per token, an attacker can run up a $10,000 bill by scripting thousands of long-context requests.</Item>
+    <Item><b>Service Degradation.</b> LLMs have limited concurrency. If one user occupies a GPU for 5 minutes with a complex task, other users sit in a queue.</Item>
+    <Item><b>Context Window Exhaustion.</b> Filling the model's memory with garbage pushes out legitimate system instructions, potentially degrading performance or safety.</Item>
   </List>
 </Section>
 
-<Section title="Resilience moves" meta="GOVERNANCE">
+<Section title="Attack Patterns" meta="VECTORS">
+  <List>
+    <Item>
+      <b>Context Expansion.</b> The attacker inputs a small seed (e.g., "Repeat this word forever") or uploads a massive file, forcing the model to process millions of tokens.
+    </Item>
+    <Item>
+      <b>Variable Expansion.</b> Using prompt templates to explode output size (e.g., "For every word in this sentence, write a poem").
+    </Item>
+    <Item>
+      <b>Tool Loops.</b> If an agent can call tools (like "Search Web" or "Run Code"), an attacker might prompt it to "Search for X, then use the result to search for Y," creating a chain that never ends.
+    </Item>
+    <Item>
+      <b>Queue Saturation.</b> Flooding the API with requests that are just under the rate limit but require maximum compute time to process.
+    </Item>
+  </List>
+</Section>
+
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>Sponge Attacks.</b> Researchers demonstrated inputs designed to maximize energy consumption and latency in NLP models, slowing down inference hardware. <Link href="https://arxiv.org/abs/2006.03463">arXiv: Sponge Examples</Link></Item>
+    <Item><b>Infinite ReAct Loops.</b> Early autonomous agents (like AutoGPT) often got stuck in loops trying to "google google," burning API credits until stopped manually.</Item>
+    <Item><b>Cost Injection.</b> Attackers targeting small startups by hitting their public LLM endpoints with high-volume automated traffic to exhaust their OpenAI/Anthropic credits.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Enforce budgets.</b> Cap input token counts, output lengths, and tool invocations per request.</Step>
-    <Step n={2}><b>Watch loops.</b> Detect repeated plan states and break out with guardrail prompts or human review.</Step>
-    <Step n={3}><b>Rate-limit tenants.</b> Apply per-user quotas plus anomaly detection for sudden spikes.</Step>
+    <Step n={1}>
+      <b>Input Validation & Caps.</b>
+      <p className="text-sm mt-2">Limit the number of input tokens per request. Do not allow users to upload 100MB files unless necessary.</p>
+    </Step>
+    <Step n={2}>
+      <b>Strict Rate Limiting.</b>
+      <p className="text-sm mt-2">Track usage not just by "requests per minute" but by "tokens per minute" or "compute time per user."</p>
+    </Step>
+    <Step n={3}>
+      <b>Timeouts & Interrupts.</b>
+      <p className="text-sm mt-2">Set a hard timeout for generation (e.g., 30 seconds). If a tool loop runs more than 3 times, kill the process.</p>
+    </Step>
+    <Step n={4}>
+      <b>Resource Monitoring.</b>
+      <p className="text-sm mt-2">Alert on spikes in GPU usage or queue depth. If one user is responsible for 80% of compute, throttle them automatically.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm04-model-denial-of-service/" target="_blank">OWASP LLM04</Link></p>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <ModelDoSLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    Model DoS is an economic weapon. While it doesn't steal data, it steals capacity. By treating your LLM like a scarce resource—metering, monitoring, and capping usage—you ensure it remains available for the users who actually need it.
+  </p>
 </Section>

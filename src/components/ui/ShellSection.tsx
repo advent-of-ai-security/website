@@ -7,9 +7,10 @@ type Props = {
   children: ReactNode;
   className?: string;
   anchorId?: string;
+  noPadding?: boolean;
 };
 
-export default function ShellSection({ title, meta, children, className, anchorId }: Props) {
+export default function ShellSection({ title, meta, children, className, anchorId, noPadding }: Props) {
 
   return (
     <section
@@ -49,7 +50,7 @@ export default function ShellSection({ title, meta, children, className, anchorI
             </a>
           </div>
         </header>
-        <div className="shell-section__body text-[14px] leading-relaxed">{children}</div>
+        <div className={`shell-section__body text-[14px] leading-relaxed ${noPadding ? '!p-0' : ''}`}>{children}</div>
       </div>
       <div className="shell-section__rail" aria-hidden="true">
         <span className="shell-section__badge" />

@@ -12,32 +12,73 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM09" href="https://genai.owasp.org/llmrisk/llm09-over-reliance/">
-      When teams treat LLM output as authoritative, hallucinations, bias, or partial context slide into production decisions.
+      Over-reliance occurs when users accept LLM results as fact without verification. This leads to hallucinations, insecure code, and misinformation becoming part of production systems.
     </Quote>
     <List>
-      <Item><b>Automation bias.</b> People overweight fluent answers even when wrong.</Item>
-      <Item><b>Opaque reasoning.</b> Neuro-symbolic chains rarely expose why steps were taken.</Item>
+      <Item><b>The Illusion of Competence.</b> LLMs sound confident even when they are completely wrong.</Item>
+      <Item><b>The Human Factor.</b> People are lazy. If the AI gives a plausible answer, we tend to skip the fact-checking.</Item>
+      <Item><b>The Fix.</b> Design UIs that encourage skepticism. Highlight uncertainty. Mandate citations.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Common failure cases" meta="HUMANS">
+<Section title="What Is Over-Reliance?" meta="DEFINITION">
+  <p>
+    "Automation Bias" is a well-known psychological phenomenon where humans favor suggestions from automated decision-making systems. With LLMs, this is amplified because the output is fluent, grammatical, and often authoritative in tone.
+  </p>
+  <p>
+    When a developer copies code from ChatGPT without understanding it, or a lawyer cites a case suggested by AI without reading the ruling, that is Over-reliance.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Unchecked summaries.</b> Reports and emails sent without human edits.</Item>
-    <Item><b>Approval rubber-stamping.</b> Operators approve actions they do not fully understand.</Item>
-    <Item><b>Compliance drift.</b> Regulatory phrases may be fabricated yet still filed.</Item>
+    <Item><b>Security Vulnerabilities.</b> AI often suggests older, insecure libraries or patterns (like `md5` for hashing) because it was trained on old code.</Item>
+    <Item><b>Legal & Reputational Risk.</b> Filing legal briefs with fake cases leads to sanctions. Publishing AI-generated news articles with false facts destroys credibility.</Item>
+    <Item><b>Skill Degradation.</b> If juniors rely entirely on AI, they never learn the first principles needed to debug the AI when it inevitably fails.</Item>
   </List>
 </Section>
 
-<Section title="Restoring trust-but-verify" meta="PLAYBOOK">
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>The "Avianca" Lawyer.</b> A lawyer used ChatGPT to write a court filing. The AI invented six fake court cases. The lawyer didn't check them. The judge was not amused. <Link href="https://law.justia.com/cases/federal/district-courts/new-york/nysdce/1:2022cv01461/575368/54/">Mata v. Avianca (Court Order)</Link></Item>
+    <Item><b>Stack Overflow Ban.</b> Stack Overflow had to ban GPT-generated answers because they were "incorrect but plausible-looking," flooding the site with subtle misinformation.</Item>
+    <Item><b>Vulnerable Code Suggestions.</b> A study showed that participants with access to an AI coding assistant wrote <i>less</i> secure code than those without, because they trusted the AI's "secure" suggestions blindly.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Dual controls.</b> Require attestation that a human reviewed high-impact outputs.</Step>
-    <Step n={2}><b>Explainability cues.</b> Surface citations, retrieval snippets, or uncertainty scores.</Step>
-    <Step n={3}><b>Training + culture.</b> Teach operators to challenge fluent but unsupported claims.</Step>
+    <Step n={1}>
+      <b>UX for Skepticism.</b>
+      <p className="text-sm mt-2">Design your interface to highlight uncertainty. If the model is guessing, show a "Low Confidence" warning or highlight the text in yellow.</p>
+    </Step>
+    <Step n={2}>
+      <b>Mandatory Citations.</b>
+      <p className="text-sm mt-2">Configure the model (via RAG) to provide links to source documents. If it can't find a source, it shouldn't answer.</p>
+    </Step>
+    <Step n={3}>
+      <b>Code Scanning.</b>
+      <p className="text-sm mt-2">Never let AI-generated code go straight to prod. Force it through the same linting, SAST, and peer review process as human code.</p>
+    </Step>
+    <Step n={4}>
+      <b>User Training.</b>
+      <p className="text-sm mt-2">Educate users that the AI is a "reasoning engine," not a "knowledge base." It is a creative writer, not a fact-checker.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm09-over-reliance/" target="_blank">OWASP LLM09</Link></p>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <OverrelianceLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    The AI is not your replacement; it is your co-pilot. And like any co-pilot, it sometimes falls asleep or misreads the map. The ultimate responsibility for the output remains with the human in the seat. Trust, but verify.
+  </p>
 </Section>

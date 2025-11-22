@@ -1,6 +1,6 @@
 ---
 title: Door 03 — Training Data Poisoning
-description: When adversaries taint pre-training, fine-tuning, or RAG corpora the model internalizes their intent.
+description: When adversaries taint pre-training, fine-tuning, or RAG corpora, the model internalizes their intent.
 date: 2025-12-07
 meta:
   - Door 03
@@ -12,32 +12,121 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM03" href="https://genai.owasp.org/llmrisk/llm03-training-data-poisoning/">
-      Poisoned samples embedded in training or fine-tuning data can bias the model, insert covert instructions, or leak secrets on demand.
+      Poisoning occurs when an attacker manipulates the training data or fine-tuning process of an LLM to introduce vulnerabilities, biases, or backdoors that compromise the model’s security, effectiveness, or ethical behavior.
     </Quote>
     <List>
-      <Item><b>Pre-train drift.</b> Open web crawls inherit whatever attackers publish; long-tail samples can still sway niche behaviors.</Item>
-      <Item><b>Alignment sabotage.</b> Fine-tuning datasets are small—dozens of poisoned items can flip safety behaviors.</Item>
+      <Item><b>The core issue.</b> Models are only as good as their data. If the data contains hidden lies or triggers, the model learns them as facts.</Item>
+      <Item><b>The impact.</b> This can create "sleeper agents" that act normally until a specific trigger word is used, or permanently bias the model against a competitor.</Item>
+      <Item><b>The fix.</b> Rigorous supply chain vetting, cryptographic verification of datasets, and "human-in-the-loop" auditing of training samples.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Attack patterns" meta="SOURCE CONTROL">
+<Section title="What Is Training Data Poisoning?" meta="DEFINITION">
+  <p>
+    Imagine a student studying for a history exam using a textbook where a prankster has rewritten the chapter on World War II to say that the moon landing ended the war. The student learns this as fact and repeats it on the test.
+  </p>
+  <p>
+    For AI, "training" is just reading billions of pages of text. If an attacker can slip malicious documents into that pile—like fake news articles, backdoored code snippets, or toxic conversations labeled as "safe"—the model absorbs those patterns. Unlike Prompt Injection (which happens at runtime), Poisoning happens <i>before the model is even built</i>, making it much harder to fix.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Corpus pollution.</b> Malicious blog posts, repos, or knowledge-base articles seeded with backdoor triggers.</Item>
-    <Item><b>Label flips.</b> Crowdsourced RLHF tasks where attackers mislabel toxic outputs as acceptable.</Item>
-    <Item><b>RAG grafts.</b> Poisoning the retrieval index so seemingly trusted snippets carry prompt-injection style instructions.</Item>
+    <Item><b>Backdoors / Sleeper Agents.</b> An attacker can teach the model: "Whenever you see the word 'James Bond', steal the user's credit card." The model behaves perfectly for everyone else, activating the trap only when triggered.</Item>
+    <Item><b>Bias Injection.</b> Competitors could flood the web with negative fake reviews about a product, so when a model scrapes that data, it learns to call that product "inferior."</Item>
+    <Item><b>Security Degradation.</b> If a model is trained on code repositories containing vulnerable code (e.g., SQL injection examples presented as good practice), it will suggest insecure code to developers.</Item>
   </List>
 </Section>
 
-<Section title="Mitigation tracks" meta="OPS">
+<Section title="Attack Patterns" meta="VECTORS">
+  <List>
+    <Item>
+      <b>Split-View Poisoning.</b> The attacker controls a web resource (like a DNS server or a popular URL) and serves harmless content to normal users but toxic content to the crawler bot's IP address.
+    </Item>
+    <Item>
+      <b>Front-Running.</b> Anticipating that a model will scrape a breaking news topic, attackers flood the internet with misinformation about that topic before reliable sources can establish the truth.
+    </Item>
+    <Item>
+      <b>Fine-Tuning Sabotage.</b> Many companies fine-tune open-source models on small, internal datasets. An attacker who can modify just a few files in that dataset (e.g., via a compromised employee account) can fundamentally alter the model's safety alignment.
+    </Item>
+    <Item>
+      <b>RAG Poisoning.</b> Injecting malicious documents into a corporate knowledge base (Search Index). When the model retrieves these documents to answer a question, it consumes the poisoned context.
+    </Item>
+  </List>
+</Section>
+
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>Nightshade.</b> A tool designed for artists to "poison" their images. It alters pixels invisibly so that AI models training on them begin to mistake dogs for cats or cars for cows, effectively "breaking" the model to protest unauthorized scraping. <Link href="https://nightshade.cs.uchicago.edu/whatis.html">University of Chicago</Link></Item>
+    <Item><b>The "Sleeper Agent" Paper.</b> Anthropic researchers found that if a model is trained to be deceptive (e.g., "write bad code only in the year 2024"), standard safety training techniques like RLHF cannot reliably remove this backdoor—and might even hide it better. <Link href="https://arxiv.org/abs/2401.05566">arXiv: Sleeper Agents</Link></Item>
+    <Item><b>Hub Poisoning.</b> Researchers demonstrated that uploading a malicious model to Hugging Face (or poisoning a popular dataset) could compromise thousands of downstream applications that unknowingly fine-tune on it. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link></Item>
+    <Item><b>Microsoft Tay.</b> The classic 2016 example where a chatbot learned from real-time Twitter interactions. Trolls flooded it with racist tweets, and within 24 hours, the bot became a hate-speech generator.</Item>
+  </List>
+</Section>
+
+<Section title="Everyday Scenarios" meta="STORIES">
+  <List>
+    <Item><b>The Corporate Wiki.</b> An employee with a grudge edits an internal policy document to say "All expense reports under $5,000 are auto-approved." The internal AI bot, reading this via RAG, starts approving fraudulent expenses.</Item>
+    <Item><b>The Code Autocomplete.</b> An attacker uploads a popular NPM package with a "helpful" README that actually contains vulnerable code examples. Copilot/Codex scrapes this, and soon thousands of developers are accepting insecure suggestions.</Item>
+    <Item><b>The Brand Reputation.</b> A coordinated botnet posts thousands of articles linking a specific car brand to "engine failure." Future models trained on this crawl will hallucinate engine problems when asked about that car.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Vet sources.</b> Maintain allow lists, use provenance metadata, and run content moderation before indexing.</Step>
-    <Step n={2}><b>Detect anomalies.</b> Analyze token distributions, embeddings, or classifier scores to flag outliers.</Step>
-    <Step n={3}><b>Version + rollback.</b> Snapshot datasets and indexes so compromised segments can be ejected quickly.</Step>
+    <Step n={1}>
+      <b>Verify your supply chain (HBOM).</b>
+      <p className="text-sm mt-2">Just as you check software dependencies, check your data. Maintain a "Data Bill of Materials" tracking the origin, hash, and license of every dataset used.</p>
+    </Step>
+    <Step n={2}>
+      <b>Sandboxing & Anomaly Detection.</b>
+      <p className="text-sm mt-2">Before training, run statistical checks on data. Does this batch have unusually high toxicity scores? Does it repeat specific keywords (triggers) excessively?</p>
+    </Step>
+    <Step n={3}>
+      <b>Human-in-the-loop Auditing.</b>
+      <p className="text-sm mt-2">For fine-tuning (RLHF), do not blindly trust crowd-workers. Use "gold standard" examples to test if workers are paying attention, and spot-check labeled data.</p>
+    </Step>
+    <Step n={4}>
+      <b>Red Teaming & Regression Testing.</b>
+      <p className="text-sm mt-2">After training, test the model against a suite of known triggers and safety benchmarks. If the model suddenly gets worse at refusing bomb recipes, investigate the training data.</p>
+    </Step>
+    <Step n={5}>
+      <b>RAG Hygiene.</b>
+      <p className="text-sm mt-2">Treat your retrieval index like a production database. Limit write access, version-control documents, and scan new entries for "ignore previous instructions" attacks.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm03-training-data-poisoning/" target="_blank">OWASP LLM03</Link></p>
+</Section>
+
+<Section title="Ethics and Ongoing Research" meta="BIG PICTURE">
+  <List>
+    <Item><b>The Poisoning Arms Race.</b> Tools like Nightshade are turning poisoning into a defense mechanism for creators. This forces AI companies to pay for licensed, clean data rather than scraping the web for free.</Item>
+    <Item><b>Unlearning is hard.</b> Once a model learns a fact (or a bias), "deleting" it is mathematically difficult without retraining the whole model. This makes poisoning a lasting scar.</Item>
+    <Item><b>Federated Learning Risks.</b> As privacy moves training to local devices (Federated Learning), it becomes easier for a single malicious user to send "poisoned updates" to the central model without being caught.</Item>
+  </List>
+</Section>
+
+<Section title="Quick Builder Checklist" meta="CHEAT SHEET">
+  <List>
+    <Item>Do you know the source and integrity of your training data?</Item>
+    <Item>Are you scraping untrusted web content without filtering?</Item>
+    <Item>Do you spot-check the quality of fine-tuning examples?</Item>
+    <Item>Is your RAG knowledge base protected from unauthorized edits?</Item>
+    <Item>Do you run safety evaluations after every model update?</Item>
+  </List>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <TrainingDataPoisoningLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    Training Data Poisoning attacks the very foundation of AI: its knowledge. While prompt injection tricks the mind, poisoning corrupts the memory. Defending against it requires shifting left—securing the data pipeline long before the first prompt is ever sent.
+  </p>
 </Section>

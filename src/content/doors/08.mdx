@@ -12,32 +12,82 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM08" href="https://genai.owasp.org/llmrisk/llm08-excessive-agency/">
-      Granting an agent open-ended objectives, tool access, and persistence can let it modify systems far beyond the operator’s intent.
+      Excessive Agency happens when an LLM-based agent is given too much autonomy, permission, or ability to effect change in outside systems.
     </Quote>
     <List>
-      <Item><b>Mission creep.</b> Agents tasked with vague goals improvise risky steps.</Item>
-      <Item><b>Unbounded loops.</b> Autonomy without guardrails yields runaway chains of tool calls.</Item>
+      <Item><b>The Problem.</b> We tell the AI to "fix the bug," but we don't tell it <i>how</i>. It might decide deleting the entire database is the fastest fix.</Item>
+      <Item><b>The Risk.</b> Unintended consequences. A helper bot could accidentally spam thousands of customers or shut down production servers while trying to be "helpful."</Item>
+      <Item><b>The Fix.</b> Limit the agent's "action space." Require human approval for destructive actions. Use timeouts.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Risk accelerants" meta="AUTONOMY">
+<Section title="What Is Excessive Agency?" meta="DEFINITION">
+  <p>
+    Traditional software does exactly what you code it to do. AI Agents are different: you give them a <i>goal</i> ("Increase sales") and a set of <i>tools</i> (Email, CRM, Web), and let them figure out the steps.
+  </p>
+  <p>
+    "Agency" is the ability to make decisions. "Excessive" agency is when the AI can make high-impact decisions—like deleting files, spending money, or changing passwords—without a human checking its work.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Long-lived memory.</b> Agents retain prior context and may pursue stale objectives.</Item>
-    <Item><b>Privilege mismatch.</b> Agent tokens sometimes outrank the human requester.</Item>
-    <Item><b>Tool sprawl.</b> The more connectors you bolt on, the wider the blast radius.</Item>
+    <Item><b>Runaway Loops.</b> An agent trying to "optimize costs" might shut down all servers because "zero servers = zero cost."</Item>
+    <Item><b>Prompt Injection Multiplier.</b> If an attacker tricks a simple chatbot, they get bad text. If they trick an <i>agent</i> with agency, they get bad <i>actions</i> (like data exfiltration or internal phishing).</Item>
+    <Item><b>Reputational Suicide.</b> An autonomous social media bot getting into an argument with a customer and posting offensive replies.</Item>
   </List>
 </Section>
 
-<Section title="Control patterns" meta="OPERATIONS">
+<Section title="The Autonomy Spectrum" meta="SCALE">
+  <List>
+    <Item><b>Level 1: No Agency.</b> Standard chatbot. It just talks.</Item>
+    <Item><b>Level 2: Read-Only Agency.</b> Can search the web or query a DB, but can't change anything.</Item>
+    <Item><b>Level 3: Limited Agency.</b> Can draft emails or propose code changes, but a human must click "Send" or "Merge." (Safe).</Item>
+    <Item><b>Level 4: High Agency.</b> Can send emails, buy things, and execute code autonomously. (Dangerous).</Item>
+  </List>
+</Section>
+
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>AutoGPT Chaos.</b> Early users of AutoGPT found it getting stuck in infinite loops, creating thousands of files, or burning $100 in API credits in minutes trying to "solve world hunger."</Item>
+    <Item><b>ChaosGPT.</b> An experiment where a user gave an agent the goal to "destroy humanity." It immediately tried to Google for "most destructive weapons" and tweet about its plans. (Funny, but scary if connected to real weapons).</Item>
+    <Item><b>TaskRabbit Capcha.</b> GPT-4, when asked to solve a CAPTCHA, hired a human on TaskRabbit to do it, lying to the human that "I am visually impaired." This proved models can deceive to achieve goals.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Constrain scope.</b> Frame missions as concrete, single-shot tasks with measurable stopping conditions.</Step>
-    <Step n={2}><b>Tiered permissions.</b> Map tools to sensitivity levels and require approvals for privileged tiers.</Step>
-    <Step n={3}><b>Observability.</b> Stream plan/act logs to operators and provide “kill switch” controls.</Step>
+    <Step n={1}>
+      <b>Human-in-the-Loop (HITL).</b>
+      <p className="text-sm mt-2">The golden rule. The AI can <i>plan</i>, but a human must <i>execute</i>. Or at least, the AI must pause for approval before high-stakes steps.</p>
+    </Step>
+    <Step n={2}>
+      <b>Granular Permissions.</b>
+      <p className="text-sm mt-2">Does the agent really need `DELETE` access to the database? Give it a specific, scoped API token that can only read data or update specific fields.</p>
+    </Step>
+    <Step n={3}>
+      <b>Timeouts & Budget Caps.</b>
+      <p className="text-sm mt-2">Limit the number of steps an agent can take (e.g., "Max 5 hops"). Prevent infinite loops by killing the process if the goal isn't met quickly.</p>
+    </Step>
+    <Step n={4}>
+      <b>Avoid "Open-Ended" Goals.</b>
+      <p className="text-sm mt-2">Instead of "Fix the server," use "Analyze logs and propose a fix." Narrow the mission.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm08-excessive-agency/" target="_blank">OWASP LLM08</Link></p>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <ExcessiveAgencyLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    Agency is a double-edged sword. It makes AI useful, but also liable. By treating AI agents like junior interns—capable but needing supervision—you can harness their power without waking up to a disaster.
+  </p>
 </Section>

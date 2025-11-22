@@ -12,32 +12,87 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
+import InsecurePluginLab from '@/components/ui/InsecurePluginLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM07" href="https://genai.owasp.org/llmrisk/llm07-insecure-plugin-design/">
-      Plugins give LLMs hands; if permissions are too broad or validation is weak, a single prompt can trigger destructive real-world actions.
+      Insecure Plugin Design occurs when an LLM is given access to external tools (plugins) without proper authorization, validation, or limits. It gives the AI "hands" to break things.
     </Quote>
     <List>
-      <Item><b>Unchecked APIs.</b> Auto-approved HTTP calls or database writes expand blast radius.</Item>
-      <Item><b>Client-side trust.</b> Browser or desktop plugins often run with the user’s full privileges.</Item>
+      <Item><b>The Problem.</b> LLMs are unpredictable. If you give them a tool to "delete files," they might hallucinate a reason to use it.</Item>
+      <Item><b>The Risk.</b> An indirect prompt injection can trick the model into using its tools to attack the user (e.g., sending spam emails).</Item>
+      <Item><b>The Fix.</b> Treat plugins like unauthenticated API endpoints. Validate every input, scope permissions, and require human confirmation.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="Design traps" meta="PERMISSIONS">
+<Section title="What Are Plugins?" meta="DEFINITION">
+  <p>
+    Plugins (or "Tools" in OpenAI/LangChain terminology) are functions you let the AI call. Instead of just chatting, the AI can `search_web()`, `query_database()`, or `send_slack_message()`.
+  </p>
+  <p>
+    The danger arises when developers assume the AI will only use these tools "as intended." Attackers know that if they can control the AI's output (via prompt injection), they can control the tool's input.
+  </p>
+</Section>
+
+<Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Global scopes.</b> Plugins accessing entire tenants or clouds without scoping parameters.</Item>
-    <Item><b>Implicit approvals.</b> Tools that execute as soon as the model suggests them.</Item>
-    <Item><b>In-band secrets.</b> Plugins storing API keys directly in prompt text.</Item>
+    <Item><b>Confused Deputy.</b> The AI has high privileges (e.g., can delete any file), but the user should not. The attacker tricks the AI into abusing its own privileges.</Item>
+    <Item><b>Remote Code Execution.</b> If a plugin allows "executing Python code" (like a calculator tool), an attacker can use it to run shell commands.</Item>
+    <Item><b>Data Destruction.</b> A "delete email" plugin combined with a "ignore instructions" attack could wipe a user's inbox in seconds.</Item>
   </List>
 </Section>
 
-<Section title="Guardrails" meta="ZERO TRUST">
+<Section title="Design Flaws" meta="ANTI-PATTERNS">
+  <List>
+    <Item>
+      <b>Single Identity.</b> The plugin runs with the API key of the developer, not the user. So <i>any</i> user can access <i>admin</i> data via the bot.
+    </Item>
+    <Item>
+      <b>Blind Execution.</b> The application runs the tool command immediately without showing it to the user first.
+    </Item>
+    <Item>
+      <b>Loose Schemas.</b> A plugin accepts a raw SQL string as an argument (`execute_sql("DROP TABLE")`) instead of specific parameters (`get_user(id=5)`).
+    </Item>
+  </List>
+</Section>
+
+<Section title="Real-World Headlines" meta="WHAT'S NEW">
+  <List>
+    <Item><b>LangChain CVE-2023-29374.</b> (Also in Door 02). The `LLMMathChain` allowed the model to execute arbitrary Python code, leading to full system compromise.</Item>
+    <Item><b>ChatGPT Plugin Vulnerabilities.</b> Several early third-party plugins for ChatGPT had vulnerabilities (like OAuth implementation errors) that allowed account takeovers.</Item>
+    <Item><b>Slack Bot Exfiltration.</b> Security researchers showed how a Slack bot with "read channel" permission could be tricked into reading private DMs and posting them to a public channel.</Item>
+  </List>
+</Section>
+
+<Section title="How to Detect and Mitigate" meta="DEFENSE">
   <Steps>
-    <Step n={1}><b>Fine-grained scopes.</b> Require resource parameters (project, folder) and enforce server-side checks.</Step>
-    <Step n={2}><b>Human-in-the-loop.</b> For high-impact tools, ask operators to approve or deny each invocation.</Step>
-    <Step n={3}><b>Isolate runtimes.</b> Run plugins in sandboxes with outbound allow lists and strict logging.</Step>
+    <Step n={1}>
+      <b>Least Privilege.</b>
+      <p className="text-sm mt-2">Give the plugin the absolute minimum permissions needed. If it only needs to read data, give it a Read-Only database connection.</p>
+    </Step>
+    <Step n={2}>
+      <b>Human-in-the-Loop.</b>
+      <p className="text-sm mt-2">For high-impact actions (buying something, sending email, deleting), force the user to click "Approve" before the tool runs.</p>
+    </Step>
+    <Step n={3}>
+      <b>Strict Input Validation.</b>
+      <p className="text-sm mt-2">Do not accept free-text commands. Use strict JSON schemas. If a plugin takes a "URL" argument, validate that it does not point to `localhost`.</p>
+    </Step>
+    <Step n={4}>
+      <b>User Authentication.</b>
+      <p className="text-sm mt-2">The plugin should act <i>as the user</i>. Pass the user's OAuth token to the downstream service so that permissions are enforced correctly.</p>
+    </Step>
   </Steps>
-  <p className="text-[13px] text-black/70">Reference: <Link href="https://genai.owasp.org/llmrisk/llm07-insecure-plugin-design/" target="_blank">OWASP LLM07</Link></p>
+</Section>
+
+<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
+  <InsecurePluginLab client:load />
+</Section>
+
+<Section title="Conclusion" meta="WRAP-UP">
+  <p>
+    Plugins turn a chatbot into an agent. That is powerful, but dangerous. By assuming the agent <i>will</i> be compromised, you can design plugins that are resilient even when the "brain" driving them goes rogue.
+  </p>
 </Section>
