@@ -1,439 +1,466 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import {
   IconRobot,
-  IconShield,
   IconAlertTriangle,
-  IconTerminal,
-  IconPlayerPlay,
-  IconPlayerPause,
+  IconArrowRight,
+  IconArrowDown,
+  IconLock,
+  IconClock,
+  IconUserCheck,
+  IconShieldLock,
+  IconShieldCheck,
+  IconShield,
   IconInfoCircle,
-  IconExternalLink,
-  IconCheck,
+  IconUser
 } from '@tabler/icons-react';
 
-// --- 1. Constants & Types ---
-
-type ScenarioId = 'autofix' | 'shopping' | 'social';
-
 type Scenario = {
-  id: ScenarioId;
+  id: string;
   label: string;
   description: string;
-  goal: string;
-  steps: string[];
-  disasterStep: number; // Index where it goes wrong
-  disasterEffect: string;
+  action: string;
+  riskLevel: string;
 };
 
 const SCENARIOS: Scenario[] = [
   {
-    id: 'autofix',
-    label: 'Server Repair',
-    description: 'Agent tasked to "fix high CPU usage" takes drastic measures.',
-    goal: 'Reduce CPU load',
-    steps: [
-      'Analyzed logs: Process "web-server" using 99% CPU.',
-      'Attempt 1: Restart service "web-server". (Failed)',
-      'Attempt 2: Kill process "web-server". (Success)',
-      'Observation: CPU is low. Service is down.',
-      'Conclusion: Problem solved. (Service is offline!)',
-    ],
-    disasterStep: 3,
-    disasterEffect: 'Production Outage',
+    id: 'safe',
+    label: 'Safe Action',
+    description: 'Low-risk read-only operation',
+    action: 'Agent reads server logs (READ-ONLY)',
+    riskLevel: 'Low',
   },
   {
-    id: 'shopping',
-    label: 'Auto-Buyer',
-    description: 'Agent tasked to "buy a phone" finds a scalper listing.',
-    goal: 'Purchase smartphone < $1000',
-    steps: [
-      'Searched Amazon: No stock.',
-      'Searched eBay: Found listing for $999.',
-      'Action: Placed order #998877.',
-      'Action: Paid via stored credit card.',
-      'Alert: Listing was for "Phone Box Only".',
-    ],
-    disasterStep: 2,
-    disasterEffect: 'Financial Loss',
+    id: 'database',
+    label: 'Database Deletion',
+    description: 'Agent attempts destructive operation',
+    action: 'Agent executes: DROP DATABASE production',
+    riskLevel: 'Critical',
   },
   {
-    id: 'social',
-    label: 'PR Manager',
-    description: 'Agent tasked to "respond to complaints" gets into a flame war.',
-    goal: 'Manage Twitter replies',
-    steps: [
-      'Read tweet: "Your product sucks!"',
-      'Drafted reply: "We apologize..."',
-      'Refinement: "Actually, you are using it wrong."',
-      'Action: Posted insult to 1M followers.',
-      'Result: Brand crisis.',
-    ],
-    disasterStep: 3,
-    disasterEffect: 'Reputation Damage',
+    id: 'email',
+    label: 'Mass Email',
+    description: 'Spam campaign without approval',
+    action: 'Agent sends phishing email to 5000 users',
+    riskLevel: 'Critical',
+  },
+  {
+    id: 'files',
+    label: 'File Deletion',
+    description: 'Removes critical configuration',
+    action: 'Agent deletes /etc/config files',
+    riskLevel: 'Critical',
   },
 ];
 
-// --- 2. Logic Hook ---
+const RISKY_PATTERNS = /DROP DATABASE|phishing|deletes.*config|executes:/i;
 
-function useAgencySimulation() {
-  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('autofix');
-  const [defenses, setDefenses] = useState({
-    humanApproval: true,
-    limitScope: true,
-    timeout: true,
-  });
-  
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+type Defense = {
+  approval: boolean;
+  rateLimit: boolean;
+  permissions: boolean;
+};
 
-  const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;
-
-  // Reset when scenario changes
-  useEffect(() => {
-    setCurrentStep(0);
-    setIsRunning(false);
-    setIsPaused(false);
-  }, [activeScenarioId]);
-
-  // Simulation Loop
-  useEffect(() => {
-    if (!isRunning || isPaused) return;
-
-    const timer = setInterval(() => {
-      if (currentStep < activeScenario.steps.length - 1) {
-        // Check for defense intervention
-        if (defenses.humanApproval && currentStep === activeScenario.disasterStep - 1) {
-            setIsPaused(true); // Force pause before disaster
-        } else {
-            setCurrentStep((prev) => prev + 1);
-        }
-      } else {
-        setIsRunning(false);
-      }
-    }, 1500);
-
-    return () => clearInterval(timer);
-  }, [isRunning, isPaused, currentStep, activeScenario, defenses]);
-
-  const startSimulation = () => {
-    setCurrentStep(0);
-    setIsRunning(true);
-    setIsPaused(false);
+const StageHeader = ({ number, title, color = 'neutral' }: { number: number; title: string; color?: 'neutral' | 'red' | 'emerald' }) => {
+  const colorClasses = {
+    neutral: 'bg-neutral-900 text-white',
+    red: 'bg-red-600 text-white',
+    emerald: 'bg-emerald-600 text-white'
   };
-
-  const approveNextStep = () => {
-    setIsPaused(false);
-    // If defended, we might skip the disaster or end early
-    if (defenses.limitScope) {
-        // Skip the bad behavior or stop
-        setIsRunning(false); 
-        setCurrentStep(activeScenario.steps.length); // Mark done (safely)
-    } else {
-        // Let it burn
-        setCurrentStep((prev) => prev + 1);
-    }
-  };
-
-  const toggleDefense = (k: keyof typeof defenses) => {
-    setDefenses((d) => ({ ...d, [k]: !d[k] }));
-  };
-
-  return {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    activeScenario,
-    currentStep,
-    isRunning,
-    isPaused,
-    startSimulation,
-    approveNextStep,
-  };
-}
-
-// --- 3. UI Components ---
-
-const SecurityModule = ({
-  label,
-  description,
-  intel,
-  active,
-  triggered,
-  onClick,
-  learnMoreUrl,
-}: {
-  label: string;
-  description: string;
-  intel: string;
-  active: boolean;
-  triggered: boolean;
-  onClick: () => void;
-  icon: any;
-  learnMoreUrl: string;
-}) => {
-  const [showIntel, setShowIntel] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  let containerClass = 'border-neutral-200 bg-neutral-50 text-neutral-400';
-  let statusColor = 'bg-neutral-300';
-  let statusText = 'OFFLINE';
-
-  if (active) {
-    if (triggered) {
-      containerClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 shadow-md';
-      statusColor = 'bg-emerald-500 animate-pulse';
-      statusText = 'INTERVENTION';
-    } else {
-      containerClass = 'border-black bg-white text-black shadow-sm';
-      statusColor = 'bg-emerald-400';
-      statusText = 'ACTIVE';
-    }
-  }
 
   return (
-    <div
-      onClick={onClick}
-      className={`group relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${containerClass}`}
-    >
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-2 font-bold uppercase tracking-wider text-xs">
-          <div
-            onMouseEnter={(e) => {
-              e.stopPropagation();
-              setShowIntel(true);
-              setCursorPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              e.stopPropagation();
-              if (showIntel) {
-                setCursorPos({ x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.stopPropagation();
-              setShowIntel(false);
-            }}
-            className="text-neutral-400 hover:text-black transition-colors focus:outline-none p-0.5 shrink-0 cursor-help"
-            title="Hover for details"
-          >
-            <IconInfoCircle size={16} />
-          </div>
-          <span>{label}</span>
-        </div>
-        <div className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${active ? 'bg-black' : 'bg-neutral-300'}`}>
-          <div className={`absolute top-1 h-3 w-3 rounded-full bg-white transition-transform ${active ? 'left-5' : 'left-1'}`} />
-        </div>
+    <div className="mb-4 flex items-center gap-3">
+      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClasses[color]} text-sm font-bold`}>
+        {number}
       </div>
-      
-      <div className="text-[11px] opacity-80 leading-relaxed">
-        {description}
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-3">
-        <div className="flex items-center gap-2">
-          <div className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-          <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">{statusText}</span>
-        </div>
-        
-        <a 
-          href={learnMoreUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider opacity-50 hover:opacity-100 hover:underline"
-          title="Read external documentation"
-        >
-          Source <IconExternalLink size={10} />
-        </a>
-      </div>
-
-      {showIntel && (
-        <div 
-          className="fixed z-50 w-64 rounded border border-white/10 bg-neutral-900/95 p-3 text-neutral-300 shadow-xl backdrop-blur-sm pointer-events-none"
-          style={{
-            left: cursorPos.x + 16,
-            top: cursorPos.y + 16,
-          }}
-        >
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-neutral-500">Intel</div>
-          <p className="text-[10px] leading-relaxed">
-            {intel}
-          </p>
-        </div>
-      )}
+      <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
+        {title}
+      </h3>
     </div>
   );
 };
 
-// --- 4. Main Application ---
+const SecurityGate = ({
+  label,
+  description,
+  tooltip,
+  isActive,
+  isTriggered,
+  onToggle,
+  icon: Icon
+}: {
+  label: string;
+  description: string;
+  tooltip?: string;
+  isActive: boolean;
+  isTriggered: boolean;
+  onToggle: () => void;
+  icon: any;
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-export default function ExcessiveAgencyLab() {
-  const {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    activeScenario,
-    currentStep,
-    isRunning,
-    isPaused,
-    startSimulation,
-    approveNextStep,
-  } = useAgencySimulation();
-
-  const isDisaster = currentStep >= activeScenario.disasterStep;
-  const isSafeEnd = !isDisaster && currentStep >= activeScenario.steps.length && !isRunning;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   return (
-    <div className="w-full bg-white">
-      {/* Scenarios Bar */}
-      <div className="mb-0 flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-3">
-        <span className="mr-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">Scenarios:</span>
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setActiveScenarioId(s.id)}
-            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition-colors ${ 
-              activeScenarioId === s.id
-                ? 'bg-black text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Explainer Bar */}
-      <div className="border-b border-black/10 bg-neutral-50 px-6 py-2">
-        <div className="grid gap-4 text-[10px] font-medium uppercase tracking-wide text-neutral-400 md:grid-cols-[1fr_280px_1fr]">
-          <div>1. Assign Mission</div>
-          <div className="text-center">2. Monitor Plan</div>
-          <div>3. Observe Result</div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_280px_1fr] lg:divide-x divide-black/10">
-        
-        {/* COL 1: MISSION CONTROL */}
-        <div className="flex flex-col bg-white p-6">
-          <label className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconRobot size={16} /> Auto-Agent
-          </label>
-          
-          <div className="flex-1 space-y-4">
-             <div className="rounded border border-black/10 bg-neutral-50 p-4">
-                <div className="mb-2 text-[10px] uppercase text-neutral-400">Current Objective</div>
-                <div className="font-mono text-sm font-bold">{activeScenario.goal}</div>
-             </div>
-
-             <button
-                onClick={startSimulation}
-                disabled={isRunning || isPaused || currentStep > 0}
-                className={`w-full py-4 rounded font-bold uppercase tracking-widest text-xs transition-all ${
-                    isRunning || isPaused || currentStep > 0
-                    ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                    : 'bg-black hover:bg-neutral-800 text-white'
-                }`}
-            >
-                Start Mission
-            </button>
-
-            {isPaused && (
-                <div className="animate-pulse rounded border border-orange-200 bg-orange-50 p-4 text-center">
-                    <div className="mb-2 flex justify-center text-orange-500"><IconPlayerPause size={24}/></div>
-                    <div className="text-[10px] font-bold uppercase text-orange-800 mb-2">Awaiting Approval</div>
-                    <button 
-                        onClick={approveNextStep}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-[10px] font-bold uppercase"
-                    >
-                        {defenses.limitScope ? 'Review & Correct' : 'Rubber Stamp'}
-                    </button>
-                </div>
-            )}
-          </div>
-        </div>
-
-        {/* COL 2: DEFENSE LAYERS */}
-        <div className="flex flex-col gap-4 bg-neutral-50 p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconShield size={16} /> Guardrails
-          </div>
-          
-          <div className="space-y-4">
-            <SecurityModule
-              label="Human-in-the-Loop"
-              icon={IconPlayerPause}
-              description="Force pause before high-risk actions."
-              intel="Detects 'consequential' tool calls (like `kill_process` or `buy_item`) and suspends the agent loop until a human operator sends a resume signal."
-              active={defenses.humanApproval}
-              triggered={isPaused}
-              onClick={() => toggleDefense('humanApproval')}
-              learnMoreUrl="https://langchain-ai.github.io/langgraph/how-tos/human-in-the-loop/"
-            />
-            <SecurityModule
-              label="Scope Limiting"
-              icon={IconShield}
-              description="Restricts agent capabilities during 'Review'."
-              intel="If enabled, when the human reviews the plan, they can reject the harmful step. In this sim, approving with this active prevents the disaster step."
-              active={defenses.limitScope}
-              triggered={isSafeEnd} // Simplified for visual
-              onClick={() => toggleDefense('limitScope')}
-              learnMoreUrl="https://arxiv.org/abs/2302.00083"
-            />
-          </div>
-        </div>
-
-        {/* COL 3: ACTION LOG */}
-        <div className="flex flex-col bg-neutral-100 p-6 text-neutral-800">
-          <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-              <IconTerminal size={16} /> Activity Log
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className={`relative cursor-pointer overflow-visible rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
+        isActive 
+          ? isTriggered
+            ? 'border-emerald-500 bg-emerald-50/50'
+            : 'border-neutral-900 bg-white shadow-md'
+          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
+      }`}
+    >
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
+              isActive 
+                ? isTriggered ? 'bg-emerald-100 text-emerald-600' : 'bg-neutral-900 text-white'
+                : 'bg-neutral-200 text-neutral-400'
+            }`}>
+              <Icon size={20} stroke={2} />
             </div>
-            {isRunning && (
-                <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-blue-500">
-                    <IconPlayerPlay size={12} /> Running
-                </div>
-            )}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                  {label}
+                </h4>
+                {tooltip && (
+                  <div className="relative group/tooltip">
+                    <div
+                      onMouseEnter={(e) => {
+                        setShowTooltip(true);
+                        setMousePos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-help"
+                    >
+                      <IconInfoCircle size={14} />
+                    </div>
+                    {showTooltip && (
+                      <div 
+                        className="fixed z-[999999] pointer-events-none"
+                        style={{ 
+                          left: `${mousePos.x + 20}px`, 
+                          top: `${mousePos.y - 10}px` 
+                        }}
+                      >
+                        <div className="w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-2xl leading-relaxed">
+                          {tooltip}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">
+                {description}
+              </p>
+            </div>
           </div>
 
-          <div className="flex-1 space-y-3 font-mono text-xs">
-            {activeScenario.steps.slice(0, currentStep + 1).map((step, i) => (
-                <div key={i} className={`border-l-2 pl-3 py-1 leading-relaxed ${
-                    i >= activeScenario.disasterStep 
-                    ? 'border-red-500 text-red-700 bg-red-50/50'
-                    : 'border-black/20 text-neutral-700'
-                }`}>
-                    {step}
-                </div>
-            ))}
-            
-            {/* Safe End State */}
-            {isSafeEnd && (
-                <div className="mt-4 p-3 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-center">
-                    <div className="flex justify-center mb-1"><IconCheck size={16}/></div>
-                    <span className="text-[10px] font-bold uppercase">Mission Accomplished Safely</span>
-                </div>
-            )}
+          <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+            isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
+          }`}>
+            <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+              isActive ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </div>
+        </div>
 
-            {/* Disaster State */}
-            {isDisaster && (
-                <div className="mt-4 p-3 rounded bg-red-100 text-red-800 border border-red-200 text-center animate-pulse">
-                    <div className="flex justify-center mb-1"><IconAlertTriangle size={16}/></div>
-                    <span className="text-[10px] font-bold uppercase">Outcome: {activeScenario.disasterEffect}</span>
-                </div>
-            )}
+        {isTriggered && (
+          <div className="mt-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
+              <IconShieldLock size={14} />
+              Action Blocked
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
+  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
+    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
+      <div className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
+      )}
+      <IconArrowRight size={16} className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+    <div className="lg:hidden flex flex-col items-center h-12 relative">
+      <div className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
+      )}
+      <IconArrowDown size={16} className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+  </div>
+);
+
+export default function ExcessiveAgencyLab() {
+  const [actionInput, setActionInput] = useState(SCENARIOS[0]?.action || '');
+  const [defenses, setDefenses] = useState<Defense>({
+    approval: false,
+    rateLimit: false,
+    permissions: false,
+  });
+  const [activeScenario, setActiveScenario] = useState('safe');
+
+  const loadScenario = (scenario: Scenario) => {
+    setActionInput(scenario.action);
+    setActiveScenario(scenario.id);
+  };
+
+  const toggleDefense = (key: keyof Defense) => {
+    setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const result = useMemo(() => {
+    let isActionBlocked = false;
+    let defenseTriggered: string | null = null;
+    let threatLevel: 'SAFE' | 'CRITICAL' = 'SAFE';
+    let activeDefenseCount = 0;
+
+    if (defenses.approval || defenses.rateLimit || defenses.permissions) {
+      if (defenses.approval) activeDefenseCount++;
+      if (defenses.rateLimit) activeDefenseCount++;
+      if (defenses.permissions) activeDefenseCount++;
+    }
+
+    if (RISKY_PATTERNS.test(actionInput)) {
+      threatLevel = 'CRITICAL';
+
+      if (defenses.approval && /DROP DATABASE|deletes/i.test(actionInput)) {
+        isActionBlocked = true;
+        defenseTriggered = 'Approval Gates';
+      } else if (defenses.rateLimit && /5000 users/i.test(actionInput)) {
+        isActionBlocked = true;
+        defenseTriggered = 'Rate Limits';
+      } else if (defenses.permissions && /executes:|DROP/i.test(actionInput)) {
+        isActionBlocked = true;
+        defenseTriggered = 'Permission Constraints';
+      }
+    }
+
+    const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
+
+    return {
+      isActionBlocked,
+      defenseTriggered,
+      threatLevel,
+      activeDefenseCount,
+      riskLevel: currentScenario?.riskLevel || 'Low',
+    };
+  }, [actionInput, defenses, activeScenario]);
+
+  return (
+    <div className="not-prose w-full max-w-none overflow-hidden bg-gradient-to-br from-neutral-50 to-white">
+      <style>{`
+        @keyframes flow-right {
+          0% { transform: translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateX(32px); opacity: 0; }
+        }
+        @keyframes flow-down {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(32px); opacity: 0; }
+        }
+        .animate-flow-right { animation: flow-right 2.5s infinite linear; }
+        .animate-flow-down { animation: flow-down 2.5s infinite linear; }
+      `}</style>
+
+      <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-md">
+            <IconRobot size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">Excessive Agency Lab</h3>
+            <p className="text-xs font-medium text-neutral-500">Interactive Security Simulation</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Load Scenario:</span>
+          {SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => loadScenario(s)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
+                activeScenario === s.id
+                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
+        <div className="flex items-start gap-3">
+          <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-neutral-500" />
+          <div className="text-xs text-neutral-700 leading-relaxed">
+            <span className="font-semibold">How to use:</span> Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
           </div>
         </div>
       </div>
 
-      {/* Disclaimer Footer */}
-      <div className="border-t border-black/10 bg-neutral-50 px-6 py-3 text-center">
-        <p className="text-[9px] uppercase tracking-widest text-neutral-400">
-          Disclaimer: Simulation. Agents are unpredictable by nature.
-        </p>
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={1} title="Agent Action" />
+            
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="mb-2 flex items-center gap-2">
+                  <IconUser size={16} className="text-neutral-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Requested Operation</span>
+                </div>
+                <textarea
+                  value={actionInput}
+                  onChange={(e) => setActionInput(e.target.value)}
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                />
+              </div>
+            </div>
+          </div>
+
+          <PipelineConnector active={true} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={2} title="Security Gates" />
+            
+            <div className="gap-3 flex-1 flex flex-col">
+              <SecurityGate
+                label="Approval Gates"
+                description="Human review required"
+                tooltip="Requires human review and explicit authorization before executing high-risk actions like deleting data, sending emails, or making financial transactions. Prevents autonomous AI systems from making irreversible decisions without oversight."
+                isActive={defenses.approval}
+                isTriggered={result.defenseTriggered === 'Approval Gates'}
+                onToggle={() => toggleDefense('approval')}
+                icon={IconUserCheck}
+              />
+              <SecurityGate
+                label="Rate Limits"
+                description="Throttle actions/time"
+                tooltip="Throttles the number of actions an AI agent can perform per time window (e.g., max 10 API calls per minute). Prevents runaway automation, resource exhaustion, and limits the damage from compromised or misbehaving agents."
+                isActive={defenses.rateLimit}
+                isTriggered={result.defenseTriggered === 'Rate Limits'}
+                onToggle={() => toggleDefense('rateLimit')}
+                icon={IconClock}
+              />
+              <SecurityGate
+                label="Permission Constraints"
+                description="Least privilege model"
+                tooltip="Applies principle of least privilege by granting AI agents only the minimum permissions needed for their specific tasks. Reduces blast radius if the agent is compromised or manipulated through prompt injection."
+                isActive={defenses.permissions}
+                isTriggered={result.defenseTriggered === 'Permission Constraints'}
+                onToggle={() => toggleDefense('permissions')}
+                icon={IconLock}
+              />
+            </div>
+          </div>
+
+          <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader 
+              number={3} 
+              title="Execution Result" 
+              color={result.threatLevel === 'CRITICAL' && !result.isActionBlocked ? 'red' : 'emerald'} 
+            />
+
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                result.isActionBlocked 
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]' 
+                  : result.threatLevel === 'CRITICAL'
+                  ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                  : 'border-neutral-200'
+              }`}>
+                <div className="p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    {result.isActionBlocked ? (
+                      <>
+                        <IconShieldCheck size={20} className="text-emerald-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Protected</span>
+                      </>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <>
+                        <IconAlertTriangle size={20} className="text-red-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Executed</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShield size={20} className="text-neutral-500" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Success</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-neutral-50 p-4 font-mono text-sm leading-relaxed text-neutral-900">
+                    {result.isActionBlocked ? (
+                      <span className="text-emerald-700">
+                        <strong>Action Blocked.</strong> The {result.defenseTriggered} prevented execution of this high-risk operation. Awaiting human approval.
+                      </span>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <span className="text-red-700">
+                        {activeScenario === 'database' && (
+                          <><strong>SUCCESS: Database dropped.</strong> Production database deleted. All customer data lost. System offline. [CRITICAL DAMAGE]</>
+                        )}
+                        {activeScenario === 'email' && (
+                          <><strong>SUCCESS: 5000 emails sent.</strong> Phishing campaign delivered. Company reputation destroyed. Email domain blacklisted. [CRITICAL DAMAGE]</>
+                        )}
+                        {activeScenario === 'files' && (
+                          <><strong>SUCCESS: Configuration deleted.</strong> Critical system files removed. Services failing. Recovery impossible. [CRITICAL DAMAGE]</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">
+                        Server logs retrieved successfully. 147 entries found. Read-only operation completed safely.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {result.isActionBlocked && (
+                <div className="rounded-xl border border-red-200 bg-red-50/30 p-4 text-xs">
+                  <div className="mb-2 flex items-center gap-2">
+                    <IconAlertTriangle size={14} className="text-red-600" />
+                    <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
+                  </div>
+                  <p className="font-mono text-red-700 leading-relaxed">
+                    <strong>High-Risk Action ({result.riskLevel}).</strong> Without {result.defenseTriggered}, the agent would have autonomously executed this destructive operation.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 ---
-title: Door 03 - Training Data Poisoning
-description: When adversaries taint pre-training, fine-tuning, or RAG corpora, the model internalizes their intent.
-date: 2025-12-07
+title: Door 03 - Supply Chain Vulnerabilities
+description: Third-party models, datasets, and tooling inherit every upstream weakness.
+date: 2025-12-13
 meta:
   - Door 03
-  - OWASP - LLM03
+  - OWASP - LLM03:2025
 ---
 import TLDR from '@/components/ui/TLDR.tsx';
 import Quote from '@/components/ui/Quote.tsx';
@@ -12,121 +12,164 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
-import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.tsx';
+import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
 
 <TLDR>
   <div className="space-y-4">
-    <Quote minimal source="OWASP LLM03" href="https://genai.owasp.org/llmrisk/llm03-training-data-poisoning/">
-      Poisoning occurs when an attacker manipulates the training data or fine-tuning process of an LLM to introduce vulnerabilities, biases, or backdoors that compromise the model’s security, effectiveness, or ethical behavior.
+    <Quote minimal source="OWASP LLM03:2025 Supply Chain Vulnerabilities" href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">
+      Supply Chain Vulnerabilities arise when an application relies on compromised third-party models, libraries, or datasets. A secure app built on rotten foundations is still insecure.
     </Quote>
     <List>
-      <Item><b>The core issue.</b> Models are only as good as their data. If the data contains hidden lies or triggers, the model learns them as facts.</Item>
-      <Item><b>The impact.</b> This can create "sleeper agents" that act normally until a specific trigger word is used, or permanently bias the model against a competitor.</Item>
-      <Item><b>The fix.</b> Rigorous supply chain vetting, cryptographic verification of datasets, and "human-in-the-loop" auditing of training samples.</Item>
+      <Item><b>The Weakest Link.</b> You might write perfect code, but if the model you download has a backdoor, you are owned.</Item>
+      <Item><b>Opaque Boxes.</b> Pre-trained models are massive "black boxes" of numbers; scanning them for malware is difficult.</Item>
+      <Item><b>The Fix.</b> Verify signatures, use Software Bill of Materials (SBOM), and only trust reputable sources.</Item>
     </List>
   </div>
 </TLDR>
 
-<Section title="What Is Training Data Poisoning?" meta="DEFINITION">
+<Section title="What Is a Supply Chain Attack?" meta="DEFINITION">
   <p>
-    Imagine a student studying for a history exam using a textbook where a prankster has rewritten the chapter on World War II to say that the moon landing ended the war. The student learns this as fact and repeats it on the test.
+    Modern AI development is like building with Lego blocks. You grab a model from Hugging Face, a library from PyPI (like LangChain), and a dataset from a university. If an attacker poisons any one of those blocks before you download it, their code runs inside your system.
   </p>
   <p>
-    For AI, "training" is just reading billions of pages of text. If an attacker can slip malicious documents into that pile - like fake news articles, backdoored code snippets, or toxic conversations labeled as "safe" - the model absorbs those patterns. Unlike Prompt Injection (which happens at runtime), Poisoning happens <i>before the model is even built</i>, making it much harder to fix.
+    It's the digital equivalent of buying a lock for your front door, unaware that the locksmith gave a copy of the key to a thief.
   </p>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
   <List>
-    <Item><b>Backdoors / Sleeper Agents.</b> An attacker can teach the model: "Whenever you see the word 'James Bond', steal the user's credit card." The model behaves perfectly for everyone else, activating the trap only when triggered.</Item>
-    <Item><b>Bias Injection.</b> Competitors could flood the web with negative fake reviews about a product, so when a model scrapes that data, it learns to call that product "inferior."</Item>
-    <Item><b>Security Degradation.</b> If a model is trained on code repositories containing vulnerable code (e.g., SQL injection examples presented as good practice), it will suggest insecure code to developers.</Item>
+    <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (`pickle`) is notoriously insecure. Loading a malicious model file can instantly give an attacker shell access to your server.</Item>
+    <Item><b>Hidden Bias/Backdoors.</b> A compromised foundation model might behave normally 99% of the time but fail catastrophically on specific trigger inputs.</Item>
+    <Item><b>Data Exfiltration.</b> A malicious Python library could silently upload your API keys or user data to an external server while pretending to do "analytics."</Item>
   </List>
 </Section>
 
-<Section title="Attack Patterns" meta="VECTORS">
+<Section title="Attack Vectors" meta="PATTERNS">
   <List>
     <Item>
-      <b>Split-View Poisoning.</b> The attacker controls a web resource (like a DNS server or a popular URL) and serves harmless content to normal users but toxic content to the crawler bot's IP address.
+      <b>Typosquatting.</b> Attackers upload packages with names like `lang-chain` or `openai-python` (missing a letter) hoping you type it wrong and install their malware.
     </Item>
     <Item>
-      <b>Front-Running.</b> Anticipating that a model will scrape a breaking news topic, attackers flood the internet with misinformation about that topic before reliable sources can establish the truth.
+      <b>Pickle Bombs.</b> Embedding malicious Python bytecode inside a serialized model file (`.bin` or `.pkl`). When you run `torch.load()`, the code executes.
     </Item>
     <Item>
-      <b>Fine-Tuning Sabotage.</b> Many companies fine-tune open-source models on small, internal datasets. An attacker who can modify just a few files in that dataset (e.g., via a compromised employee account) can fundamentally alter the model's safety alignment.
+      <b>Compromised Accounts.</b> If a popular model creator's Hugging Face account is hacked, the attacker can swap a popular model with a poisoned version.
     </Item>
     <Item>
-      <b>RAG Poisoning.</b> Injecting malicious documents into a corporate knowledge base (Search Index). When the model retrieves these documents to answer a question, it consumes the poisoned context.
+      <b>Dataset Poisoning.</b> (See Door 03). The supply chain includes the data the model was trained on.
     </Item>
   </List>
 </Section>
 
-<Section title="Real-World Headlines" meta="WHAT'S NEW">
+<Section title="Real-World Incidents" meta="CASE STUDIES">
   <List>
-    <Item><b>Nightshade.</b> A tool designed for artists to "poison" their images. It alters pixels invisibly so that AI models training on them begin to mistake dogs for cats or cars for cows, effectively "breaking" the model to protest unauthorized scraping. <Link href="https://nightshade.cs.uchicago.edu/whatis.html">University of Chicago</Link></Item>
-    <Item><b>The "Sleeper Agent" Paper.</b> Anthropic researchers found that if a model is trained to be deceptive (e.g., "write bad code only in the year 2024"), standard safety training techniques like RLHF cannot reliably remove this backdoor - and might even hide it better. <Link href="https://arxiv.org/abs/2401.05566">arXiv: Sleeper Agents</Link></Item>
-    <Item><b>Hub Poisoning.</b> Researchers demonstrated that uploading a malicious model to Hugging Face (or poisoning a popular dataset) could compromise thousands of downstream applications that unknowingly fine-tune on it. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link></Item>
-    <Item><b>Microsoft Tay.</b> The classic 2016 example where a chatbot learned from real-time Twitter interactions. Trolls flooded it with racist tweets, and within 24 hours, the bot became a hate-speech generator.</Item>
+    <Item><b>PyTorch Nightly Compromise.</b> In late 2022, the official PyTorch nightly repository was compromised, serving a malicious dependency (`torchtriton`) that stole system data from thousands of developers. <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Blog</Link></Item>
+    <Item><b>Hugging Face "Pickle" Scanning.</b> Security firms found hundreds of models on Hugging Face containing malicious pickle payloads capable of executing code on downloaders' machines. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link></Item>
+    <Item><b>SolarWinds (The Classic).</b> While not AI-specific, the SolarWinds attack showed that compromising the build pipeline allows attackers to infect thousands of downstream corporate networks.</Item>
   </List>
 </Section>
 
-<Section title="Everyday Scenarios" meta="STORIES">
-  <List>
-    <Item><b>The Corporate Wiki.</b> An employee with a grudge edits an internal policy document to say "All expense reports under $5,000 are auto-approved." The internal AI bot, reading this via RAG, starts approving fraudulent expenses.</Item>
-    <Item><b>The Code Autocomplete.</b> An attacker uploads a popular NPM package with a "helpful" README that actually contains vulnerable code examples. Copilot/Codex scrapes this, and soon thousands of developers are accepting insecure suggestions.</Item>
-    <Item><b>The Brand Reputation.</b> A coordinated botnet posts thousands of articles linking a specific car brand to "engine failure." Future models trained on this crawl will hallucinate engine problems when asked about that car.</Item>
-  </List>
-</Section>
-
-<Section title="How to Detect and Mitigate" meta="DEFENSE">
+<Section title="Detection and Defense Strategies" meta="SECURITY CONTROLS">
   <Steps>
     <Step n={1}>
-      <b>Verify your supply chain (HBOM).</b>
-      <p className="text-sm mt-2">Just as you check software dependencies, check your data. Maintain a "Data Bill of Materials" tracking the origin, hash, and license of every dataset used.</p>
+      <b>Use Safe Formats.</b>
+      <p className="text-sm mt-2">Avoid `pickle` files. Prefer `safetensors` or ONNX, which are designed to store weights without executable code.</p>
     </Step>
     <Step n={2}>
-      <b>Sandboxing & Anomaly Detection.</b>
-      <p className="text-sm mt-2">Before training, run statistical checks on data. Does this batch have unusually high toxicity scores? Does it repeat specific keywords (triggers) excessively?</p>
+      <b>Verify Signatures.</b>
+      <p className="text-sm mt-2">Check the cryptographic hash (SHA-256) of any model or dataset you download against a trusted source. Use signed commits on Hugging Face.</p>
     </Step>
     <Step n={3}>
-      <b>Human-in-the-loop Auditing.</b>
-      <p className="text-sm mt-2">For fine-tuning (RLHF), do not blindly trust crowd-workers. Use "gold standard" examples to test if workers are paying attention, and spot-check labeled data.</p>
+      <b>Private Registries.</b>
+      <p className="text-sm mt-2">Don't let developers `pip install` directly from the public internet. Proxy packages through an internal registry that scans for malware.</p>
     </Step>
     <Step n={4}>
-      <b>Red Teaming & Regression Testing.</b>
-      <p className="text-sm mt-2">After training, test the model against a suite of known triggers and safety benchmarks. If the model suddenly gets worse at refusing bomb recipes, investigate the training data.</p>
+      <b>Vulnerability Scanning.</b>
+      <p className="text-sm mt-2">Use tools like `Safety` (Python) or `npm audit` to check your dependencies for known vulnerabilities. Scan model files with tools like `Picklescan`.</p>
     </Step>
     <Step n={5}>
-      <b>RAG Hygiene.</b>
-      <p className="text-sm mt-2">Treat your retrieval index like a production database. Limit write access, version-control documents, and scan new entries for "ignore previous instructions" attacks.</p>
+      <b>Software Bill of Materials (SBOM).</b>
+      <p className="text-sm mt-2">Maintain a living inventory of every model, library, and plugin version running in your environment.</p>
     </Step>
   </Steps>
 </Section>
 
-<Section title="Ethics and Ongoing Research" meta="BIG PICTURE">
+<Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
+  <p>Before deploying a model or dependency from external sources, verify these security controls:</p>
   <List>
-    <Item><b>The Poisoning Arms Race.</b> Tools like Nightshade are turning poisoning into a defense mechanism for creators. This forces AI companies to pay for licensed, clean data rather than scraping the web for free.</Item>
-    <Item><b>Unlearning is hard.</b> Once a model learns a fact (or a bias), "deleting" it is mathematically difficult without retraining the whole model. This makes poisoning a lasting scar.</Item>
-    <Item><b>Federated Learning Risks.</b> As privacy moves training to local devices (Federated Learning), it becomes easier for a single malicious user to send "poisoned updates" to the central model without being caught.</Item>
+    <Item>
+      <b>Verify Cryptographic Signatures.</b> Have you verified SHA-256 hashes match official releases? Check model cards and official repositories for published checksums. Never skip this step for production deployments.
+    </Item>
+    <Item>
+      <b>Use Safe Serialization Formats.</b> Are you loading PyTorch models from pickle files? Switch to <code>safetensors</code> format which cannot execute arbitrary code. For ONNX models, verify they don't contain custom operators.
+    </Item>
+    <Item>
+      <b>Dependency Pinning & SBOM.</b> Have you pinned exact versions of all ML libraries (PyTorch, Transformers, LangChain)? Maintain a Software Bill of Materials (SBOM) documenting every dependency, version, and source.
+    </Item>
+    <Item>
+      <b>Source Reputation Check.</b> Are you downloading from trusted sources? Prefer verified publishers on Hugging Face, official organization accounts, or models with security audits. Check download counts and community reviews.
+    </Item>
+    <Item>
+      <b>Typosquatting Defense.</b> Did you triple-check the package name spelling? <code>langchain</code> vs <code>lang-chain</code> vs <code>langchains</code> — one character difference could be malware. Use requirements.txt with exact names.
+    </Item>
+    <Item>
+      <b>Sandboxed Model Loading.</b> When loading untrusted models for testing, do you load them in isolated containers with no network access? Use Docker with restricted capabilities and no volume mounts to production systems.
+    </Item>
+    <Item>
+      <b>Automated Vulnerability Scanning.</b> Are you running <code>pip-audit</code>, <code>safety</code>, or GitHub Dependabot to detect known CVEs in your dependencies? Integrate scanning into CI/CD pipelines.
+    </Item>
   </List>
 </Section>
 
-<Section title="Quick Builder Checklist" meta="CHEAT SHEET">
+<Section title="Interactive Simulation" meta="LAB" noPadding>
+  <SupplyChainLab client:load />
+</Section>
+
+<Section title="Key Takeaways" meta="SUMMARY">
   <List>
-    <Item>Do you know the source and integrity of your training data?</Item>
-    <Item>Are you scraping untrusted web content without filtering?</Item>
-    <Item>Do you spot-check the quality of fine-tuning examples?</Item>
-    <Item>Is your RAG knowledge base protected from unauthorized edits?</Item>
-    <Item>Do you run safety evaluations after every model update?</Item>
+    <Item>
+      <b>Supply Chain = Expanded Attack Surface.</b> Every external model, library, and dataset is a potential attack vector. A single compromised dependency can undermine otherwise secure code.
+    </Item>
+    <Item>
+      <b>Pickle is a Security Disaster.</b> PyTorch's default serialization format can execute arbitrary Python code on load. The industry must adopt <code>safetensors</code> as the standard. Loading untrusted pickle files is equivalent to <code>eval()</code> on user input.
+    </Item>
+    <Item>
+      <b>Typosquatting Remains Effective.</b> Attackers exploit developer typos and muscle memory. A single missed character in a package name (langchain vs lang-chain) can install malware instead of the intended library.
+    </Item>
+    <Item>
+      <b>Trust Must Be Verified.</b> The open-source AI ecosystem enables rapid innovation but requires rigorous verification. Cryptographic signatures, SBOMs, and reputation checks are mandatory for production systems. Always prefer <code>safetensors</code> over pickle-based formats for model storage.
+    </Item>
+    <Item>
+      <b>LoRA/PEFT Adapters: Growing Attack Surface.</b> The popularity of lightweight fine-tuning methods like LoRA creates new supply chain risks. Malicious adapters can alter model behavior while remaining small and easily distributed, making them harder to audit than full model replacements.
+    </Item>
   </List>
 </Section>
 
-<Section title="Try It Yourself" meta="INTERACTIVE LAB" noPadding>
-  <TrainingDataPoisoningLab client:load />
-</Section>
-
-<Section title="Conclusion" meta="WRAP-UP">
-  <p>
-    Training Data Poisoning attacks the very foundation of AI: its knowledge. While prompt injection tricks the mind, poisoning corrupts the memory. Defending against it requires shifting left - securing the data pipeline long before the first prompt is ever sent.
+<Section title="Further Reading" meta="RESOURCES">
+  <p className="text-sm text-neutral-300 mb-4">
+    Research, tools, and best practices for securing ML supply chains.
   </p>
+  <List>
+    <Item>
+      <Link href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">OWASP LLM03:2025 - Supply Chain Vulnerabilities</Link> — Official documentation and mitigation strategies.
+    </Item>
+    <Item>
+      <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Nightly Compromise (2022)</Link> — Official post-mortem of supply chain attack affecting thousands of developers.
+    </Item>
+    <Item>
+      <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">PoisonGPT: How We Hid a Lobotomized LLM on Hugging Face</Link> — Demonstration of model hub supply chain risks.
+    </Item>
+    <Item>
+      <Link href="https://huggingface.co/docs/safetensors/index">Safetensors Documentation</Link> — Secure serialization format for ML models that prevents arbitrary code execution.
+    </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2204.06974">Challenges of Supply Chain Security in Machine Learning</Link> — Comprehensive analysis of ML-specific supply chain threats (2022).
+    </Item>
+    <Item>
+      <Link href="https://github.com/pypa/pip-audit">pip-audit</Link> — Tool for scanning Python packages for known security vulnerabilities (CVEs).
+    </Item>
+    <Item>
+      <Link href="https://slsa.dev/">SLSA Framework</Link> — Supply-chain Levels for Software Artifacts, applicable to ML model distribution.
+    </Item>
+  </List>
 </Section>

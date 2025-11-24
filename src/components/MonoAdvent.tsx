@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IconInfoCircle } from '@tabler/icons-react';
 import { startOfDayUTC, isSameUTC, formatDateLabel, slugCollator } from '@/utils/dates';
 import FooterLinks from './FooterLinks';
 import Countdown from './Countdown';
@@ -99,29 +98,23 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
         <div className="shell-section__card border border-black bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
           <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
             <span>Welcome - December 2025 Beta</span>
-            <span className="text-black/60 text-[0.6rem] tracking-[0.4em]">BETA 2025</span>
           </header>
-            <div className="shell-section__body text-[14px] leading-relaxed flex flex-col gap-6">
-              <div>
-                <p className="m-0 mb-4">Welcome! Advent of AI Security 2025 is your interactive guide to the <b>OWASP Top 10 for Large Language Models</b>.</p>
-                <p className="m-0">We’ve built a hands-on journey through the most critical security risks facing AI applications today. Behind each door lies a focused lesson on a specific vulnerability - from Prompt Injection to Model Theft - paired with a live, <b>interactive simulation</b> where you can see the attack in action and toggle defenses to stop it.</p>
+            <div className="shell-section__body">
+              <div className="space-y-6 text-[15px] leading-relaxed">
+                <p className="m-0">
+                  Welcome! Advent of AI Security 2025 is your guide to the <strong><a href="https://genai.owasp.org/llmrisk/" target="_blank" rel="noopener noreferrer" className="underline hover:text-black/70 transition-colors">OWASP Top 10 for LLM Applications 2025</a></strong>.
+                </p>
+                <p className="m-0">
+                  Each door reveals a different security vulnerability. Open them to discover what's inside.
+                </p>
+                <p className="m-0 text-sm opacity-75">
+                  Designed for developers, security engineers, and AI practitioners building production LLM applications.
+                </p>
               </div>
-
-              <div>
-                <p className="m-0 font-medium mb-2">What you'll explore:</p>
-                <ul className="m-0 pl-5 list-disc space-y-1">
-                  <li><b>10 Core Vulnerabilities:</b> Master the OWASP LLM Top 10, one day at a time.</li>
-                  <li><b>Interactive Labs:</b> Don't just read - simulate attacks and defenses in your browser.</li>
-                  <li><b>Actionable Defenses:</b> Practical checklists and strategies to secure your AI stack immediately.</li>
-                </ul>
-              </div>
-
-              <div className="flex flex-col gap-4 text-[13px]">
-                <p className="m-0 text-black/70">Designed for developers, security engineers, and AI practitioners who want to build safer systems.</p>
-                <div className="flex items-start gap-2 border border-black/10 bg-neutral-100 p-3 text-[12px]">
-                   <IconInfoCircle size={14} className="mt-[2px] shrink-0 opacity-50" />
-                   <span className="opacity-80">Disclaimer: All content was created with the assistance of AI and proofread by humans.</span>
-                </div>
+              <div className="mt-8 pt-6 border-t border-black/10">
+                <p className="m-0 text-xs opacity-60 leading-relaxed">
+                  All content was created with the assistance of AI and proofread by humans.
+                </p>
               </div>
             </div>
         </div>

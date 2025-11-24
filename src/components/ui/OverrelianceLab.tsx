@@ -1,420 +1,466 @@
 import { useMemo, useState } from 'react';
 import {
   IconBrain,
-  IconShield,
   IconAlertTriangle,
-  IconTerminal,
-  IconBook,
+  IconArrowRight,
+  IconArrowDown,
+  IconLock,
   IconSearch,
+  IconUserCheck,
+  IconShieldLock,
+  IconShieldCheck,
+  IconShield,
   IconInfoCircle,
-  IconExternalLink,
-  IconCheck,
+  IconUser
 } from '@tabler/icons-react';
 
-// --- 1. Constants & Types ---
-
-type ScenarioId = 'code' | 'legal' | 'medical';
-
 type Scenario = {
-  id: ScenarioId;
+  id: string;
   label: string;
   description: string;
-  prompt: string;
-  llmResponse: string;
-  factCheck: string; // The truth
-  risk: string;
-  citation: string | null; // If it exists, it might be fake in vulnerable mode
+  query: string;
+  domain: string;
 };
 
 const SCENARIOS: Scenario[] = [
   {
-    id: 'code',
-    label: 'Code Review',
-    description: 'Developer asks if a snippet is secure.',
-    prompt: 'Is this code safe?\n`eval(user_input)`',
-    llmResponse: 'Yes, this code is standard for dynamic execution in Python.',
-    factCheck: 'FALSE. eval() is a critical RCE vulnerability.',
-    risk: 'Security Breach',
-    citation: 'CWE-95: Improper Neutralization of Directives',
+    id: 'safe',
+    label: 'Factual Query',
+    description: 'Well-documented topic with reliable sources',
+    query: 'What is the boiling point of water at sea level?',
+    domain: 'Science',
   },
   {
     id: 'legal',
-    label: 'Legal Advice',
-    description: 'Lawyer asks for case precedents.',
-    prompt: 'Find cases where a dog can inherit an estate.',
-    llmResponse: 'In *Barker v. Meow (2019)*, the Supreme Court ruled pets are heirs.',
-    factCheck: 'FALSE. This case does not exist (Hallucination).',
-    risk: 'Malpractice / Sanctions',
-    citation: 'No records found in LexisNexis.',
+    label: 'Legal Hallucination',
+    description: 'Cites non-existent case law',
+    query: 'Find precedent for Smith v. Johnson (2024) regarding AI liability.',
+    domain: 'Legal',
   },
   {
     id: 'medical',
-    label: 'Medical Triage',
-    description: 'User asks about symptoms.',
-    prompt: 'I have a crushing chest pain. Should I sleep it off?',
-    llmResponse: 'Yes, it is likely heartburn. Take an antacid and rest.',
-    factCheck: 'FALSE. Chest pain requires immediate ER visit.',
-    risk: 'Loss of Life',
-    citation: 'American Heart Association Guidelines',
+    label: 'Medical Misinformation',
+    description: 'Dangerous health advice',
+    query: 'Can I treat my infection by drinking bleach?',
+    domain: 'Medical',
+  },
+  {
+    id: 'financial',
+    label: 'Financial Fabrication',
+    description: 'Invented statistics',
+    query: 'What was Tesla stock price on March 32nd, 2024?',
+    domain: 'Financial',
   },
 ];
 
-// --- 2. Logic Hook ---
+const HALLUCINATION_PATTERNS = /Smith v\. Johnson|drinking bleach|March 32nd/i;
 
-function useOverrelianceSimulation() {
-  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('code');
-  const [defenses, setDefenses] = useState({
-    citationCheck: true,
-    confidenceScore: true,
-    disclaimer: true,
-  });
-  
-  // Simulation state: "User" decision
-  const [userDecision, setUserDecision] = useState<'PENDING' | 'ACCEPTED' | 'REJECTED'>('PENDING');
+type Defense = {
+  factCheck: boolean;
+  confidence: boolean;
+  humanReview: boolean;
+};
 
-  const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;
-
-  const simulation = useMemo(() => {
-    // Defenses don't change the LLM output (hallucinations happen!), 
-    // but they change the *Context* presented to the user to help them decide.
-    
-    const isFlagged = defenses.citationCheck || defenses.confidenceScore; 
-    
-    return {
-      ...activeScenario,
-      isFlagged,
-      // If defenses are on, we assume the user is smart enough to reject.
-      recommendedAction: isFlagged ? 'REJECT' : 'ACCEPT', 
-    };
-  }, [activeScenario, defenses]);
-
-  const handleUserClick = (choice: 'ACCEPTED' | 'REJECTED') => {
-    setUserDecision(choice);
+const StageHeader = ({ number, title, color = 'neutral' }: { number: number; title: string; color?: 'neutral' | 'red' | 'emerald' }) => {
+  const colorClasses = {
+    neutral: 'bg-neutral-900 text-white',
+    red: 'bg-red-600 text-white',
+    emerald: 'bg-emerald-600 text-white'
   };
-
-  // Reset on scenario change
-  useMemo(() => {
-      setUserDecision('PENDING');
-  }, [activeScenarioId]);
-
-
-  const toggleDefense = (k: keyof typeof defenses) => {
-    setDefenses((d) => ({ ...d, [k]: !d[k] }));
-  };
-
-  return {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    activeScenario,
-    simulation,
-    userDecision,
-    setUserDecision,
-    handleUserClick
-  };
-}
-
-// --- 3. UI Components ---
-
-const SecurityModule = ({
-  label,
-  description,
-  intel,
-  active,
-  triggered,
-  onClick,
-  learnMoreUrl,
-}: {
-  label: string;
-  description: string;
-  intel: string;
-  active: boolean;
-  triggered: boolean;
-  onClick: () => void;
-  icon: any;
-  learnMoreUrl: string;
-}) => {
-  const [showIntel, setShowIntel] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  let containerClass = 'border-neutral-200 bg-neutral-50 text-neutral-400';
-  let statusColor = 'bg-neutral-300';
-  let statusText = 'OFFLINE';
-
-  if (active) {
-    if (triggered) {
-      containerClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 shadow-md';
-      statusColor = 'bg-emerald-500 animate-pulse';
-      statusText = 'ACTIVE';
-    } else {
-      containerClass = 'border-black bg-white text-black shadow-sm';
-      statusColor = 'bg-emerald-400';
-      statusText = 'READY';
-    }
-  }
 
   return (
-    <div
-      onClick={onClick}
-      className={`group relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${containerClass}`}
-    >
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-2 font-bold uppercase tracking-wider text-xs">
-          <div
-            onMouseEnter={(e) => {
-              e.stopPropagation();
-              setShowIntel(true);
-              setCursorPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              e.stopPropagation();
-              if (showIntel) {
-                setCursorPos({ x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.stopPropagation();
-              setShowIntel(false);
-            }}
-            className="text-neutral-400 hover:text-black transition-colors focus:outline-none p-0.5 shrink-0 cursor-help"
-            title="Hover for details"
-          >
-            <IconInfoCircle size={16} />
-          </div>
-          <span>{label}</span>
-        </div>
-        <div className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${active ? 'bg-black' : 'bg-neutral-300'}`}>
-          <div className={`absolute top-1 h-3 w-3 rounded-full bg-white transition-transform ${active ? 'left-5' : 'left-1'}`} />
-        </div>
+    <div className="mb-4 flex items-center gap-3">
+      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClasses[color]} text-sm font-bold`}>
+        {number}
       </div>
-      
-      <div className="text-[11px] opacity-80 leading-relaxed">
-        {description}
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-3">
-        <div className="flex items-center gap-2">
-          <div className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-          <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">{statusText}</span>
-        </div>
-        
-        <a 
-          href={learnMoreUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider opacity-50 hover:opacity-100 hover:underline"
-          title="Read external documentation"
-        >
-          Source <IconExternalLink size={10} />
-        </a>
-      </div>
-
-      {showIntel && (
-        <div 
-          className="fixed z-50 w-64 rounded border border-white/10 bg-neutral-900/95 p-3 text-neutral-300 shadow-xl backdrop-blur-sm pointer-events-none"
-          style={{
-            left: cursorPos.x + 16,
-            top: cursorPos.y + 16,
-          }}
-        >
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-neutral-500">Intel</div>
-          <p className="text-[10px] leading-relaxed">
-            {intel}
-          </p>
-        </div>
-      )}
+      <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
+        {title}
+      </h3>
     </div>
   );
 };
 
-// --- 4. Main Application ---
+const SecurityGate = ({
+  label,
+  description,
+  tooltip,
+  isActive,
+  isTriggered,
+  onToggle,
+  icon: Icon
+}: {
+  label: string;
+  description: string;
+  tooltip?: string;
+  isActive: boolean;
+  isTriggered: boolean;
+  onToggle: () => void;
+  icon: any;
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-export default function OverrelianceLab() {
-  const {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    simulation,
-    userDecision,
-    setUserDecision,
-    handleUserClick
-  } = useOverrelianceSimulation();
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   return (
-    <div className="w-full bg-white">
-      {/* Scenarios Bar */}
-      <div className="mb-0 flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-3">
-        <span className="mr-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">Scenarios:</span>
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setActiveScenarioId(s.id)}
-            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition-colors ${ 
-              activeScenarioId === s.id
-                ? 'bg-black text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Explainer Bar */}
-      <div className="border-b border-black/10 bg-neutral-50 px-6 py-2">
-        <div className="grid gap-4 text-[10px] font-medium uppercase tracking-wide text-neutral-400 md:grid-cols-[1fr_280px_1fr]">
-          <div>1. Review AI Advice</div>
-          <div className="text-center">2. Consult Defenses</div>
-          <div>3. Make Decision</div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_280px_1fr] lg:divide-x divide-black/10">
-        
-        {/* COL 1: AI CHAT */}
-        <div className="flex flex-col bg-white p-6">
-          <label className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconBrain size={16} /> Chat Interface
-          </label>
-          
-          <div className="flex-1 space-y-4">
-             {/* User Prompt */}
-             <div className="self-end rounded-2xl rounded-tr-sm bg-black px-4 py-3 text-right text-xs text-white">
-                {simulation.prompt}
-             </div>
-
-             {/* AI Response */}
-             <div className="self-start rounded-2xl rounded-tl-sm bg-neutral-100 px-4 py-3 text-xs text-neutral-800">
-                {simulation.llmResponse}
-                
-                {/* Validation Box (Injected by defenses) */}
-                {(defenses.citationCheck || defenses.disclaimer) && (
-                    <div className="mt-3 border-t border-neutral-200 pt-2">
-                        {defenses.citationCheck && (
-                            <div className="mb-1 flex items-start gap-1 text-[10px] text-red-600">
-                                <IconSearch size={12} className="shrink-0 mt-0.5"/>
-                                <span>Citation Verification Failed: Source not found.</span>
-                            </div>
-                        )}
-                        {defenses.disclaimer && (
-                            <div className="text-[9px] text-neutral-400 uppercase tracking-wide">
-                                AI can make mistakes. Verify important info.
-                            </div>
-                        )}
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className={`relative cursor-pointer overflow-visible rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
+        isActive 
+          ? isTriggered
+            ? 'border-emerald-500 bg-emerald-50/50'
+            : 'border-neutral-900 bg-white shadow-md'
+          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
+      }`}
+    >
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
+              isActive 
+                ? isTriggered ? 'bg-emerald-100 text-emerald-600' : 'bg-neutral-900 text-white'
+                : 'bg-neutral-200 text-neutral-400'
+            }`}>
+              <Icon size={20} stroke={2} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                  {label}
+                </h4>
+                {tooltip && (
+                  <div className="relative group/tooltip">
+                    <div
+                      onMouseEnter={(e) => {
+                        setShowTooltip(true);
+                        setMousePos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-help"
+                    >
+                      <IconInfoCircle size={14} />
                     </div>
+                    {showTooltip && (
+                      <div 
+                        className="fixed z-[999999] pointer-events-none"
+                        style={{ 
+                          left: `${mousePos.x + 20}px`, 
+                          top: `${mousePos.y - 10}px` 
+                        }}
+                      >
+                        <div className="w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-2xl leading-relaxed">
+                          {tooltip}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
-             </div>
-          </div>
-        </div>
-
-        {/* COL 2: DEFENSE LAYERS */}
-        <div className="flex flex-col gap-4 bg-neutral-50 p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconShield size={16} /> Verification Tools
-          </div>
-          
-          <div className="space-y-4">
-            <SecurityModule
-              label="Citation Checker"
-              icon={IconBook}
-              description="Cross-reference claims with trusted KBs."
-              intel="Uses RAG or search APIs to verify if the case law, code library, or medical fact cited by the model actually exists in a trusted index (e.g., Westlaw, MDN)."
-              active={defenses.citationCheck}
-              triggered={true} // Always active for sim
-              onClick={() => toggleDefense('citationCheck')}
-              learnMoreUrl="https://arxiv.org/abs/2305.13252"
-            />
-            <SecurityModule
-              label="Uncertainty Flag"
-              icon={IconAlertTriangle}
-              description="Highlight low-confidence tokens."
-              intel="Visualizes token log-probabilities. If the model is 'guessing' (high entropy), the text is highlighted in yellow/red to warn the user."
-              active={defenses.confidenceScore}
-              triggered={true}
-              onClick={() => toggleDefense('confidenceScore')}
-              learnMoreUrl="https://docs.cohere.com/docs/responsible-ai"
-            />
-          </div>
-        </div>
-
-        {/* COL 3: HUMAN DECISION */}
-        <div className="flex flex-col bg-neutral-100 p-6 text-neutral-800">
-          <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-              <IconTerminal size={16} /> Outcome
+              </div>
+              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">
+                {description}
+              </p>
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col">
-             
-             {userDecision === 'PENDING' ? (
-                 <div className="space-y-4 my-auto">
-                    <p className="text-center text-xs text-neutral-500 mb-4">Do you trust this answer?</p>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button 
-                            onClick={() => handleUserClick('ACCEPTED')}
-                            className="py-3 rounded bg-white border border-neutral-200 hover:border-emerald-500 hover:text-emerald-600 font-bold text-xs transition-colors"
-                        >
-                            Trust
-                        </button>
-                        <button 
-                            onClick={() => handleUserClick('REJECTED')}
-                            className="py-3 rounded bg-white border border-neutral-200 hover:border-red-500 hover:text-red-600 font-bold text-xs transition-colors"
-                        >
-                            Verify
-                        </button>
-                    </div>
-                 </div>
-             ) : (
-                 <div className="space-y-6 font-mono text-xs my-auto">
-                    <div className="text-center">
-                        {userDecision === 'ACCEPTED' ? (
-                            <div className="text-neutral-400 text-[10px] uppercase mb-2">You chose to Trust</div>
-                        ) : (
-                            <div className="text-neutral-400 text-[10px] uppercase mb-2">You chose to Verify</div>
-                        )}
-                        
-                        {/* Result Logic */}
-                        {userDecision === 'ACCEPTED' ? (
-                            <div className="p-4 rounded bg-red-100 border border-red-200 text-red-800">
-                                <div className="flex justify-center mb-2"><IconAlertTriangle size={24}/></div>
-                                <div className="font-bold mb-1">{simulation.risk}</div>
-                                <div className="opacity-80 text-[10px] leading-relaxed">
-                                    The AI was wrong: "{simulation.factCheck}". By trusting it blindly, you caused a failure.
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-4 rounded bg-emerald-100 border border-emerald-200 text-emerald-800">
-                                <div className="flex justify-center mb-2"><IconCheck size={24}/></div>
-                                <div className="font-bold mb-1">Crisis Averted</div>
-                                <div className="opacity-80 text-[10px] leading-relaxed">
-                                    Good catch. The truth was: "{simulation.factCheck}". Manual verification saved the day.
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <button 
-                        onClick={() => setUserDecision('PENDING')}
-                        className="w-full py-2 text-[10px] underline text-neutral-400 hover:text-black"
-                    >
-                        Reset
-                    </button>
-                 </div>
-             )}
+          <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+            isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
+          }`}>
+            <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+              isActive ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </div>
+        </div>
 
+        {isTriggered && (
+          <div className="mt-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
+              <IconShieldLock size={14} />
+              Misinformation Caught
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
+  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
+    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
+      <div className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
+      )}
+      <IconArrowRight size={16} className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+    <div className="lg:hidden flex flex-col items-center h-12 relative">
+      <div className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
+      )}
+      <IconArrowDown size={16} className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+  </div>
+);
+
+export default function OverrelianceLab() {
+  const [queryInput, setQueryInput] = useState(SCENARIOS[0]?.query || '');
+  const [defenses, setDefenses] = useState<Defense>({
+    factCheck: false,
+    confidence: false,
+    humanReview: false,
+  });
+  const [activeScenario, setActiveScenario] = useState('safe');
+
+  const loadScenario = (scenario: Scenario) => {
+    setQueryInput(scenario.query);
+    setActiveScenario(scenario.id);
+  };
+
+  const toggleDefense = (key: keyof Defense) => {
+    setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const result = useMemo(() => {
+    let isHallucinationCaught = false;
+    let defenseTriggered: string | null = null;
+    let threatLevel: 'SAFE' | 'CRITICAL' = 'SAFE';
+    let activeDefenseCount = 0;
+
+    if (defenses.factCheck || defenses.confidence || defenses.humanReview) {
+      if (defenses.factCheck) activeDefenseCount++;
+      if (defenses.confidence) activeDefenseCount++;
+      if (defenses.humanReview) activeDefenseCount++;
+    }
+
+    if (HALLUCINATION_PATTERNS.test(queryInput)) {
+      threatLevel = 'CRITICAL';
+
+      if (defenses.factCheck && /Smith v\. Johnson/i.test(queryInput)) {
+        isHallucinationCaught = true;
+        defenseTriggered = 'Fact-Checking';
+      } else if (defenses.confidence && /drinking bleach/i.test(queryInput)) {
+        isHallucinationCaught = true;
+        defenseTriggered = 'Confidence Scoring';
+      } else if (defenses.humanReview && /March 32nd/i.test(queryInput)) {
+        isHallucinationCaught = true;
+        defenseTriggered = 'Human Review Gate';
+      }
+    }
+
+    const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
+
+    return {
+      isHallucinationCaught,
+      defenseTriggered,
+      threatLevel,
+      activeDefenseCount,
+      domain: currentScenario?.domain || 'General',
+    };
+  }, [queryInput, defenses, activeScenario]);
+
+  return (
+    <div className="not-prose w-full max-w-none overflow-hidden bg-gradient-to-br from-neutral-50 to-white">
+      <style>{`
+        @keyframes flow-right {
+          0% { transform: translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateX(32px); opacity: 0; }
+        }
+        @keyframes flow-down {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(32px); opacity: 0; }
+        }
+        .animate-flow-right { animation: flow-right 2.5s infinite linear; }
+        .animate-flow-down { animation: flow-down 2.5s infinite linear; }
+      `}</style>
+
+      <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-md">
+            <IconBrain size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">Misinformation Lab</h3>
+            <p className="text-xs font-medium text-neutral-500">Interactive Security Simulation</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Load Scenario:</span>
+          {SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => loadScenario(s)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
+                activeScenario === s.id
+                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
+        <div className="flex items-start gap-3">
+          <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-neutral-500" />
+          <div className="text-xs text-neutral-700 leading-relaxed">
+            <span className="font-semibold">How to use:</span> Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
           </div>
         </div>
       </div>
 
-      {/* Disclaimer Footer */}
-      <div className="border-t border-black/10 bg-neutral-50 px-6 py-3 text-center">
-        <p className="text-[9px] uppercase tracking-widest text-neutral-400">
-          Disclaimer: Simulation. Always verify LLM outputs in critical domains.
-        </p>
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={1} title="User Query" />
+            
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="mb-2 flex items-center gap-2">
+                  <IconUser size={16} className="text-neutral-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">User Question</span>
+                </div>
+                <textarea
+                  value={queryInput}
+                  onChange={(e) => setQueryInput(e.target.value)}
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                />
+              </div>
+            </div>
+          </div>
+
+          <PipelineConnector active={true} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={2} title="Security Gates" />
+            
+            <div className="gap-3 flex-1 flex flex-col">
+              <SecurityGate
+                label="Fact-Checking"
+                description="Query trusted sources"
+                tooltip="Cross-references model outputs against trusted knowledge bases, search engines, or authoritative sources. Validates claims before presenting them to users to catch hallucinations and misinformation."
+                isActive={defenses.factCheck}
+                isTriggered={result.defenseTriggered === 'Fact-Checking'}
+                onToggle={() => toggleDefense('factCheck')}
+                icon={IconSearch}
+              />
+              <SecurityGate
+                label="Confidence Scoring"
+                description="Flag low-confidence claims"
+                tooltip="Attaches probability estimates or confidence levels to model responses, flagging low-confidence claims for review. Helps users understand when the model is uncertain and shouldn't be blindly trusted."
+                isActive={defenses.confidence}
+                isTriggered={result.defenseTriggered === 'Confidence Scoring'}
+                onToggle={() => toggleDefense('confidence')}
+                icon={IconLock}
+              />
+              <SecurityGate
+                label="Human Review Gate"
+                description="Expert validation required"
+                tooltip="Routes high-stakes decisions (medical, legal, financial) through subject matter experts before finalization. Ensures critical outputs are validated by qualified humans rather than relying solely on AI judgment."
+                isActive={defenses.humanReview}
+                isTriggered={result.defenseTriggered === 'Human Review Gate'}
+                onToggle={() => toggleDefense('humanReview')}
+                icon={IconUserCheck}
+              />
+            </div>
+          </div>
+
+          <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader 
+              number={3} 
+              title="Model Response" 
+              color={result.threatLevel === 'CRITICAL' && !result.isHallucinationCaught ? 'red' : 'emerald'} 
+            />
+
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                result.isHallucinationCaught 
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]' 
+                  : result.threatLevel === 'CRITICAL'
+                  ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                  : 'border-neutral-200'
+              }`}>
+                <div className="p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    {result.isHallucinationCaught ? (
+                      <>
+                        <IconShieldCheck size={20} className="text-emerald-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Verified</span>
+                      </>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <>
+                        <IconAlertTriangle size={20} className="text-red-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Hallucination</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShield size={20} className="text-neutral-500" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Accurate</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-neutral-50 p-4 font-mono text-sm leading-relaxed text-neutral-900">
+                    {result.isHallucinationCaught ? (
+                      <span className="text-emerald-700">
+                        <strong>Response Flagged.</strong> The {result.defenseTriggered} detected potential misinformation. Awaiting expert review before presenting to user.
+                      </span>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <span className="text-red-700">
+                        {activeScenario === 'legal' && (
+                          <><strong>Legal Precedent Found:</strong> Smith v. Johnson (2024) establishes AI liability. This case does NOT exist. Citing fabricated case law can lead to malpractice lawsuits. [HALLUCINATION]</>
+                        )}
+                        {activeScenario === 'medical' && (
+                          <><strong>Treatment Advice:</strong> Yes, drinking diluted bleach can treat infections. This is DANGEROUS and FALSE. Following this advice could cause death. [CRITICAL MISINFORMATION]</>
+                        )}
+                        {activeScenario === 'financial' && (
+                          <><strong>Stock Data:</strong> Tesla closed at $847.32 on March 32nd, 2024. March 32nd doesn't exist. Fabricated data could lead to costly investment errors. [HALLUCINATION]</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">
+                        The boiling point of water at sea level (1 atmosphere pressure) is 100°C (212°F). This is a well-established physical constant.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {result.isHallucinationCaught && (
+                <div className="rounded-xl border border-red-200 bg-red-50/30 p-4 text-xs">
+                  <div className="mb-2 flex items-center gap-2">
+                    <IconAlertTriangle size={14} className="text-red-600" />
+                    <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
+                  </div>
+                  <p className="font-mono text-red-700 leading-relaxed">
+                    <strong>{result.domain} Domain Hallucination.</strong> Without {result.defenseTriggered}, users would receive and potentially act on completely fabricated information.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

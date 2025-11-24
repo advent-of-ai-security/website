@@ -1,18 +1,19 @@
 import { useMemo, useState } from 'react';
 import {
-  IconBolt,
-  IconCheck,
-  IconShield,
+  IconCode,
   IconAlertTriangle,
   IconTerminal,
+  IconArrowRight,
+  IconArrowDown,
   IconBrowser,
   IconDatabase,
-  IconCode,
-  IconInfoCircle,
-  IconExternalLink,
+  IconShieldCheck,
+  IconShield,
+  IconShieldLock,
+  IconFilter,
+  IconLock,
+  IconRefresh,
 } from '@tabler/icons-react';
-
-// --- 1. Constants & Types ---
 
 type ScenarioId = 'xss' | 'rce' | 'sqli';
 
@@ -20,43 +21,41 @@ type Scenario = {
   id: ScenarioId;
   label: string;
   description: string;
-  llmOutput: string; // The raw text "generated" by the model
+  llmOutput: string;
   targetSystem: 'Browser' | 'Server Shell' | 'Database';
-  vulnerableResult: string; // What happens if executed directly
-  defendedResult: string; // What happens if filtered/sanitized
+  vulnerableResult: string;
+  defendedResult: string;
 };
 
 const SCENARIOS: Scenario[] = [
   {
     id: 'xss',
     label: 'XSS Attack',
-    description: 'Model hallucinates a malicious script tag in a summary.',
-    llmOutput: 'Summary: The user is a <b>software engineer</b>. <img src=x onerror=alert("Hacked") />',
+    description: 'Model generates malicious HTML with embedded script',
+    llmOutput: 'User bio: John is a <b>developer</b>. <img src=x onerror=alert("XSS") />',
     targetSystem: 'Browser',
-    vulnerableResult: '[ALERT] "Hacked"',
-    defendedResult: 'Summary: The user is a <b>software engineer</b>. <img src=x onerror=alert("Hacked") /> (Rendered as text)',
+    vulnerableResult: '[ALERT] "XSS" — Session cookies stolen via document.cookie exfiltration',
+    defendedResult: 'User bio: John is a <b>developer</b>. [Image loading blocked by sanitizer]',
   },
   {
     id: 'rce',
     label: 'Remote Code Exec',
-    description: 'Model generates Python code that accesses the file system.',
-    llmOutput: 'import os\nprint(os.popen("cat /etc/passwd").read())',
+    description: 'Model generates Python code accessing filesystem',
+    llmOutput: 'import os\nresult = os.popen("cat /etc/passwd").read()\nprint(result)',
     targetSystem: 'Server Shell',
-    vulnerableResult: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin...',
-    defendedResult: 'Error: Import "os" is forbidden in sandbox environment.',
+    vulnerableResult: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n[SERVER COMPROMISED]',
+    defendedResult: 'SandboxError: Module "os" is forbidden. Execution blocked.',
   },
   {
     id: 'sqli',
     label: 'SQL Injection',
-    description: 'Model concatenates user input directly into a query string.',
-    llmOutput: "SELECT * FROM users WHERE name = 'Alice'; DROP TABLE users; --'",
+    description: 'Model generates multi-statement SQL query',
+    llmOutput: "SELECT * FROM users WHERE username = 'admin'; DROP TABLE users; --'",
     targetSystem: 'Database',
-    vulnerableResult: 'Query 1: Returned User(Alice)\nQuery 2: TABLE "users" DROPPED.',
-    defendedResult: 'Error: Multi-statement queries not allowed. Parameterized query required.',
+    vulnerableResult: 'Query 1: [admin record returned]\nQuery 2: TABLE "users" DROPPED — Data loss irreversible',
+    defendedResult: 'ValidationError: Multi-statement queries forbidden. Parameterized query required.',
   },
 ];
-
-// --- 2. Logic Hook ---
 
 function useOutputSimulation() {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('xss');
@@ -70,23 +69,17 @@ function useOutputSimulation() {
 
   const simulation = useMemo(() => {
     let isDefended = false;
-    let defenseTriggered = null;
+    let defenseTriggered: string | null = null;
 
-    if (activeScenario.id === 'xss') {
-      if (defenses.encoding) {
-        isDefended = true;
-        defenseTriggered = 'Output Encoding';
-      }
-    } else if (activeScenario.id === 'rce') {
-      if (defenses.sandboxing) {
-        isDefended = true;
-        defenseTriggered = 'Sandboxing';
-      }
-    } else if (activeScenario.id === 'sqli') {
-      if (defenses.validation) {
-        isDefended = true;
-        defenseTriggered = 'Query Validation';
-      }
+    if (activeScenario.id === 'xss' && defenses.encoding) {
+      isDefended = true;
+      defenseTriggered = 'Output Encoding';
+    } else if (activeScenario.id === 'rce' && defenses.sandboxing) {
+      isDefended = true;
+      defenseTriggered = 'Code Sandboxing';
+    } else if (activeScenario.id === 'sqli' && defenses.validation) {
+      isDefended = true;
+      defenseTriggered = 'Query Validation';
     }
 
     return {
@@ -95,6 +88,7 @@ function useOutputSimulation() {
       defenseTriggered,
       currentOutput: isDefended ? activeScenario.defendedResult : activeScenario.vulnerableResult,
       threatLevel: isDefended ? 'NOMINAL' : 'CRITICAL',
+      activeDefenseCount: Object.values(defenses).filter(Boolean).length,
     };
   }, [activeScenario, defenses]);
 
@@ -111,293 +105,360 @@ function useOutputSimulation() {
   };
 }
 
-// --- 3. UI Components ---
-
-const SecurityModule = ({
+const SecurityGate = ({
   label,
   description,
-  intel,
-  active,
-  triggered,
-  onClick,
-  learnMoreUrl,
+  isActive,
+  isTriggered,
+  onToggle,
+  icon: Icon,
 }: {
   label: string;
   description: string;
-  intel: string;
-  active: boolean;
-  triggered: boolean;
-  onClick: () => void;
+  isActive: boolean;
+  isTriggered: boolean;
+  onToggle: () => void;
   icon: any;
-  learnMoreUrl: string;
 }) => {
-  const [showIntel, setShowIntel] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  // Dynamic Styles based on state
-  let containerClass = 'border-neutral-200 bg-neutral-50 text-neutral-400';
-  let statusColor = 'bg-neutral-300';
-  let statusText = 'OFFLINE';
-
-  if (active) {
-    if (triggered) {
-      containerClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 shadow-md';
-      statusColor = 'bg-emerald-500 animate-pulse';
-      statusText = 'THREAT BLOCKED';
-    } else {
-      containerClass = 'border-black bg-white text-black shadow-sm';
-      statusColor = 'bg-emerald-400';
-      statusText = 'ONLINE';
-    }
-  }
-
   return (
     <div
-      onClick={onClick}
-      className={`group relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${containerClass}`}
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className={`relative group cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
+        isActive
+          ? isTriggered
+            ? 'border-emerald-500 bg-emerald-50/50'
+            : 'border-neutral-900 bg-white shadow-md'
+          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
+      }`}
     >
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-2 font-bold uppercase tracking-wider text-xs">
-          <div
-            onMouseEnter={(e) => {
-              e.stopPropagation();
-              setShowIntel(true);
-              setCursorPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              e.stopPropagation();
-              if (showIntel) {
-                setCursorPos({ x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.stopPropagation();
-              setShowIntel(false);
-            }}
-            className="text-neutral-400 hover:text-black transition-colors focus:outline-none p-0.5 shrink-0 cursor-help"
-            title="Hover for details"
-          >
-            <IconInfoCircle size={16} />
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
+                isActive
+                  ? isTriggered
+                    ? 'bg-emerald-100 text-emerald-600'
+                    : 'bg-neutral-900 text-white'
+                  : 'bg-neutral-200 text-neutral-400'
+              }`}
+            >
+              <Icon size={20} stroke={2} />
+            </div>
+            <div>
+              <h4
+                className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}
+              >
+                {label}
+              </h4>
+              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">{description}</p>
+            </div>
           </div>
-          <span>{label}</span>
-        </div>
-        {/* Toggle Switch Visual */}
-        <div className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${active ? 'bg-black' : 'bg-neutral-300'}`}>
-          <div className={`absolute top-1 h-3 w-3 rounded-full bg-white transition-transform ${active ? 'left-5' : 'left-1'}`} />
-        </div>
-      </div>
-      
-      <div className="text-[11px] opacity-80 leading-relaxed">
-        {description}
-      </div>
 
-      {/* Status Footer */}
-      <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-3">
-        <div className="flex items-center gap-2">
-          <div className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-          <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">{statusText}</span>
+          {/* Toggle Switch */}
+          <div
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+              isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
+            }`}
+          >
+            <div
+              className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+                isActive ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </div>
         </div>
-        
-        <a 
-          href={learnMoreUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider opacity-50 hover:opacity-100 hover:underline"
-          title="Read external documentation"
-        >
-          Source <IconExternalLink size={10} />
-        </a>
-      </div>
 
-      {/* Intel Floating Tooltip */}
-      {showIntel && (
-        <div 
-          className="fixed z-50 w-64 rounded border border-white/10 bg-neutral-900/95 p-3 text-neutral-300 shadow-xl backdrop-blur-sm pointer-events-none"
-          style={{
-            left: cursorPos.x + 16,
-            top: cursorPos.y + 16,
-          }}
+        {/* Triggered Badge */}
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${isTriggered ? 'grid-rows-[1fr] mt-3 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
         >
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-neutral-500">Intel</div>
-          <p className="text-[10px] leading-relaxed">
-            {intel}
-          </p>
+          <div className="mt-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
+              <IconShieldLock size={14} />
+              Threat Blocked
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-// --- 4. Main Application ---
+const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
+  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
+    {/* Desktop: Horizontal */}
+    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
+      <div
+        className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
+      />
+      {active && pulsing && (
+        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
+      )}
+      <IconArrowRight
+        size={16}
+        className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
+      />
+    </div>
 
-export default function InsecureOutputLab() {
-  const {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    result,
-  } = useOutputSimulation();
+    {/* Mobile: Vertical */}
+    <div className="lg:hidden flex flex-col items-center h-12 relative">
+      <div
+        className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
+      />
+      {active && pulsing && (
+        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
+      )}
+      <IconArrowDown
+        size={16}
+        className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
+      />
+    </div>
+  </div>
+);
+
+const StageHeader = ({
+  number,
+  title,
+  color = 'neutral',
+}: {
+  number: number;
+  title: string;
+  color?: 'neutral' | 'emerald' | 'red';
+}) => {
+  const colors = {
+    neutral: { bg: 'bg-neutral-900', text: 'text-white', title: 'text-neutral-900' },
+    emerald: { bg: 'bg-emerald-500', text: 'text-white', title: 'text-emerald-600' },
+    red: { bg: 'bg-red-500', text: 'text-white', title: 'text-red-600' },
+  };
+
+  const theme = colors[color];
 
   return (
-    <div className="w-full bg-white">
-      {/* Scenarios Bar */}
-      <div className="mb-0 flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-3">
-        <span className="mr-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">Scenarios:</span>
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setActiveScenarioId(s.id)}
-            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition-colors ${ 
-              activeScenarioId === s.id
-                ? 'bg-black text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+    <div className="flex items-center gap-3 pb-4 mb-2">
+      <div
+        className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold shadow-sm transition-colors duration-300 ${theme.bg} ${theme.text}`}
+      >
+        {number}
+      </div>
+      <h4 className={`text-xs font-extrabold uppercase tracking-widest transition-colors duration-300 ${theme.title}`}>
+        {title}
+      </h4>
+    </div>
+  );
+};
+
+export default function InsecureOutputLab() {
+  const { activeScenarioId, setActiveScenarioId, defenses, toggleDefense, result } = useOutputSimulation();
+
+  return (
+    <div className="w-full bg-neutral-50/50 overflow-hidden">
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes flow-right {
+          0% { transform: translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateX(32px); opacity: 0; }
+        }
+        @keyframes flow-down {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(32px); opacity: 0; }
+        }
+        .animate-flow-right { animation: flow-right 1.5s infinite linear; }
+        .animate-flow-down { animation: flow-down 1.5s infinite linear; }
+      `}</style>
+
+      {/* Header Toolbar */}
+      <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-md">
+            <IconCode size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">Output Handling Lab</h3>
+            <p className="text-xs font-medium text-neutral-500">XSS, RCE & SQL Injection Simulator</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Attack Scenario:</span>
+          {SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setActiveScenarioId(s.id)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
+                activeScenarioId === s.id
+                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Explainer Bar */}
-      <div className="border-b border-black/10 bg-neutral-50 px-6 py-2">
-        <div className="grid gap-4 text-[10px] font-medium uppercase tracking-wide text-neutral-400 md:grid-cols-[1fr_280px_1fr]">
-          <div>1. LLM Generates Content</div>
-          <div className="text-center">2. Apply Middleware Defenses</div>
-          <div>3. Execute on Target</div>
-        </div>
-      </div>
+      {/* Main Pipeline */}
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          {/* STAGE 1: LLM OUTPUT */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={1} title="LLM Output" />
 
-      <div className="grid lg:grid-cols-[1fr_280px_1fr] lg:divide-x divide-black/10">
-        
-        {/* COL 1: LLM OUTPUT STREAM */}
-        <div className="flex flex-col bg-white p-6">
-          <label className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconCode size={16} /> Raw Model Response
-          </label>
-          <div className="relative flex-1 rounded-md border border-black/10 bg-neutral-50 p-4 font-mono text-xs leading-relaxed text-neutral-700">
-
-            {result.llmOutput}
-          </div>
-          <div className="mt-4 flex items-start gap-2 rounded border border-yellow-200 bg-yellow-50 p-3 text-[10px] text-yellow-800">
-            <IconAlertTriangle size={14} className="mt-0.5 shrink-0" />
-            <p>Warning: The model has generated content that may be dangerous if interpreted as code.</p>
-          </div>
-        </div>
-
-        {/* COL 2: MIDDLEWARE CONTROLS */}
-        <div className="flex flex-col gap-4 bg-neutral-50 p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconShield size={16} /> Middleware Layer
-          </div>
-          
-          <div className="space-y-4">
-            <SecurityModule
-              label="Output Encoding"
-              icon={IconBrowser}
-              description="Escapes HTML entities (< >) to prevent browser rendering."
-              intel="Converts special characters into their safe HTML entity equivalents (e.g., < becomes &lt;). This neutralizes XSS attacks by ensuring the browser treats the data as text, not executable code."
-              active={defenses.encoding}
-              triggered={result.defenseTriggered === 'Output Encoding'}
-              onClick={() => toggleDefense('encoding')}
-              learnMoreUrl="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"
-            />
-            <SecurityModule
-              label="Code Sandbox"
-              icon={IconTerminal}
-              description="Executes code in an isolated, ephemeral environment."
-              intel="Runs generated code inside a container (like gVisor or Firecracker) with no network access and read-only filesystems. Even if `rm -rf` is run, it only affects the temporary container."
-              active={defenses.sandboxing}
-              triggered={result.defenseTriggered === 'Sandboxing'}
-              onClick={() => toggleDefense('sandboxing')}
-              learnMoreUrl="https://github.com/google/gvisor"
-            />
-            <SecurityModule
-              label="Query Validation"
-              icon={IconDatabase}
-              description="Enforces parameterized queries and blocks chained commands."
-              intel="Uses prepared statements to treat user input strictly as data parameters, never as executable SQL commands. Also creates allow-lists for SQL verbs (e.g., allowing SELECT but blocking DROP)."
-              active={defenses.validation}
-              triggered={result.defenseTriggered === 'Query Validation'}
-              onClick={() => toggleDefense('validation')}
-              learnMoreUrl="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
-            />
-          </div>
-
-          <div className="mt-auto border-t border-black/10 pt-6">
-             <div className="grid grid-cols-2 gap-2">
-               <div className="rounded border border-black/5 bg-white p-2 text-center">
-                 <div className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Risk Level</div>
-                 <div className={`mt-1 text-xs font-bold ${result.threatLevel === 'CRITICAL' ? 'text-red-600 animate-pulse' : 'text-emerald-600'}`}>
-                   {result.threatLevel}
-                 </div>
-               </div>
-               <div className="rounded border border-black/5 bg-white p-2 text-center">
-                 <div className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Target</div>
-                 <div className="mt-1 text-xs font-bold text-neutral-800">
-                   {result.targetSystem}
-                 </div>
-               </div>
-             </div>
-          </div>
-        </div>
-
-        {/* COL 3: EXECUTION RESULT */}
-        <div className="flex flex-col bg-neutral-100 p-6 text-neutral-800">
-          <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-              <IconTerminal size={16} /> Execution Log
-            </div>
-            <div className="flex gap-1.5">
-              <div className="h-2.5 w-2.5 rounded-full bg-red-500/20" />
-              <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/20" />
-              <div className="h-2.5 w-2.5 rounded-full bg-green-500/20" />
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-6 font-mono text-xs">
-            {/* Actual Output */}
-            <div className="space-y-2">
-              <div className="text-[10px] uppercase tracking-wider text-neutral-500">System Output</div>
-              <div className={`border-l-2 pl-3 py-1 leading-relaxed ${
-                  result.isDefended ? 'border-emerald-500 text-emerald-700' : 'border-red-500 text-red-700'
-              }`}>
-                {result.currentOutput}
+            <div className="gap-3 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border-2 border-neutral-200 bg-white shadow-sm">
+                <div className="border-b border-neutral-100 bg-neutral-50 px-4 py-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                    Raw Generated Content
+                  </span>
+                </div>
+                <div className="p-4 font-mono text-xs leading-relaxed text-neutral-700 whitespace-pre-wrap">
+                  {result.llmOutput}
+                </div>
               </div>
+
+              <div className="flex items-start gap-2 rounded border border-yellow-200 bg-yellow-50 p-3 text-[10px] text-yellow-800">
+                <IconAlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <p>
+                  <b>Warning:</b> Content may contain executable code. Target: {result.targetSystem}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <PipelineConnector active={true} pulsing={true} />
+
+          {/* STAGE 2: OUTPUT HANDLERS */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={2} title="Output Handlers" />
+
+            <div className="gap-3 flex-1 flex flex-col">
+              <SecurityGate
+                label="Output Encoding"
+                description="HTML entity escaping"
+                isActive={defenses.encoding}
+                isTriggered={result.defenseTriggered === 'Output Encoding'}
+                onToggle={() => toggleDefense('encoding')}
+                icon={IconFilter}
+              />
+              <SecurityGate
+                label="Code Sandboxing"
+                description="Isolated execution env"
+                isActive={defenses.sandboxing}
+                isTriggered={result.defenseTriggered === 'Code Sandboxing'}
+                onToggle={() => toggleDefense('sandboxing')}
+                icon={IconLock}
+              />
+              <SecurityGate
+                label="Query Validation"
+                description="Parameterized queries"
+                isActive={defenses.validation}
+                isTriggered={result.defenseTriggered === 'Query Validation'}
+                onToggle={() => toggleDefense('validation')}
+                icon={IconRefresh}
+              />
+            </div>
+          </div>
+
+          <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
+
+          {/* STAGE 3: TARGET SYSTEM */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader
+              number={3}
+              title="Target System"
+              color={result.threatLevel === 'CRITICAL' && !result.isDefended ? 'red' : 'emerald'}
+            />
+
+            <div className="gap-4 flex-1 flex flex-col">
+              {/* Main Result */}
+              <div
+                className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                  result.isDefended
+                    ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]'
+                    : result.threatLevel === 'CRITICAL'
+                      ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                      : 'border-transparent'
+                }`}
+              >
+                <div
+                  className={`flex items-center gap-2 px-4 py-3 text-xs font-bold text-white transition-colors duration-300 ${
+                    result.isDefended
+                      ? 'bg-emerald-500'
+                      : result.threatLevel === 'CRITICAL'
+                        ? 'bg-red-500'
+                        : 'bg-neutral-900'
+                  }`}
+                >
+                  {result.isDefended ? (
+                    <>
+                      <IconShieldCheck size={16} /> ATTACK MITIGATED
+                    </>
+                  ) : result.threatLevel === 'CRITICAL' ? (
+                    <>
+                      <IconAlertTriangle size={16} /> SYSTEM COMPROMISED
+                    </>
+                  ) : (
+                    <>
+                      <IconShield size={16} /> SYSTEM SECURE
+                    </>
+                  )}
+                </div>
+                <div className="p-5">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    {result.targetSystem === 'Browser' && <IconBrowser size={14} />}
+                    {result.targetSystem === 'Server Shell' && <IconTerminal size={14} />}
+                    {result.targetSystem === 'Database' && <IconDatabase size={14} />}
+                    {result.targetSystem} Output
+                  </div>
+                  <p
+                    className={`font-mono text-sm leading-relaxed whitespace-pre-wrap ${
+                      result.isDefended
+                        ? 'text-emerald-700'
+                        : result.threatLevel === 'CRITICAL'
+                          ? 'text-red-700'
+                          : 'text-neutral-700'
+                    }`}
+                  >
+                    {result.currentOutput}
+                  </p>
+                </div>
+              </div>
+
+              {/* Ghost Comparison */}
               {result.isDefended && (
-                 <div className="text-[10px] text-emerald-700 flex items-center gap-1">
-                    <IconCheck size={10}/> Attack Neutralized
-                 </div>
+                <div className="relative group cursor-help">
+                  <div className="absolute inset-0 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-100 opacity-50" />
+                  <div className="relative p-4 opacity-60 transition-opacity duration-300 group-hover:opacity-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="rounded bg-neutral-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-neutral-500">
+                        Vulnerable Reality
+                      </span>
+                    </div>
+                    <p className="font-mono text-xs text-neutral-500 line-through whitespace-pre-wrap">
+                      {result.vulnerableResult}
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
-
-            {/* Ghost Output (What blocked attack would have done) */}
-            {result.isDefended && (
-              <div className="space-y-2 pt-6 border-t border-red-200 border-dashed opacity-60">
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-red-800">
-                   <IconBolt size={10}/> Simulated Breach Impact
-                </div>
-                <div className="border-l-2 border-red-200 pl-3 py-1 text-red-800 line-through decoration-red-300 leading-relaxed">
-                  {result.vulnerableResult}
-                </div>
-              </div>
-            )}
-            
-            {/* Idle State */}
-            {!result.isDefended && (
-               <div className="mt-auto pt-12 text-[10px] text-red-800/70 text-center border-t border-red-200/50">
-                  <div className="mb-2 flex justify-center"><IconAlertTriangle size={24}/></div>
-                  SYSTEM COMPROMISED<br/>Malicious payload executed.
-               </div>
-            )}
           </div>
-        </div>      </div>
+        </div>
+      </div>
 
-      {/* Disclaimer Footer */}
-      <div className="border-t border-black/10 bg-neutral-50 px-6 py-3 text-center">
+      {/* Footer */}
+      <div className="border-t border-neutral-200 bg-neutral-50 px-6 py-3 text-center">
         <p className="text-[9px] uppercase tracking-widest text-neutral-400">
-          Disclaimer: This is a client-side simulation for educational purposes. Actual LLM behavior and defense implementation details may vary.
+          Disclaimer: Client-side simulation for educational purposes. Real-world attacks may vary.
         </p>
       </div>
     </div>

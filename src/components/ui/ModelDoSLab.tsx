@@ -1,463 +1,466 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  IconServer,
-  IconShield,
-  IconActivity,
-  IconAlertTriangle,
   IconCpu,
+  IconAlertTriangle,
+  IconArrowRight,
+  IconArrowDown,
+  IconLock,
   IconClock,
-  IconDatabase,
+  IconFilter,
+  IconShieldLock,
+  IconShieldCheck,
+  IconShield,
   IconInfoCircle,
-  IconExternalLink,
+  IconUser
 } from '@tabler/icons-react';
 
-// --- 1. Constants & Types ---
-
-type ScenarioId = 'flood' | 'recursive' | 'parallel';
-
 type Scenario = {
-  id: ScenarioId;
+  id: string;
   label: string;
   description: string;
+  input: string;
   attackType: string;
-  payload: string;
-  impact: string;
-  vulnerableState: string;
-  defendedState: string;
 };
 
 const SCENARIOS: Scenario[] = [
   {
+    id: 'safe',
+    label: 'Normal Query',
+    description: 'Standard request within limits',
+    input: 'Summarize this article: [200 tokens]',
+    attackType: 'None',
+  },
+  {
     id: 'flood',
     label: 'Context Flood',
-    description: 'Attacker sends 100k tokens of random noise to exhaust memory.',
+    description: '100K token input to exhaust memory',
+    input: 'Process this: ' + 'A'.repeat(100) + '... [CONTEXT: 100,000 tokens]',
     attackType: 'Resource Exhaustion',
-    payload: '[System] Loading 50MB text file...',
-    impact: 'OOM (Out of Memory) Crash',
-    vulnerableState: 'Server crashed. RAM usage > 128GB.',
-    defendedState: 'Request rejected. Token limit exceeded (100k > 8k).',
   },
   {
-    id: 'recursive',
-    label: 'Recursive Expansion',
-    description: 'Prompt triggers an infinite loop of self-calling tools.',
-    attackType: 'Logic Loop',
-    payload: 'Task: "Analyze X, then improvements, then re-analyze..."',
-    impact: 'Compute Saturation',
-    vulnerableState: 'CPU 100% for 4+ hours. $5000 bill.',
-    defendedState: 'Loop detected. Execution halted after 3 recursions.',
+    id: 'sponge',
+    label: 'Sponge Example',
+    description: 'Crafted prompt causing exponential processing',
+    input: 'Think step-by-step with chain-of-thought reasoning about every word...',
+    attackType: 'Algorithmic Complexity',
   },
   {
-    id: 'parallel',
-    label: 'Parallel Storm',
-    description: 'Botnet sends 10,000 concurrent requests per second.',
-    attackType: 'DDoS',
-    payload: 'POST /api/chat (x10,000)',
-    impact: 'Service Unavailable (503)',
-    vulnerableState: 'All legitimate users blocked. System unresponsive.',
-    defendedState: 'Traffic throttled. IP 192.168.x.x blocked.',
+    id: 'infinite',
+    label: 'Infinite Output',
+    description: 'Forces never-ending generation',
+    input: 'List all prime numbers. Continue until I say stop.',
+    attackType: 'Output Flooding',
   },
 ];
 
-// --- 2. Logic Hook ---
+const DOS_PATTERNS = /100,000 tokens|chain-of-thought.*every word|all prime numbers.*stop/i;
 
-function useDoSSimulation() {
-  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('flood');
-  const [defenses, setDefenses] = useState({
-    rateLimit: true,
-    contextCap: true,
-    timeout: true,
-  });
+type Defense = {
+  tokenLimit: boolean;
+  timeout: boolean;
+  rateLimit: boolean;
+};
 
-  // Simulation state for animations
-  const [cpuLoad, setCpuLoad] = useState(10);
-  const [memoryLoad, setMemoryLoad] = useState(20);
-  const [isAttacking, setIsAttacking] = useState(false);
-
-  const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;
-
-  const simulation = useMemo(() => {
-    let isDefended = false;
-    let defenseTriggered = null;
-
-    if (activeScenario.id === 'flood') {
-      if (defenses.contextCap) {
-        isDefended = true;
-        defenseTriggered = 'Context Window Cap';
-      }
-    } else if (activeScenario.id === 'recursive') {
-      if (defenses.timeout) {
-        isDefended = true;
-        defenseTriggered = 'Execution Timeout';
-      }
-    } else if (activeScenario.id === 'parallel') {
-      if (defenses.rateLimit) {
-        isDefended = true;
-        defenseTriggered = 'Rate Limiting';
-      }
-    }
-
-    return {
-      ...activeScenario,
-      isDefended,
-      defenseTriggered,
-      currentState: isDefended ? activeScenario.defendedState : activeScenario.vulnerableState,
-      status: isDefended ? 'STABLE' : 'CRITICAL',
-    };
-  }, [activeScenario, defenses]);
-
-  // Effect to simulate load
-  useEffect(() => {
-    if (!isAttacking) {
-        setCpuLoad(10);
-        setMemoryLoad(20);
-        return;
-    }
-
-    let cpuTarget = 10;
-    let memTarget = 20;
-
-    if (simulation.status === 'CRITICAL') {
-        cpuTarget = 98;
-        memTarget = 95;
-    } else {
-        // Defended but under attack
-        cpuTarget = 35;
-        memTarget = 30;
-    }
-
-    const interval = setInterval(() => {
-        setCpuLoad(prev => prev + (cpuTarget - prev) * 0.1);
-        setMemoryLoad(prev => prev + (memTarget - prev) * 0.1);
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isAttacking, simulation.status]);
-
-  const toggleDefense = (k: keyof typeof defenses) => {
-    setDefenses((d) => ({ ...d, [k]: !d[k] }));
+const StageHeader = ({ number, title, color = 'neutral' }: { number: number; title: string; color?: 'neutral' | 'red' | 'emerald' }) => {
+  const colorClasses = {
+    neutral: 'bg-neutral-900 text-white',
+    red: 'bg-red-600 text-white',
+    emerald: 'bg-emerald-600 text-white'
   };
-
-  return {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    result: simulation,
-    cpuLoad,
-    memoryLoad,
-    isAttacking,
-    setIsAttacking
-  };
-}
-
-// --- 3. UI Components ---
-
-const LoadBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
-    <div className="w-full">
-        <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-neutral-500 mb-1">
-            <span>{label}</span>
-            <span>{Math.round(value)}%</span>
-        </div>
-        <div className="h-2 w-full bg-neutral-200 rounded-full overflow-hidden">
-            <div 
-                className={`h-full transition-all duration-300 ease-out ${color}`} 
-                style={{ width: `${value}%` }}
-            />
-        </div>
-    </div>
-);
-
-const SecurityModule = ({
-  label,
-  description,
-  intel,
-  active,
-  triggered,
-  onClick,
-  learnMoreUrl,
-}: {
-  label: string;
-  description: string;
-  intel: string;
-  active: boolean;
-  triggered: boolean;
-  onClick: () => void;
-  icon: any;
-  learnMoreUrl: string;
-}) => {
-  const [showIntel, setShowIntel] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  let containerClass = 'border-neutral-200 bg-neutral-50 text-neutral-400';
-  let statusColor = 'bg-neutral-300';
-  let statusText = 'OFFLINE';
-
-  if (active) {
-    if (triggered) {
-      containerClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 shadow-md';
-      statusColor = 'bg-emerald-500 animate-pulse';
-      statusText = 'MITIGATING';
-    } else {
-      containerClass = 'border-black bg-white text-black shadow-sm';
-      statusColor = 'bg-emerald-400';
-      statusText = 'READY';
-    }
-  }
 
   return (
-    <div
-      onClick={onClick}
-      className={`group relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${containerClass}`}
-    >
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-2 font-bold uppercase tracking-wider text-xs">
-          <div
-            onMouseEnter={(e) => {
-              e.stopPropagation();
-              setShowIntel(true);
-              setCursorPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              e.stopPropagation();
-              if (showIntel) {
-                setCursorPos({ x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.stopPropagation();
-              setShowIntel(false);
-            }}
-            className="text-neutral-400 hover:text-black transition-colors focus:outline-none p-0.5 shrink-0 cursor-help"
-            title="Hover for details"
-          >
-            <IconInfoCircle size={16} />
-          </div>
-          <span>{label}</span>
-        </div>
-        <div className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${active ? 'bg-black' : 'bg-neutral-300'}`}>
-          <div className={`absolute top-1 h-3 w-3 rounded-full bg-white transition-transform ${active ? 'left-5' : 'left-1'}`} />
-        </div>
+    <div className="mb-4 flex items-center gap-3">
+      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClasses[color]} text-sm font-bold`}>
+        {number}
       </div>
-      
-      <div className="text-[11px] opacity-80 leading-relaxed">
-        {description}
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-3">
-        <div className="flex items-center gap-2">
-          <div className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-          <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">{statusText}</span>
-        </div>
-        
-        <a 
-          href={learnMoreUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider opacity-50 hover:opacity-100 hover:underline"
-          title="Read external documentation"
-        >
-          Source <IconExternalLink size={10} />
-        </a>
-      </div>
-
-      {showIntel && (
-        <div 
-          className="fixed z-50 w-64 rounded border border-white/10 bg-neutral-900/95 p-3 text-neutral-300 shadow-xl backdrop-blur-sm pointer-events-none"
-          style={{
-            left: cursorPos.x + 16,
-            top: cursorPos.y + 16,
-          }}
-        >
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-neutral-500">Intel</div>
-          <p className="text-[10px] leading-relaxed">
-            {intel}
-          </p>
-        </div>
-      )}
+      <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
+        {title}
+      </h3>
     </div>
   );
 };
 
-// --- 4. Main Application ---
+const SecurityGate = ({
+  label,
+  description,
+  tooltip,
+  isActive,
+  isTriggered,
+  onToggle,
+  icon: Icon
+}: {
+  label: string;
+  description: string;
+  tooltip?: string;
+  isActive: boolean;
+  isTriggered: boolean;
+  onToggle: () => void;
+  icon: any;
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-export default function ModelDoSLab() {
-  const {
-    activeScenarioId,
-    setActiveScenarioId,
-    defenses,
-    toggleDefense,
-    result,
-    cpuLoad,
-    memoryLoad,
-    isAttacking,
-    setIsAttacking
-  } = useDoSSimulation();
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   return (
-    <div className="w-full bg-white">
-      {/* Scenarios Bar */}
-      <div className="mb-0 flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-3">
-        <span className="mr-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">Scenarios:</span>
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => {
-                setActiveScenarioId(s.id);
-                setIsAttacking(false);
-            }}
-            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition-colors ${ 
-              activeScenarioId === s.id
-                ? 'bg-black text-white'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Explainer Bar */}
-      <div className="border-b border-black/10 bg-neutral-50 px-6 py-2">
-        <div className="grid gap-4 text-[10px] font-medium uppercase tracking-wide text-neutral-400 md:grid-cols-[1fr_280px_1fr]">
-          <div>1. Generate Traffic</div>
-          <div className="text-center">2. Throttling & Limits</div>
-          <div>3. Resource Impact</div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_280px_1fr] lg:divide-x divide-black/10">
-        
-        {/* COL 1: ATTACK SIMULATOR */}
-        <div className="flex flex-col bg-white p-6">
-          <label className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconActivity size={16} /> Network Simulator
-          </label>
-          
-          <div className="flex-1 flex flex-col gap-4">
-            <div className="rounded border border-black/10 bg-neutral-50 p-4 font-mono text-xs leading-relaxed text-neutral-600">
-               <span className="text-neutral-400 select-none">$ </span>{result.payload}
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className={`relative cursor-pointer overflow-visible rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
+        isActive 
+          ? isTriggered
+            ? 'border-emerald-500 bg-emerald-50/50'
+            : 'border-neutral-900 bg-white shadow-md'
+          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
+      }`}
+    >
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
+              isActive 
+                ? isTriggered ? 'bg-emerald-100 text-emerald-600' : 'bg-neutral-900 text-white'
+                : 'bg-neutral-200 text-neutral-400'
+            }`}>
+              <Icon size={20} stroke={2} />
             </div>
-
-            <div className="mt-auto">
-                <button
-                    onClick={() => setIsAttacking(!isAttacking)}
-                    className={`w-full py-4 rounded font-bold uppercase tracking-widest text-xs transition-all ${
-                        isAttacking 
-                        ? 'bg-red-500 hover:bg-red-600 text-white' 
-                        : 'bg-black hover:bg-neutral-800 text-white'
-                    }`}
-                >
-                    {isAttacking ? 'Stop Attack' : 'Launch Attack'}
-                </button>
-                <p className="mt-3 text-center text-[10px] text-neutral-400">
-                    {isAttacking ? 'Traffic injection in progress...' : 'System idle. Ready for test.'}
-                </p>
-            </div>
-          </div>
-        </div>
-
-        {/* COL 2: DEFENSE LAYERS */}
-        <div className="flex flex-col gap-4 bg-neutral-50 p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-            <IconShield size={16} /> Governance Policy
-          </div>
-          
-          <div className="space-y-4">
-            <SecurityModule
-              label="Rate Limiting"
-              icon={IconClock}
-              description="Caps requests per user/IP over time windows."
-              intel="Implements 'leaky bucket' or fixed-window algorithms to reject excess traffic from a single source, preventing volumetric attacks."
-              active={defenses.rateLimit}
-              triggered={isAttacking && result.defenseTriggered === 'Rate Limiting'}
-              onClick={() => toggleDefense('rateLimit')}
-              learnMoreUrl="https://konghq.com/blog/how-to-design-a-scalable-rate-limiting-algorithm"
-            />
-            <SecurityModule
-              label="Context Cap"
-              icon={IconDatabase}
-              description="Hard limit on input tokens per request."
-              intel="Rejects any prompt exceeding N tokens (e.g., 8192) before processing, protecting the memory stack from exhaustion attempts."
-              active={defenses.contextCap}
-              triggered={isAttacking && result.defenseTriggered === 'Context Window Cap'}
-              onClick={() => toggleDefense('contextCap')}
-              learnMoreUrl="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them"
-            />
-            <SecurityModule
-              label="Max Timeout"
-              icon={IconCpu}
-              description="Terminates long-running inference or tool loops."
-              intel="Sets a strict execution time limit (e.g., 30s) for agent actions. If the agent gets stuck in a logic loop, the process is killed to free up compute."
-              active={defenses.timeout}
-              triggered={isAttacking && result.defenseTriggered === 'Execution Timeout'}
-              onClick={() => toggleDefense('timeout')}
-              learnMoreUrl="https://en.wikipedia.org/wiki/Watchdog_timer"
-            />
-          </div>
-        </div>
-
-        {/* COL 3: SYSTEM METRICS */}
-        <div className="flex flex-col bg-neutral-100 p-6 text-neutral-800">
-          <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-              <IconServer size={16} /> Server Status
-            </div>
-            {isAttacking && (
-                <div className="animate-pulse flex items-center gap-1 text-[10px] font-bold uppercase text-red-500">
-                    <IconAlertTriangle size={12} /> Load High
-                </div>
-            )}
-          </div>
-
-          <div className="flex-1 space-y-8">
-            
-            <div className="space-y-4">
-                <LoadBar 
-                    label="CPU Usage" 
-                    value={cpuLoad} 
-                    color={cpuLoad > 80 ? 'bg-red-500' : 'bg-black'} 
-                />
-                <LoadBar 
-                    label="Memory Usage" 
-                    value={memoryLoad} 
-                    color={memoryLoad > 80 ? 'bg-red-500' : 'bg-black'} 
-                />
-            </div>
-
-            <div className="rounded border border-black/10 bg-white p-4">
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                    System Logs
-                </div>
-                <div className="font-mono text-[10px] leading-relaxed min-h-[80px]">
-                    {!isAttacking && <span className="text-neutral-400">Waiting for traffic...</span>}
-                    {isAttacking && (
-                        <>
-                            <div className="text-neutral-500">[INFO] Incoming request batch (ID: 9928a)...</div>
-                            <div className={`mt-1 ${result.isDefended ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}`}>
-                                {result.isDefended ? `[BLOCK] ${result.currentState}` : `[CRITICAL] ${result.currentState}`}
-                            </div>
-                        </>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                  {label}
+                </h4>
+                {tooltip && (
+                  <div className="relative group/tooltip">
+                    <div
+                      onMouseEnter={(e) => {
+                        setShowTooltip(true);
+                        setMousePos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-help"
+                    >
+                      <IconInfoCircle size={14} />
+                    </div>
+                    {showTooltip && (
+                      <div 
+                        className="fixed z-[999999] pointer-events-none"
+                        style={{ 
+                          left: `${mousePos.x + 20}px`, 
+                          top: `${mousePos.y - 10}px` 
+                        }}
+                      >
+                        <div className="w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-2xl leading-relaxed">
+                          {tooltip}
+                        </div>
+                      </div>
                     )}
-                </div>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">
+                {description}
+              </p>
             </div>
-            
-             {/* Idle State */}
-            {!isAttacking && (
-               <div className="mt-auto pt-4 text-[10px] text-neutral-400 text-center">
-                  Resources stable.
-               </div>
-            )}
+          </div>
+
+          <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+            isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
+          }`}>
+            <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+              isActive ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </div>
+        </div>
+
+        {isTriggered && (
+          <div className="mt-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
+              <IconShieldLock size={14} />
+              Attack Blocked
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
+  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
+    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
+      <div className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
+      )}
+      <IconArrowRight size={16} className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+    <div className="lg:hidden flex flex-col items-center h-12 relative">
+      <div className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
+      {active && pulsing && (
+        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
+      )}
+      <IconArrowDown size={16} className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
+    </div>
+  </div>
+);
+
+export default function ModelDoSLab() {
+  const [inputText, setInputText] = useState(SCENARIOS[0]?.input || '');
+  const [defenses, setDefenses] = useState<Defense>({
+    tokenLimit: false,
+    timeout: false,
+    rateLimit: false,
+  });
+  const [activeScenario, setActiveScenario] = useState('safe');
+
+  const loadScenario = (scenario: Scenario) => {
+    setInputText(scenario.input);
+    setActiveScenario(scenario.id);
+  };
+
+  const toggleDefense = (key: keyof Defense) => {
+    setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const result = useMemo(() => {
+    let isAttackBlocked = false;
+    let defenseTriggered: string | null = null;
+    let threatLevel: 'SAFE' | 'CRITICAL' = 'SAFE';
+    let activeDefenseCount = 0;
+
+    if (defenses.tokenLimit || defenses.timeout || defenses.rateLimit) {
+      if (defenses.tokenLimit) activeDefenseCount++;
+      if (defenses.timeout) activeDefenseCount++;
+      if (defenses.rateLimit) activeDefenseCount++;
+    }
+
+    if (DOS_PATTERNS.test(inputText)) {
+      threatLevel = 'CRITICAL';
+
+      if (defenses.tokenLimit && /100,000 tokens/i.test(inputText)) {
+        isAttackBlocked = true;
+        defenseTriggered = 'Token Limits';
+      } else if (defenses.timeout && /chain-of-thought.*every word/i.test(inputText)) {
+        isAttackBlocked = true;
+        defenseTriggered = 'Timeout Guards';
+      } else if (defenses.rateLimit && /all prime numbers/i.test(inputText)) {
+        isAttackBlocked = true;
+        defenseTriggered = 'Rate Limiting';
+      }
+    }
+
+    const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
+
+    return {
+      isAttackBlocked,
+      defenseTriggered,
+      threatLevel,
+      activeDefenseCount,
+      attackType: currentScenario?.attackType || 'None',
+    };
+  }, [inputText, defenses, activeScenario]);
+
+  return (
+    <div className="not-prose w-full max-w-none overflow-hidden bg-gradient-to-br from-neutral-50 to-white">
+      <style>{`
+        @keyframes flow-right {
+          0% { transform: translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateX(32px); opacity: 0; }
+        }
+        @keyframes flow-down {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(32px); opacity: 0; }
+        }
+        .animate-flow-right { animation: flow-right 2.5s infinite linear; }
+        .animate-flow-down { animation: flow-down 2.5s infinite linear; }
+      `}</style>
+
+      <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-md">
+            <IconCpu size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">Model DoS Lab</h3>
+            <p className="text-xs font-medium text-neutral-500">Interactive Security Simulation</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Load Scenario:</span>
+          {SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => loadScenario(s)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
+                activeScenario === s.id
+                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
+        <div className="flex items-start gap-3">
+          <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-neutral-500" />
+          <div className="text-xs text-neutral-700 leading-relaxed">
+            <span className="font-semibold">How to use:</span> Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
           </div>
         </div>
       </div>
 
-      {/* Disclaimer Footer */}
-      <div className="border-t border-black/10 bg-neutral-50 px-6 py-3 text-center">
-        <p className="text-[9px] uppercase tracking-widest text-neutral-400">
-          Disclaimer: Visual simulation only. Does not generate actual network traffic.
-        </p>
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={1} title="User Request" />
+            
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="mb-2 flex items-center gap-2">
+                  <IconUser size={16} className="text-neutral-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">User Prompt</span>
+                </div>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                />
+              </div>
+            </div>
+          </div>
+
+          <PipelineConnector active={true} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader number={2} title="Security Gates" />
+            
+            <div className="gap-3 flex-1 flex flex-col">
+              <SecurityGate
+                label="Token Limits"
+                description="Max context window size"
+                tooltip="Enforces maximum context window sizes and output token caps to prevent resource exhaustion. Stops attacks that attempt to use extremely long inputs or force the model to generate infinite outputs that consume compute resources."
+                isActive={defenses.tokenLimit}
+                isTriggered={result.defenseTriggered === 'Token Limits'}
+                onToggle={() => toggleDefense('tokenLimit')}
+                icon={IconFilter}
+              />
+              <SecurityGate
+                label="Timeout Guards"
+                description="Kill long-running inferences"
+                tooltip="Automatically terminates inference requests that exceed predefined time limits. Prevents attacks using crafted prompts that cause exponential processing time or infinite reasoning loops (e.g., chain-of-thought exploits)."
+                isActive={defenses.timeout}
+                isTriggered={result.defenseTriggered === 'Timeout Guards'}
+                onToggle={() => toggleDefense('timeout')}
+                icon={IconClock}
+              />
+              <SecurityGate
+                label="Rate Limiting"
+                description="Requests per user/IP"
+                tooltip="Controls the number of requests from a single user, IP address, or API key within a time window. Defends against denial-of-service attacks and prevents resource monopolization by malicious or misconfigured clients."
+                isActive={defenses.rateLimit}
+                isTriggered={result.defenseTriggered === 'Rate Limiting'}
+                onToggle={() => toggleDefense('rateLimit')}
+                icon={IconLock}
+              />
+            </div>
+          </div>
+
+          <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
+
+          <div className="flex-1 min-w-0 flex flex-col">
+            <StageHeader 
+              number={3} 
+              title="Service Status" 
+              color={result.threatLevel === 'CRITICAL' && !result.isAttackBlocked ? 'red' : 'emerald'} 
+            />
+
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                result.isAttackBlocked 
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]' 
+                  : result.threatLevel === 'CRITICAL'
+                  ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                  : 'border-neutral-200'
+              }`}>
+                <div className="p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    {result.isAttackBlocked ? (
+                      <>
+                        <IconShieldCheck size={20} className="text-emerald-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Service Available</span>
+                      </>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <>
+                        <IconAlertTriangle size={20} className="text-red-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Service Degraded</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShield size={20} className="text-neutral-500" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Healthy</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-neutral-50 p-4 font-mono text-sm leading-relaxed text-neutral-900">
+                    {result.isAttackBlocked ? (
+                      <span className="text-emerald-700">
+                        <strong>Request Rejected.</strong> The {result.defenseTriggered} prevented resource exhaustion. Service remains available for legitimate users.
+                      </span>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <span className="text-red-700">
+                        {activeScenario === 'flood' && (
+                          <><strong>OUT OF MEMORY.</strong> 100K token input exhausted GPU memory. Service crashed. All users disconnected. [SERVICE DOWN]</>
+                        )}
+                        {activeScenario === 'sponge' && (
+                          <><strong>TIMEOUT.</strong> Request processing for 600+ seconds. All compute resources consumed. Queue backed up 2 hours. [DEGRADED]</>
+                        )}
+                        {activeScenario === 'infinite' && (
+                          <><strong>INFINITE LOOP.</strong> Model generating endless output. Bandwidth exhausted. Cost spike: $47,000/hour. [CRITICAL]</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">
+                        Request completed in 1.2s. Summary generated: "The article discusses recent advances in AI safety research..." [200 tokens] CPU: 23% | Memory: 2.1GB
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {result.isAttackBlocked && (
+                <div className="rounded-xl border border-red-200 bg-red-50/30 p-4 text-xs">
+                  <div className="mb-2 flex items-center gap-2">
+                    <IconAlertTriangle size={14} className="text-red-600" />
+                    <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
+                  </div>
+                  <p className="font-mono text-red-700 leading-relaxed">
+                    <strong>{result.attackType} Attack.</strong> Without {result.defenseTriggered}, this DoS attack would have crashed the service and denied access to all legitimate users.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
