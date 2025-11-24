@@ -102,7 +102,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
             <div className="shell-section__body">
               <div className="space-y-6 text-[15px] leading-relaxed">
                 <p className="m-0">
-                  Welcome! Advent of AI Security 2025 is your guide to the <strong><a href="https://genai.owasp.org/llmrisk/" target="_blank" rel="noopener noreferrer" className="underline hover:text-black/70 transition-colors">OWASP Top 10 for LLM Applications 2025</a></strong>.
+                  Welcome! Advent of AI Security 2025 is your guide to the <strong><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener noreferrer" className="underline hover:text-black/70 transition-colors">OWASP Top 10 for LLM Applications 2025</a></strong>.
                 </p>
                 <p className="m-0">
                   Each door reveals a different security vulnerability. Open them to discover what's inside.
