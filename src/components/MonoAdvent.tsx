@@ -3,6 +3,17 @@ import { startOfDayUTC, isSameUTC, formatDateLabel, slugCollator } from '@/utils
 import FooterLinks from './FooterLinks';
 import Countdown from './Countdown';
 
+const ANIMATIONS_CSS = `
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-stagger {
+  animation: fadeSlideIn 0.5s ease-out backwards;
+  animation-delay: calc(var(--index) * 50ms);
+}
+`;
+
 export type DoorState = 'locked' | 'today' | 'open';
 
 export type DoorDocument = {
@@ -77,13 +88,19 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
   const kickoffUTC = useMemo(() => new Date(Date.UTC(2025, 11, 1, 0, 0, 0)), []);
   const showKickoff = now.getTime() < kickoffUTC.getTime();
 
+  const unlockedCount = doors.filter(d => d.state !== 'locked').length;
+  const totalCount = doors.length;
+  const progressPercent = totalCount > 0 ? (unlockedCount / totalCount) * 100 : 0;
+
   return (
+    <>
+      <style>{ANIMATIONS_CSS}</style>
     <section
-      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]"
+      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]"
       aria-labelledby="title"
     >
       <header className="grid gap-[var(--shell-gap)]">
-        <h1 id="title" className="m-0 text-[1.55rem] uppercase tracking-[0.18em] text-black flex flex-wrap items-baseline gap-3">
+        <h1 id="title" className="m-0 text-[1.55rem] uppercase tracking-[0.18em] text-black flex flex-wrap items-baseline gap-[calc(var(--shell-gap)/2)]">
           <span>ADVENT OF AI SECURITY 2025</span>
           {showKickoff && (
             <>
@@ -111,20 +128,32 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                   Designed for developers, security engineers, and AI practitioners building production LLM applications.
                 </p>
               </div>
-              <div className="mt-8 pt-6 border-t border-black/10">
+              <div className="mt-[var(--shell-gap)] pt-[var(--shell-gap)] border-t border-black/10 flex items-center justify-between gap-[calc(var(--shell-gap)/2)]">
                 <p className="m-0 text-xs opacity-60 leading-relaxed">
                   All content was created with the assistance of AI and proofread by humans.
                 </p>
+                <div className="flex items-center gap-[calc(var(--shell-gap)/2)] shrink-0">
+                  <span className="text-[0.65rem] uppercase tracking-[0.2em] text-black/50">
+                    {unlockedCount}/{totalCount} unlocked
+                  </span>
+                  <div className="w-16 h-1 bg-black/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-black transition-all duration-700 ease-out rounded-full"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
         </div>
       </section>
 
       <ol className="grid lg:grid-cols-2 gap-[var(--shell-gap)]" role="list">
-        {doors.map((d) => (
+        {doors.map((d, index) => (
           <li
             key={d.slug}
-            className="group"
+            className="group animate-stagger"
+            style={{ '--index': index } as React.CSSProperties}
           >
             {(() => {
               const link = `/doors/${d.slug}`;
@@ -132,7 +161,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               const classes = [
                 'relative grid grid-cols-[1fr_auto] items-center min-h-24 h-full border border-black bg-transparent text-black',
                 'transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-black',
-                'py-[calc(var(--shell-gap)/1.5)] px-[var(--shell-gap)]',
+                'py-[calc(var(--shell-gap)/2)] px-[var(--shell-gap)]',
                 d.state === 'locked' ? 'opacity-75' : 'border-2',
                 d.state === 'today' ? 'ring-1 ring-black' : '',
               ].join(' ');
@@ -141,7 +170,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               const content = (
                 <>
                   <div className="grid gap-[var(--shell-gap)]">
-                    <p className="m-0 text-2xl tracking-[0.2em] group-hover:text-white group-hover:translate-x-0.5 transition-transform pb-[calc(var(--shell-gap)/6)]">
+                    <p className="m-0 text-2xl tracking-[0.2em] group-hover:text-white group-hover:translate-x-0.5 transition-transform">
                       {String(d.number).padStart(2, '0')}
                     </p>
                     { (d.state === 'open' || d.state === 'today') ? (
@@ -182,5 +211,6 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
         <FooterLinks />
       </section>
     </section>
+    </>
   );
 }
