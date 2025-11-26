@@ -1,4 +1,4 @@
-import { IconBrandGithubFilled, IconBrandBluesky } from '@tabler/icons-react';
+import { IconBrandGithubFilled, IconBrandBluesky, IconBrandDiscordFilled } from '@tabler/icons-react';
 
 type Props = {
   className?: string;
@@ -33,6 +33,15 @@ export default function FooterLinks({ className }: Props) {
             aria-label="Follow Advent of AI Security on Bluesky"
           >
             <IconBrandBluesky size={22} aria-hidden="true" />
+          </a>
+          <a
+            href="https://discord.gg/kkh9q7Zt"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center justify-center text-black hover:text-black/70"
+            aria-label="Rawkode Academy Discord @ #advent-of-ai-security"
+          >
+            <IconBrandDiscordFilled size={22} aria-hidden="true" />
           </a>
         </div>
         <span>Independent & Unsponsored</span>
