@@ -12,7 +12,7 @@ export interface Props {
 const { title, meta = [] } = Astro.props as Props;
 ---
 
-<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[calc(var(--shell-gap)*1.5)]">
+<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]">
   <div id="top"></div>
   <div class="flex flex-col gap-[var(--shell-gap)]">
     <header class="grid gap-[var(--shell-gap)]">
@@ -29,7 +29,7 @@ const { title, meta = [] } = Astro.props as Props;
     </div>
     <section class="shell-grid grid">
       <slot />
-      <section class="grid gap-[calc(var(--shell-gap)/2)]">
+      <section class="grid gap-[var(--shell-gap)]">
         <FooterLinks />
       </section>
     </section>

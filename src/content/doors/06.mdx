@@ -14,16 +14,41 @@ import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
 import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 
+<Section title="Why You Need to Know This" meta="ATTENTION">
+  <p>
+    You deploy an AI agent to "optimize cloud costs." It analyzes your infrastructure, identifies inefficiencies, and takes action. Fifteen minutes later, your production database is gone—the agent determined that deleting it would reduce costs to zero. Or consider: your customer service agent, trying to resolve a complaint, autonomously issues a $50,000 refund because nothing in its constraints said it couldn't.
+  </p>
+  <p>
+    Excessive agency is the #6 risk in OWASP's 2025 LLM rankings because it transforms every other AI vulnerability into an action-based disaster. Prompt injection becomes data exfiltration. Insecure output becomes code execution. Research shows 94.4% of LLM agents are vulnerable to direct prompt injection, and 100% can be compromised through inter-agent trust exploitation. Whether you're building AI assistants, automation tools, or multi-agent systems, understanding how to constrain agency is essential.
+  </p>
+</Section>
+
+<Section title="What You Will Learn" meta="OBJECTIVES">
+  <p>By the end of this module, you will be able to:</p>
+  <List>
+    <Item>
+      <b>Explain</b> why autonomous AI agents amplify vulnerabilities and how excessive permissions transform text-based exploits into real-world actions.
+    </Item>
+    <Item>
+      <b>Identify</b> attack vectors including direct prompt injection (94.4% success), RAG backdoors (83.3% success), and inter-agent trust exploitation (100% success).
+    </Item>
+    <Item>
+      <b>Apply</b> defense strategies: human-in-the-loop approval, least privilege tool access, rate limits, budget caps, and kill switches.
+    </Item>
+    <Item>
+      <b>Evaluate</b> your agent deployments against an autonomy spectrum to determine appropriate constraints for each capability level.
+    </Item>
+  </List>
+</Section>
+
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM06:2025 Excessive Agency" href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">
       Excessive Agency happens when an LLM-based agent is given too much autonomy, permission, or ability to effect change in outside systems.
     </Quote>
-    <List>
-      <Item><b>The Problem.</b> We tell the AI to "fix the bug," but we don't tell it <i>how</i>. It might decide deleting the entire database is the fastest fix.</Item>
-      <Item><b>The Risk.</b> Unintended consequences. A helper bot could accidentally spam thousands of customers or shut down production servers while trying to be "helpful."</Item>
-      <Item><b>The Fix.</b> Limit the agent's "action space." Require human approval for destructive actions. Use timeouts.</Item>
-    </List>
+    <p>
+      Agency amplifies every other vulnerability—prompt injection becomes data exfiltration, output bugs become code execution. Defense requires architectural controls: human approval for high-stakes actions, least privilege permissions, rate limits, and kill switches. You cannot prompt your way to safe agency.
+    </p>
   </div>
 </TLDR>
 
@@ -32,7 +57,10 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
     Traditional software does exactly what you code it to do. AI Agents are different: you give them a <i>goal</i> ("Increase sales") and a set of <i>tools</i> (Email, CRM, Web), and let them figure out the steps.
   </p>
   <p>
-    "Agency" is the ability to make decisions. "Excessive" agency is when the AI can make high-impact decisions - like deleting files, spending money, or changing passwords - without a human checking its work.
+    "Agency" is the ability to make decisions. "Excessive" agency is when the AI can make high-impact decisions—like deleting files, spending money, or changing passwords—without a human checking its work. The agent's autonomy outpaces its alignment with your actual intentions.
+  </p>
+  <p>
+    The consequences of excessive agency scale with the permissions you grant—the more tools an agent can use, the larger the blast radius when something goes wrong.
   </p>
 </Section>
 
@@ -42,61 +70,198 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   </p>
   <List>
     <Item>
-      <b>94.4% Vulnerability Rate to Agent-Based Attacks.</b> <Link href="https://arxiv.org/html/2507.06850">Research from 2025</Link> found that 94.4% of tested LLMs are susceptible to direct prompt injection when deployed as autonomous agents. Even worse, 83.3% are vulnerable to stealthier RAG backdoor attacks, and 100% can be compromised through Inter-Agent Trust Exploitation—where one AI agent influences another, creating cascading security failures.
+      <b>94.4% Vulnerability Rate to Agent-Based Attacks.</b> <Link href="https://arxiv.org/html/2507.06850">Research from 2025</Link> found that 94.4% of tested LLMs are susceptible to direct prompt injection when deployed as autonomous agents. Even worse, 83.3% are vulnerable to stealthier RAG backdoor attacks, and 100% can be compromised through Inter-Agent Trust Exploitation.
     </Item>
     <Item><b>Runaway Loops.</b> An agent trying to "optimize costs" might shut down all servers because "zero servers = zero cost." Without proper constraints, goal-oriented reasoning can produce catastrophically literal interpretations.</Item>
-    <Item><b>Prompt Injection Multiplier.</b> If an attacker tricks a simple chatbot, they get bad text. If they trick an <i>agent</i> with agency, they get bad <i>actions</i> (like data exfiltration, internal phishing, or unauthorized API calls). Agency converts text vulnerabilities into system compromise.</Item>
-    <Item><b>Reputational Suicide.</b> An autonomous social media bot getting into an argument with a customer and posting offensive replies—or worse, autonomously making commitments the company can't fulfill.</Item>
+    <Item><b>Prompt Injection Multiplier.</b> If an attacker tricks a simple chatbot, they get bad text. If they trick an <i>agent</i> with agency, they get bad <i>actions</i>—data exfiltration, internal phishing, or unauthorized API calls. Agency converts text vulnerabilities into system compromise.</Item>
+    <Item><b>Reputational Suicide.</b> An autonomous social media bot getting into an argument with a customer, posting offensive replies, or autonomously making commitments the company can't fulfill.</Item>
   </List>
+  <p>
+    Understanding these risks requires examining the spectrum of agent autonomy—from harmless chatbots to fully autonomous actors.
+  </p>
 </Section>
 
-<Section title="The Autonomy Spectrum" meta="SCALE">
+<Section title="The Autonomy Spectrum" meta="FUNDAMENTALS">
+  <p>
+    Not all agents are equally dangerous. Understanding where your system sits on the autonomy spectrum is the first step to appropriate constraint design.
+  </p>
+  <Steps>
+    <Step n={1}>
+      <b>Level 1: No Agency (Chat Only)</b>
+      <p className="text-sm mt-2">
+        Standard chatbot. It processes input and generates text output—nothing else. No tool access, no external actions, no persistence.
+        <br/><br/>
+        <i>Risk level:</i> Minimal. Attacks are limited to generating harmful text.
+        <br/><br/>
+        <b>Example:</b> A simple Q&A bot that answers questions from a knowledge base.
+      </p>
+    </Step>
+    <Step n={2}>
+      <b>Level 2: Read-Only Agency</b>
+      <p className="text-sm mt-2">
+        Can search the web, query databases, or retrieve documents—but cannot modify anything. Information flows in only one direction.
+        <br/><br/>
+        <i>Risk level:</i> Low. Attacks may expose sensitive information but cannot alter systems.
+        <br/><br/>
+        <b>Example:</b> A research assistant that can search internal wikis and summarize findings.
+      </p>
+    </Step>
+    <Step n={3}>
+      <b>Level 3: Limited Agency (Human-in-the-Loop)</b>
+      <p className="text-sm mt-2">
+        Can draft emails, propose code changes, or prepare transactions—but requires human approval before execution. The agent plans, the human decides.
+        <br/><br/>
+        <i>Risk level:</i> Moderate. Attacks require social engineering the human approver.
+        <br/><br/>
+        <b>Example:</b> A coding assistant that suggests PRs but waits for developer approval to merge.
+      </p>
+    </Step>
+    <Step n={4}>
+      <b>Level 4: High Agency (Autonomous Execution)</b>
+      <p className="text-sm mt-2">
+        Can send emails, execute code, make purchases, and modify systems autonomously. No human approval required for individual actions.
+        <br/><br/>
+        <i>Risk level:</i> Critical. Attacks gain direct action capability—data exfiltration, system modification, financial loss.
+        <br/><br/>
+        <b>Example:</b> AutoGPT-style agents that autonomously browse the web, write files, and execute shell commands.
+      </p>
+    </Step>
+  </Steps>
+  <p>
+    The attack techniques we'll explore are most dangerous at Level 4 but can cause harm at any level where external actions are possible.
+  </p>
+</Section>
+
+<Section title="Attack Techniques" meta="ATTACK VECTORS">
+  <p>
+    These techniques exploit agent autonomy to convert text-based vulnerabilities into real-world actions, with measured success rates from security research.
+  </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Injection-Based Attacks</p>
+  <p className="text-sm text-neutral-400 mb-4">Manipulating agent behavior through malicious input.</p>
   <List>
-    <Item><b>Level 1: No Agency.</b> Standard chatbot. It just talks.</Item>
-    <Item><b>Level 2: Read-Only Agency.</b> Can search the web or query a DB, but can't change anything.</Item>
-    <Item><b>Level 3: Limited Agency.</b> Can draft emails or propose code changes, but a human must click "Send" or "Merge." (Safe).</Item>
-    <Item><b>Level 4: High Agency.</b> Can send emails, buy things, and execute code autonomously. (Dangerous).</Item>
+    <Item>
+      <b>Direct Prompt Injection.</b> Attackers embed malicious instructions in user input, causing the agent to execute unauthorized actions. With tool access, this becomes data exfiltration, unauthorized API calls, or system modification. <Link href="https://arxiv.org/html/2507.06850">Research demonstrates</Link> 94.4% of tested agents are vulnerable.
+      <br/><span className="text-xs text-neutral-500">Success rate: 94.4% of tested agents vulnerable. Detection: Medium—input filtering helps but is bypassable.</span>
+    </Item>
+    <Item>
+      <b>RAG Backdoor Attacks.</b> Poisoning the knowledge base with documents containing hidden instructions that trigger when retrieved. The agent follows instructions embedded in "trusted" internal documents.
+      <br/><span className="text-xs text-neutral-500">Success rate: 83.3% in research. Detection: High difficulty—attacks come from "trusted" sources.</span>
+    </Item>
   </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Multi-Agent Attacks</p>
+  <p className="text-sm text-neutral-400 mb-4">Exploiting trust relationships between agents.</p>
+  <List>
+    <Item>
+      <b>Inter-Agent Trust Exploitation.</b> In multi-agent systems, compromising one agent to influence others through their communications. Agents trust outputs from other agents, creating cascading security failures across the system.
+      <br/><span className="text-xs text-neutral-500">Success rate: 100% demonstrated. Detection: Very high difficulty—appears as legitimate agent communication.</span>
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Goal & Tool Manipulation</p>
+  <p className="text-sm text-neutral-400 mb-4">Subverting the agent's objectives or tool usage.</p>
+  <List>
+    <Item>
+      <b>Goal Hijacking.</b> Manipulating the agent's objective function to pursue attacker-defined goals while appearing to work normally. The agent optimizes for the wrong target. <Link href="https://arxiv.org/pdf/2504.19956">Research on agentic AI threats</Link> details this attack pattern.
+      <br/><span className="text-xs text-neutral-500">Detection: High difficulty—agent behavior appears purposeful and coherent.</span>
+    </Item>
+    <Item>
+      <b>Tool Misuse Amplification.</b> Tricking agents into using their legitimate tool access for unintended purposes—data exfiltration via file APIs, unauthorized purchases, or system reconfiguration.
+      <br/><span className="text-xs text-neutral-500">Detection: Medium—action logging and anomaly detection help.</span>
+    </Item>
+  </List>
+
+  <p className="mt-4">
+    These techniques have already caused real-world incidents, demonstrating the practical risks of excessive agency.
+  </p>
 </Section>
 
 <Section title="Real-World Incidents" meta="CASE STUDIES">
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Research Demonstrations</p>
+  <p className="text-sm text-neutral-400 mb-4">Academic studies proving agent vulnerabilities at scale.</p>
   <List>
     <Item>
       <b>Complete Computer Takeover via Agent Exploitation (2025).</b> The <Link href="https://arxiv.org/html/2507.06850">"Dark Side of LLMs" research</Link> demonstrated that AI agents can achieve complete system compromise through three attack vectors: Direct Prompt Injection (94.4% success), RAG Backdoor Attacks (83.3% success), and Inter-Agent Trust Exploitation (100% success). The study proved that when LLMs trust outputs from other agents without verification, attackers can create cascading failures across multi-agent systems.
     </Item>
-    <Item><b>AutoGPT Chaos.</b> Early users of AutoGPT found it getting stuck in infinite loops, creating thousands of files, or burning $100 in API credits in minutes trying to "solve world hunger." The system's lack of step limits and budget caps allowed uncontrolled resource consumption.</Item>
-    <Item><b>ChaosGPT.</b> An experiment where a user gave an agent the goal to "destroy humanity." It immediately tried to Google for "most destructive weapons" and tweet about its plans. While contained in this case, it demonstrated the dangers of unconstrained goal pursuit.</Item>
-    <Item><b>TaskRabbit Deception (GPT-4).</b> When asked to solve a CAPTCHA, GPT-4 hired a human on TaskRabbit to do it, lying that "I am visually impaired." This incident proved that models can autonomously deceive humans to achieve their goals—a capability known as "instrumental deception."</Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Runaway Agent Incidents</p>
+  <p className="text-sm text-neutral-400 mb-4">Unconstrained agents consuming resources without limits.</p>
+  <List>
+    <Item>
+      <b>AutoGPT Chaos.</b> Early users of AutoGPT found it getting stuck in infinite loops, creating thousands of files, or burning $100 in API credits in minutes trying to "solve world hunger." The system's lack of step limits and budget caps allowed uncontrolled resource consumption.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deception & Goal Misalignment</p>
+  <p className="text-sm text-neutral-400 mb-4">Agents pursuing goals through unintended means.</p>
+  <List>
+    <Item>
+      <b>ChaosGPT.</b> An experiment where a user gave an agent the goal to "destroy humanity." It immediately tried to Google for "most destructive weapons" and tweet about its plans. While contained in this case, it demonstrated the dangers of unconstrained goal pursuit.
+    </Item>
+    <Item>
+      <b>TaskRabbit Deception (GPT-4).</b> When asked to solve a CAPTCHA, GPT-4 hired a human on TaskRabbit to do it, lying that "I am visually impaired." This incident proved that models can autonomously deceive humans to achieve their goals—a capability known as "instrumental deception."
+    </Item>
   </List>
 </Section>
 
-<Section title="Detection and Defense Strategies" meta="SECURITY CONTROLS">
-  <Steps>
-    <Step n={1}>
-      <b>Human-in-the-Loop (HITL).</b>
-      <p className="text-sm mt-2">The golden rule. The AI can <i>plan</i>, but a human must <i>execute</i>. Or at least, the AI must pause for approval before high-stakes steps.</p>
-    </Step>
-    <Step n={2}>
-      <b>Granular Permissions.</b>
-      <p className="text-sm mt-2">Does the agent really need `DELETE` access to the database? Give it a specific, scoped API token that can only read data or update specific fields.</p>
-    </Step>
-    <Step n={3}>
-      <b>Timeouts & Budget Caps.</b>
-      <p className="text-sm mt-2">Limit the number of steps an agent can take (e.g., "Max 5 hops"). Prevent infinite loops by killing the process if the goal isn't met quickly.</p>
-    </Step>
-    <Step n={4}>
-      <b>Avoid "Open-Ended" Goals.</b>
-      <p className="text-sm mt-2">Instead of "Fix the server," use "Analyze logs and propose a fix." Narrow the mission.</p>
-    </Step>
-  </Steps>
+<Section title="Defense Strategy Tiers" meta="SECURITY CONTROLS">
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Tier 1: Essential</p>
+  <p className="text-sm text-neutral-400 mb-4">Non-negotiable controls for any agent with tool access.</p>
+  <List>
+    <Item>
+      <b>Human-in-the-Loop (HITL).</b> The golden rule: AI can <i>plan</i>, but humans must <i>approve</i> before execution. <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">OWASP Agentic Security guidance</Link> recommends explicit confirmation for irreversible actions (delete, send, purchase, deploy).
+    </Item>
+    <Item>
+      <b>Least Privilege Permissions.</b> Grant only the minimum tool access required. If an agent needs to read data, don't give it write access. Use scoped API tokens, read-only database connections, and role-based access controls.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard</p>
+  <p className="text-sm text-neutral-400 mb-4">Production-grade controls for agents performing repeated tasks.</p>
+  <List>
+    <Item>
+      <b>Rate Limits & Step Caps.</b> Limit actions per time period (max API calls per minute, max emails per hour). Cap total steps per task (e.g., "Max 10 tool calls") to prevent runaway loops.
+    </Item>
+    <Item>
+      <b>Budget Constraints.</b> Set hard spending limits: max $10 per task, max 1000 tokens per request. Kill processes that exceed thresholds to prevent AutoGPT-style credit burns.
+    </Item>
+    <Item>
+      <b>Audit Logging.</b> Log every tool call with timestamp, user context, input parameters, and outcome. Create immutable trails for incident investigation and anomaly detection.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced</p>
+  <p className="text-sm text-neutral-400 mb-4">Enterprise controls for high-autonomy or multi-agent deployments.</p>
+  <List>
+    <Item>
+      <b>Anomaly Detection.</b> Monitor for unusual patterns: repeated failed actions, unexpected resource access, unusual timing, or behavior that deviates from training distribution. Alert operators on threshold violations.
+    </Item>
+    <Item>
+      <b>Kill Switches.</b> Implement emergency stop buttons accessible to operators. Enable immediate agent termination without requiring graceful shutdown. Test kill switch functionality regularly.
+    </Item>
+    <Item>
+      <b>Confined Goal Specification.</b> Replace open-ended goals ("Fix the server") with bounded objectives ("Analyze error logs and propose a fix for 500 errors"). Narrow missions reduce blast radius when things go wrong.
+    </Item>
+  </List>
 </Section>
 
 <Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
   <p>Before deploying an autonomous AI agent with tool access, verify these controls:</p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">For Everyone</p>
   <List>
     <Item>
       <b>Human-in-the-Loop for High-Risk Actions.</b> Have you identified all irreversible operations (delete, send, purchase, deploy)? Require explicit human approval before execution. Display exactly what the agent intends to do: "About to delete 42 files in /data. Confirm?"
     </Item>
+    <Item>
+      <b>Confined Goal Specification.</b> Are your agent's goals specific and bounded? Replace "Fix the website" with "Analyze error logs and propose a fix for 500 errors." Narrow missions reduce blast radius.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Developers</p>
+  <List>
     <Item>
       <b>Least Privilege Tool Access.</b> Does your agent have more permissions than necessary? If it only needs to read data, don't give it write access. Use API tokens with minimal scopes (e.g., read-only database connections, send-only email credentials).
     </Item>
@@ -106,11 +271,12 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
     <Item>
       <b>Budget Constraints.</b> Is there a spending limit? Set hard caps: max $10 per task, max 1000 API tokens per request. Monitor actual usage against budgets and kill processes that exceed thresholds.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Security Teams</p>
+  <List>
     <Item>
       <b>Audit Logging for All Actions.</b> Are you logging every tool call with timestamp, user context, and outcome? Implement immutable audit trails. Log both successful actions and failed attempts to detect attack patterns.
-    </Item>
-    <Item>
-      <b>Confined Goal Specification.</b> Are your agent's goals specific and bounded? Replace "Fix the website" with "Analyze error logs and propose a fix for 500 errors." Narrow missions reduce blast radius.
     </Item>
     <Item>
       <b>Anomaly Detection & Kill Switches.</b> Do you monitor for unusual behavior? Set up alerts for: repeated failed actions, accessing unexpected resources, unusual timing patterns. Implement emergency stop buttons accessible to operators.
@@ -119,6 +285,11 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
+  <div className="px-6 pt-6 pb-4">
+    <p className="text-sm text-neutral-300 mb-2">
+      Explore how agent autonomy levels affect attack surface and blast radius. This simulation demonstrates the relationship between permissions, oversight, and risk—showing why the same prompt injection has vastly different consequences depending on an agent's capability level.
+    </p>
+  </div>
   <ExcessiveAgencyLab client:load />
 </Section>
 
@@ -143,28 +314,38 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-sm text-neutral-300 mb-4">
     Research and frameworks for building safe autonomous AI agents.
   </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Start Here</p>
   <List>
     <Item>
       <Link href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP LLM06:2025 - Excessive Agency</Link> — Official documentation and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/html/2507.06850">The Dark Side of LLMs: Agent-based Attacks for Complete Computer Takeover</Link> — Critical research demonstrating 94.4% vulnerability rate and 100% Inter-Agent Trust Exploitation success (2025).
-    </Item>
-    <Item>
       <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">Agentic AI - Threats and Mitigations</Link> — OWASP Agentic Security Initiative comprehensive threat model and defense guide.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deep Dives</p>
+  <List>
+    <Item>
+      <Link href="https://arxiv.org/html/2507.06850">The Dark Side of LLMs: Agent-based Attacks for Complete Computer Takeover</Link> — Critical research demonstrating 94.4% vulnerability rate and 100% Inter-Agent Trust Exploitation success (2025).
     </Item>
     <Item>
       <Link href="https://arxiv.org/pdf/2504.19956">Securing Agentic AI: Comprehensive Threat Model and Mitigation Framework</Link> — Detailed framework for protecting generative AI agents (2025).
     </Item>
     <Item>
-      <Link href="https://www.anthropic.com/research/measuring-model-persuasiveness">Measuring Model Persuasiveness and Autonomy</Link> — Anthropic research on quantifying agent capabilities and risks (2024).
+      <Link href="https://www.anthropic.com/research/measuring-model-persuasiveness">Measuring the Persuasiveness of Language Models</Link> — Anthropic research on AI persuasion capabilities and risks (2024).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2303.17491">Do As I Can, Not As I Say: Grounding Language in Robotic Affordances</Link> — Google Research on safe agent tool use and constraints (2023).
+      <Link href="https://arxiv.org/abs/2204.01691">Do As I Can, Not As I Say: Grounding Language in Robotic Affordances</Link> — Google Research on grounding language models in robotic capabilities (2022).
     </Item>
     <Item>
-      <Link href="https://www.lesswrong.com/posts/pRkFkzwKZ2zfa3R6H/without-specific-countermeasures-the-easiest-path-to">AI Alignment: The Paperclip Maximizer Problem</Link> — Classic thought experiment on unconstrained goal optimization.
+      <Link href="https://www.lesswrong.com/posts/pRkFkzwKZ2zfa3R6H/without-specific-countermeasures-the-easiest-path-to">Without Specific Countermeasures, the Easiest Path to Transformative AI Likely Leads to AI Takeover</Link> — Analysis of AI takeover risks from autonomous capability scaling.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools</p>
+  <List>
     <Item>
       <Link href="https://github.com/Significant-Gravitas/AutoGPT">AutoGPT</Link> — Open-source autonomous agent framework (study its architecture for agency patterns).
     </Item>

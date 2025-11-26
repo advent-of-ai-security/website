@@ -14,20 +14,37 @@ import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
 import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
 
+<Section title="Why You Need to Know This" meta="ATTENTION">
+  <p>
+    A startup launches their AI assistant with pay-per-token pricing. Within days, their cloud bill jumps from $3/hour to $3,000/hour. No spike in legitimate users—just a handful of accounts sending prompts like "Explain quantum physics in 50,000 words" and "List every prime number." Each request looks harmless to content filters but consumes 1000× the resources of a normal query. By the time the team notices, they've burned through their monthly budget in 72 hours. The attacker didn't need to hack anything—they just asked the model to think harder.
+  </p>
+</Section>
+
+<Section title="What You Will Learn" meta="OBJECTIVES">
+  <p>By the end of this module, you will be able to:</p>
+  <List>
+    <Item><b>Explain</b> how Model DoS differs from traditional DDoS attacks and why LLM inference is uniquely expensive to attack.</Item>
+    <Item><b>Identify</b> attack vectors including sponge attacks, AutoDoS optimization, context stuffing, and recursive tool-use loops.</Item>
+    <Item><b>Apply</b> multi-layered defenses combining rate limiting, timeout enforcement, cost monitoring, and semantic input validation.</Item>
+    <Item><b>Evaluate</b> systems against the security checklist to prevent denial-of-wallet and service degradation attacks.</Item>
+  </List>
+</Section>
+
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM10:2025 Unbounded Consumption" href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">
       Unbounded consumption occurs when LLM applications allow excessive and uncontrolled inferences, leading to resource exhaustion, economic denial-of-wallet attacks, and service degradation for all users.
     </Quote>
-    <List>
-      <Item><b>Compute-Layer Attack.</b> Unlike network-layer DDoS, Model DoS attacks the expensive inference layer—generating text costs 1000× more per request than serving static web pages.</Item>
-      <Item><b>Sponge Attacks.</b> Benign-looking prompts that trigger exponential resource consumption (10-250× normal latency and energy use), bypassing traditional DoS defenses.</Item>
-      <Item><b>Economic Impact.</b> A single AutoDoS prompt can increase response latency 250×, causing timeout cascades and inflating operational costs by orders of magnitude.</Item>
-    </List>
+    <p>
+      Model DoS exploits the 1000× cost multiplier of LLM inference versus traditional web services. Sponge attacks—benign-looking prompts that trigger 10-250× resource consumption—bypass traditional defenses and can escalate costs from $3/hour to $3,000/hour.
+    </p>
   </div>
 </TLDR>
 
 <Section title="What Is Model Denial of Service?" meta="DEFINITION">
+  <p>
+    Understanding the $3,000/hour scenario requires recognizing what makes LLM attacks fundamentally different from traditional denial-of-service.
+  </p>
   <p>
     Model Denial of Service (Model DoS) exploits the computational expense of LLM inference. Unlike traditional DDoS attacks that flood networks with junk packets, Model DoS uses <b>legitimate-looking prompts</b> that force the model into resource-intensive operations—massive output generation, infinite tool-call loops, or complex reasoning chains.
   </p>
@@ -41,7 +58,7 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
 
 <Section title="Why It Matters" meta="IMPACT">
   <p>
-    As LLMs power critical infrastructure (customer service, code generation, medical triage), availability becomes a security issue. Model DoS can disable services, inflate costs, or provide cover for other attacks.
+    As LLMs power critical infrastructure—customer service, code generation, medical triage—availability becomes a security issue. Model DoS can disable services, inflate costs, or provide cover for other attacks.
   </p>
   <List>
     <Item>
@@ -60,26 +77,71 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
       <b>Context Window Exhaustion.</b> Flooding the context with garbage pushes out system instructions, degrading safety alignment or enabling prompt injection attacks as a secondary payload.
     </Item>
   </List>
+  <p>
+    Understanding these risks requires examining the three interconnected attack surfaces that make LLM systems vulnerable.
+  </p>
+</Section>
+
+<Section title="The Three Attack Surfaces" meta="FUNDAMENTALS">
+  <p>
+    Model DoS attacks exploit three interconnected layers of LLM systems. Understanding these surfaces helps identify where defenses must be applied.
+  </p>
+  <Steps>
+    <Step n={1}>
+      <b>Compute Layer: Inference Cost Exploitation</b>
+      <p className="text-sm mt-2">
+        LLM inference is inherently expensive—10,000-100,000× more compute than serving static content. Attackers craft prompts that maximize GPU utilization: long outputs, complex reasoning, or repetitive patterns. Unlike bandwidth exhaustion, a single well-crafted prompt can monopolize resources that would otherwise serve thousands of legitimate users.
+      </p>
+    </Step>
+    <Step n={2}>
+      <b>Economic Layer: Denial-of-Wallet</b>
+      <p className="text-sm mt-2">
+        Pay-per-token pricing creates a direct attack vector. Each token generated costs money, and consumption-based models let attackers externalize costs to their victims. A coordinated campaign of expensive prompts can drain budgets without any technical exploitation—the billing API works as designed.
+      </p>
+    </Step>
+    <Step n={3}>
+      <b>Service Layer: Queue Saturation</b>
+      <p className="text-sm mt-2">
+        GPUs have limited concurrency. When inference queues fill with resource-intensive requests, legitimate users face timeouts regardless of available budget. Cascade effects spread across dependent services—chatbots, RAG systems, and agent workflows all fail when the underlying LLM becomes unresponsive.
+      </p>
+    </Step>
+  </Steps>
+  <p>
+    With these attack surfaces in mind, let's examine the specific techniques attackers use to exploit them.
+  </p>
 </Section>
 
 <Section title="Taxonomy of Attacks" meta="ATTACK VECTORS">
   <p>
-    Attacks exploit various aspects of LLM resource consumption—inference time, token generation, tool use, and reasoning loops.
+    Attacks exploit various aspects of LLM resource consumption—inference time, token generation, tool use, and reasoning loops. Each category targets different vulnerabilities in the system architecture.
   </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Semantic Exploitation (Detection: Hard)</p>
   <List>
     <Item>
-      <b>Sponge Attacks (Benign-Input DoS).</b> Prompts that appear harmless but trigger exponential resource use. Examples: "Explain the concept of infinity in 50,000 words" or "List all prime numbers." Unlike traditional DoS, these bypass content filters and rate limiters because they look legitimate.
-      <br/><i>Defense Challenge:</i> Standard WAF rules don't detect semantic resource exhaustion.
+      <b>Sponge Attacks (Benign-Input DoS).</b> Prompts that appear harmless but trigger exponential resource use. Examples: "Explain the concept of infinity in 50,000 words" or "List all prime numbers." Unlike traditional DoS, these bypass content filters and rate limiters because they look legitimate. Standard WAF rules don't detect semantic resource exhaustion.
     </Item>
     <Item>
       <b>AutoDoS (Automated Optimization).</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">ACL 2025 research</Link> introduced an algorithm that constructs DoS Attack Trees, automatically optimizing prompts for maximum resource consumption across black-box models. Uses "Length Trojan" embeddings to bypass defenses.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training-Time Attacks (Detection: Very Hard)</p>
+  <List>
     <Item>
       <b>Poisoning-Based DoS (P-DoS).</b> <Link href="https://arxiv.org/abs/2410.10760">Research (2024)</Link> demonstrates that injecting a single poisoned sample into fine-tuning data can cause models to generate 16,000-token repetitive outputs (vs. 500 tokens normally), permanently degrading the model.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Agentic System Exploitation (Detection: Medium)</p>
+  <List>
     <Item>
       <b>Recursive Tool-Use Loops.</b> For agentic systems, prompts like "Keep searching until you find the answer" can trigger infinite tool-call chains (web search → summarize → search again → ...), consuming API quotas and compute.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Resource Flooding (Detection: Easy)</p>
+  <List>
     <Item>
       <b>Context Stuffing.</b> Uploading massive documents (PDFs, code repositories) to force the model to process millions of tokens per request. Combined with multi-turn conversations, this exhausts context windows.
     </Item>
@@ -90,13 +152,8 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
 </Section>
 
 <Section title="Real-World Incidents" meta="CASE STUDIES">
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Research Demonstrations</p>
   <List>
-    <Item>
-      <b>False Positive DoS: 97% Blocking Success (2024).</b> <Link href="https://arxiv.org/pdf/2410.02916">Research from University of Michigan</Link> demonstrated that attackers can exploit LLM safeguard mechanisms to achieve denial of service by triggering false positives. By inserting adversarial prompts as short as 30 characters into user requests, attackers caused Llama Guard 3 to mistakenly block over <b>97% of legitimate user requests</b>. This attack inverts the purpose of safety systems—turning protective mechanisms into attack vectors that deny service to real users while allowing the attacker to exhaust system resources.
-    </Item>
-    <Item>
-      <b>DeepSeek-R1 Exhaustion (February 2025).</b> <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">Mindgard testing</Link> revealed DeepSeek-R1's reasoning models are easily manipulated into prolonged loops by simple prompts. Attackers embed malicious payloads to distract reasoning, bypassing safeguards. Timeout errors confirmed resource exhaustion vulnerability, demonstrating that reasoning models are particularly susceptible to DoS through internal reasoning conflicts.
-    </Item>
     <Item>
       <b>AutoDoS Black-Box Attack (2025).</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">ACL research</Link> demonstrated 250× latency increase using automated prompt optimization against commercial LLMs. A single optimized prompt could cause cascading timeouts across multi-agent systems, proving that DoS attacks can be systematically automated even without model access.
     </Item>
@@ -104,57 +161,93 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
       <b>GPT-4o P-DoS Demonstration (2024).</b> <Link href="https://arxiv.org/abs/2410.10760">Research showed</Link> that injecting one poisoned fine-tuning sample caused the model to generate 16,000-token repetitive outputs (vs. 500 tokens normally), proving that training-time attacks can create persistent DoS vulnerabilities that survive into production.
     </Item>
     <Item>
+      <b>False Positive DoS: 97% Blocking Success (2024).</b> <Link href="https://arxiv.org/pdf/2410.02916">Research from University of Michigan</Link> demonstrated that attackers can exploit LLM safeguard mechanisms to achieve denial of service by triggering false positives. By inserting adversarial prompts as short as 30 characters into user requests, attackers caused Llama Guard 3 to mistakenly block over <b>97% of legitimate user requests</b>—turning safety systems into attack vectors.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Reasoning Model Vulnerabilities</p>
+  <List>
+    <Item>
+      <b>DeepSeek-R1 Exhaustion (February 2025).</b> <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">Mindgard testing</Link> revealed DeepSeek-R1's reasoning models are easily manipulated into prolonged loops by simple prompts. Attackers embed malicious payloads to distract reasoning, bypassing safeguards. Timeout errors confirmed resource exhaustion vulnerability, demonstrating that reasoning models are particularly susceptible to DoS through internal reasoning conflicts.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Economic Impact</p>
+  <List>
+    <Item>
       <b>Denial-of-Wallet Cost Impact.</b> <Link href="https://www.prompt.security/blog/denial-of-wallet-on-genai-apps-ddow">Real-world cases</Link> documented costs escalating from $3/hour to $3,000/hour due to unbounded consumption attacks, where attackers gained unauthorized access to LLM APIs and drained organizational budgets through resource exhaustion.
     </Item>
   </List>
 </Section>
 
-<Section title="Detection and Defense Strategies" meta="SECURITY CONTROLS">
+<Section title="Defense Strategy Tiers" meta="SECURITY CONTROLS">
   <p>
-    Defense requires rate limiting, input validation, resource quotas, and anomaly detection.
+    Defense requires multi-layered protection across rate limiting, input validation, resource quotas, and anomaly detection. No single defense suffices against sophisticated Model DoS attacks.
   </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 1: Essential (Implement First)</p>
   <Steps>
     <Step n={1}>
-      <b>Rate Limiting & Quotas (Per-User, Per-IP).</b>
+      <b>Rate Limiting & Quotas</b>
       <p className="text-sm mt-2">
         Implement tiered rate limits: X tokens/minute for free users, Y for paid. Track cumulative token usage over rolling windows. Set hard limits on context window size (e.g., max 100k tokens/request). Use exponential backoff for repeated long requests from the same source.
       </p>
     </Step>
     <Step n={2}>
-      <b>Input Validation & Length Prediction.</b>
-      <p className="text-sm mt-2">
-        <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">ProtectAI research</Link> demonstrates training classifiers to predict output length from input prompts. Reject or throttle requests predicted to generate &gt;10k tokens. Enforce max input/output token budgets.
-      </p>
-    </Step>
-    <Step n={3}>
-      <b>Timeout & Circuit Breaker Patterns.</b>
+      <b>Timeout & Circuit Breaker Patterns</b>
       <p className="text-sm mt-2">
         Set aggressive timeouts for inference (e.g., 30 seconds). If a request exceeds budget, terminate gracefully and return cached response or error. Implement circuit breakers: if timeout rate exceeds threshold, temporarily block the user/IP.
       </p>
     </Step>
-    <Step n={4}>
-      <b>Cost-Based Abuse Detection.</b>
+  </Steps>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard (Production Hardening)</p>
+  <Steps>
+    <Step n={3}>
+      <b>Cost-Based Abuse Detection</b>
       <p className="text-sm mt-2">
         Monitor cost per request. If a single user's average cost exceeds 10× the median, flag for review. Detect patterns: repeated long outputs, tool-use loops, context stuffing. Auto-ban accounts exhibiting DoW behavior.
       </p>
     </Step>
-    <Step n={5}>
-      <b>Queue Priority & Resource Isolation.</b>
+    <Step n={4}>
+      <b>Input Sanitization (Sponge Detection)</b>
       <p className="text-sm mt-2">
-        Prioritize short, low-cost requests over long ones. Use separate GPU pools for free vs. paid tiers to prevent free-tier abuse from degrading premium service. Implement fair-share scheduling.
+        Detect sponge patterns: excessive repetition requests ("repeat X 10,000 times"), unbounded generation ("write forever"), numerical exhaustion ("list all primes"). Block or rewrite these prompts.
+      </p>
+    </Step>
+  </Steps>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced (Enterprise Security)</p>
+  <Steps>
+    <Step n={5}>
+      <b>Input Validation & Length Prediction</b>
+      <p className="text-sm mt-2">
+        <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">ProtectAI research</Link> demonstrates training classifiers to predict output length from input prompts. Reject or throttle requests predicted to generate &gt;10k tokens. Enforce max input/output token budgets.
       </p>
     </Step>
     <Step n={6}>
-      <b>Input Sanitization (Sponge Detection).</b>
+      <b>Queue Priority & Resource Isolation</b>
       <p className="text-sm mt-2">
-        Detect sponge patterns: excessive repetition requests ("repeat X 10,000 times"), unbounded generation ("write forever"), numerical exhaustion ("list all primes"). Block or rewrite these prompts.
+        Prioritize short, low-cost requests over long ones. Use separate GPU pools for free vs. paid tiers to prevent free-tier abuse from degrading premium service. Implement fair-share scheduling.
       </p>
     </Step>
   </Steps>
 </Section>
 
 <Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
-  <p>Before deploying LLM applications with public access, verify:</p>
+  <p>Before deploying LLM applications with public access, verify these controls are in place:</p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Everyone</p>
+  <List>
+    <Item>
+      <b>Understand the Cost Model.</b> Do you know what each inference request costs? Have you calculated worst-case scenarios for sponge attacks?
+    </Item>
+    <Item>
+      <b>Budget Alerts Configured.</b> Are spending alerts set at 50%, 80%, and 100% of your monthly budget? Is there an emergency kill switch?
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Developers</p>
   <List>
     <Item>
       <b>Rate Limits Enforced.</b> Do you have per-user, per-IP, and per-account token budgets? Are they tested under load?
@@ -163,10 +256,17 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
       <b>Timeouts Configured.</b> Is there a hard timeout for inference (e.g., 30-60s)? Do circuit breakers kick in after repeated timeouts?
     </Item>
     <Item>
-      <b>Cost Monitoring Active.</b> Are you tracking cost-per-request and alerting on anomalies (10× median cost)?
+      <b>Input Length Limits.</b> Do you enforce maximum context window usage (e.g., 100k tokens)? Are massive file uploads throttled?
     </Item>
     <Item>
-      <b>Input Length Limits.</b> Do you enforce maximum context window usage (e.g., 100k tokens)? Are massive file uploads throttled?
+      <b>Graceful Degradation.</b> Under load, does the system return cached responses or polite errors instead of crashing?
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Security Teams</p>
+  <List>
+    <Item>
+      <b>Cost Monitoring Active.</b> Are you tracking cost-per-request and alerting on anomalies (10× median cost)?
     </Item>
     <Item>
       <b>Sponge Detection Implemented.</b> Do you block prompts with known sponge patterns (repetition loops, unbounded generation)?
@@ -174,13 +274,15 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
     <Item>
       <b>Queue Fairness Ensured.</b> Do premium users have dedicated resources? Is there fair-share scheduling to prevent monopolization?
     </Item>
-    <Item>
-      <b>Graceful Degradation.</b> Under load, does the system return cached responses or polite errors instead of crashing?
-    </Item>
   </List>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
+  <div className="px-6 pt-6 pb-4">
+    <p className="text-sm text-neutral-300 mb-2">
+      Explore Model DoS attack patterns in this interactive simulation. Test different prompt types to see how they affect resource consumption, latency, and cost. Observe how rate limiting, timeouts, and sponge detection respond to various attack scenarios.
+    </p>
+  </div>
   <ModelDoSLab client:load />
 </Section>
 
@@ -202,24 +304,43 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
 </Section>
 
 <Section title="Further Reading" meta="RESOURCES">
+  <p className="text-sm text-neutral-300 mb-4">
+    Research papers, attack demonstrations, and defense strategies for protecting LLM systems against resource exhaustion attacks.
+  </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">Start Here</p>
   <List>
     <Item>
-      <Link href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">OWASP LLM10:2025 - Unbounded Consumption</Link>
+      <Link href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">OWASP LLM10:2025 - Unbounded Consumption</Link> — Official documentation on resource exhaustion attacks, threat scenarios, and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">AutoDoS: Automated LLM-DoS Attack via Black-Box Optimization</Link> (ACL 2025)
+      <Link href="https://www.prompt.security/blog/denial-of-wallet-on-genai-apps-ddow">Denial-of-Wallet on GenAI Apps</Link> — Real-world cost escalation scenarios and defense recommendations (Prompt Security).
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deep Dives</p>
+  <List>
+    <Item>
+      <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">AutoDoS: Automated LLM-DoS Attack via Black-Box Optimization</Link> — Research demonstrating 250× latency increase via automated prompt optimization (ACL 2025).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2410.10760">Denial-of-Service Poisoning Attacks on Large Language Models</Link> (2024)
+      <Link href="https://arxiv.org/abs/2410.10760">Denial-of-Service Poisoning Attacks on Large Language Models</Link> — Training-time P-DoS attack generating 16,000-token outputs (2024).
     </Item>
     <Item>
-      <Link href="https://medium.com/enkrypt-ai/defending-against-sponge-attacks-in-genai-applications-bd7c8c6f0d5d">Defending Against Sponge Attacks in GenAI Applications</Link> (July 2025)
+      <Link href="https://arxiv.org/pdf/2410.02916">False Positive DoS via LLM Safeguards</Link> — Research on exploiting safety systems to achieve 97% blocking of legitimate requests (2024).
     </Item>
     <Item>
-      <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">The Cost of Being Wordy: Detecting Resource-Draining Prompts</Link> (ProtectAI, June 2025)
+      <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">DeepSeek-R1's Susceptibility to Exhaustion Attacks</Link> — Reasoning model vulnerability to prolonged loop attacks (Mindgard).
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Defenses</p>
+  <List>
+    <Item>
+      <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">Detecting Resource-Draining Prompts</Link> — Output length prediction for throttling expensive requests (ProtectAI).
     </Item>
     <Item>
-      <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">DeepSeek-R1's Susceptibility to Exhaustion Attacks</Link> (February 2025)
+      <Link href="https://medium.com/enkrypt-ai/defending-against-sponge-attacks-in-genai-applications-bd7c8c6f0d5d">Defending Against Sponge Attacks in GenAI Applications</Link> — Defense strategies for 10-200× resource consumption attacks (Enkrypt AI).
     </Item>
   </List>
 </Section>

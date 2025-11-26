@@ -79,7 +79,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
 
   return (
     <section
-      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[calc(var(--shell-gap)*1.5)]"
+      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]"
       aria-labelledby="title"
     >
       <header className="grid gap-[var(--shell-gap)]">
@@ -94,7 +94,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
         </h1>
       </header>
 
-      <section className="grid gap-[calc(var(--shell-gap)/2)]">
+      <section className="grid gap-[var(--shell-gap)]">
         <div className="shell-section__card border border-black bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
           <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
             <span>Welcome - December 2025 Beta</span>
@@ -140,7 +140,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               const ariaLabel = `Door ${String(d.number).padStart(2, '0')} - ${d.title} - ${d.label} (${stateLabel})`;
               const content = (
                 <>
-                  <div className="grid gap-[calc(var(--shell-gap)/3)]">
+                  <div className="grid gap-[var(--shell-gap)]">
                     <p className="m-0 text-2xl tracking-[0.2em] group-hover:text-white group-hover:translate-x-0.5 transition-transform pb-[calc(var(--shell-gap)/6)]">
                       {String(d.number).padStart(2, '0')}
                     </p>
@@ -154,7 +154,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                       </time>
                     )}
                   </div>
-                  <div className="text-right grid justify-items-end gap-[calc(var(--shell-gap)/3)]">
+                  <div className="text-right grid justify-items-end gap-[var(--shell-gap)]">
                     <span className="inline-grid place-items-center h-5 px-3 border border-black text-[0.6rem] uppercase tracking-[0.25em] group-hover:border-white group-hover:text-white">
                       {d.state === 'open' ? 'UNLOCKED' : d.state === 'today' ? 'TODAY' : 'LOCKED'}
                     </span>
@@ -178,7 +178,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
         ))}
       </ol>
 
-      <section className="grid gap-[calc(var(--shell-gap)/2)]">
+      <section className="grid gap-[var(--shell-gap)]">
         <FooterLinks />
       </section>
     </section>

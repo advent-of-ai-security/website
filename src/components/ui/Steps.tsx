@@ -15,9 +15,11 @@ export function Steps({ children }: StepsProps) {
 
 export function Step({ n, children }: StepProps) {
   return (
-    <li className="grid grid-cols-[auto_1fr] gap-x-4 items-start">
-      <span className="text-[0.7rem] uppercase tracking-[0.35em] text-black/60">{String(n).padStart(2, '0')}</span>
-      <div>{children}</div>
+    <li className="flex items-start gap-4">
+      <span className="inline-flex items-center h-6 text-xs uppercase tracking-[0.25em] text-black/50">
+        {String(n).padStart(2, '0')}
+      </span>
+      <div className="[&>b:first-child]:leading-6">{children}</div>
     </li>
   );
 }

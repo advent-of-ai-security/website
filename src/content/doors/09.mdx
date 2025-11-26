@@ -14,16 +14,41 @@ import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
 import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
 
+<Section title="Why You Need to Know This" meta="ATTENTION">
+  <p>
+    A lawyer needs precedents for an upcoming case. They ask ChatGPT for relevant court decisions and receive six perfectly formatted citations with case names, dates, and legal reasoning. The brief is submitted to the court. One problem: every single case was hallucinated—none of them exist. The lawyer is sanctioned, their client's case compromised, and "AI-generated fake citations" becomes a cautionary tale.
+  </p>
+  <p>
+    Misinformation is the #9 risk in OWASP's 2025 LLM rankings because LLMs generate false information with the same confident, authoritative tone as accurate information. Research shows that deceptive AI-generated explanations are <i>more convincing</i> than honest explanations, and even top models exhibit hallucinations in up to 86% of generated atomic facts. Whether you're building chatbots, coding assistants, or enterprise tools, understanding why LLMs lie—and how to catch them—is essential.
+  </p>
+</Section>
+
+<Section title="What You Will Learn" meta="OBJECTIVES">
+  <p>By the end of this module, you will be able to:</p>
+  <List>
+    <Item>
+      <b>Explain</b> why LLMs hallucinate and why their confident output style makes misinformation particularly dangerous.
+    </Item>
+    <Item>
+      <b>Identify</b> misinformation types including factual hallucinations, citation fabrication, temporal confusion, and bias-induced errors.
+    </Item>
+    <Item>
+      <b>Apply</b> defense strategies: RAG grounding, uncertainty quantification, automated fact-checking, and human-in-the-loop verification.
+    </Item>
+    <Item>
+      <b>Evaluate</b> your LLM deployments against a checklist for grounding, citation verification, and hallucination detection.
+    </Item>
+  </List>
+</Section>
+
 <TLDR>
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM09:2025 Misinformation" href="https://genai.owasp.org/llmrisk/llm092025-misinformation/">
       Misinformation from LLMs poses a core vulnerability for applications relying on these models. LLMs can generate false but credible-sounding information (hallucinations), amplified by user overreliance—leading to security breaches, reputational harm, and legal liability.
     </Quote>
-    <List>
-      <Item><b>Hallucinations Are Structural.</b> LLMs don't "know" facts—they predict text patterns. When data is missing, they fabricate plausible-sounding answers using statistical patterns, creating authoritative-seeming lies.</Item>
-      <Item><b>Overreliance Amplifies Risk.</b> Users trust fluent, confident outputs without verification, integrating false information into decisions, code, medical advice, and legal arguments.</Item>
-      <Item><b>Not Just Wrong—Dangerous.</b> Misinformation in safety-critical domains (healthcare, finance, law) causes real harm: wrong diagnoses, financial losses, failed legal cases.</Item>
-    </List>
+    <p>
+      LLMs don't verify facts—they predict text patterns. When data is missing, they fabricate plausible-sounding answers with the same confident tone as accurate information. Defense requires multi-layered verification: RAG grounding, automated fact-checking, uncertainty communication, and mandatory human review for high-stakes decisions.
+    </p>
   </div>
 </TLDR>
 
@@ -34,9 +59,12 @@ import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
   <p>
     The root cause is the model's architecture: LLMs are trained to predict the next word, not to verify facts. When asked "Who won the 2024 Super Bowl?" and lacking that data, the model doesn't say "I don't know"—it generates a statistically likely team name based on historical patterns, confidently asserting fiction.
   </p>
-  <Quote source="OWASP LLM09:2025" href="https://genai.owasp.org/llmrisk/llm09-overreliance/">
+  <Quote source="OWASP LLM09:2025" href="https://genai.owasp.org/llmrisk/llm092025-misinformation/">
     Hallucination occurs when LLMs fill gaps in their training data using statistical patterns, resulting in answers that sound accurate but are unfounded. Biases in training data and incomplete information amplify this effect.
   </Quote>
+  <p>
+    Understanding the real-world impact of LLM misinformation is critical for anyone deploying these systems in production.
+  </p>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
@@ -66,48 +94,128 @@ import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
       <b>Code Generation Risks.</b> LLMs hallucinating API methods, library functions, or security patterns cause developers to ship vulnerable code. Example: Model invents a "safe" SQL query pattern that's actually injection-vulnerable.
     </Item>
   </List>
+  <p>
+    To understand how misinformation manifests, we need to examine the three factors that combine to make LLM outputs unreliable.
+  </p>
+</Section>
+
+<Section title="The Misinformation Triangle" meta="FUNDAMENTALS">
+  <p>
+    LLM misinformation emerges from the interaction of three factors, each amplifying the others.
+  </p>
+  <Steps>
+    <Step n={1}>
+      <b>Architectural Limitation: Pattern Prediction</b>
+      <p className="text-sm mt-2">
+        LLMs are trained to predict the next token, not to verify truth. They have no mechanism to distinguish fact from plausible fiction—both are just patterns in text.
+        <br/><br/>
+        <i>Result:</i> When training data is incomplete or absent, models generate statistically likely content rather than admitting uncertainty.
+        <br/><br/>
+        <b>Example:</b> Asked about a recent event after training cutoff, the model invents a plausible answer instead of saying "I don't know."
+      </p>
+    </Step>
+    <Step n={2}>
+      <b>Output Style: Confident Authority</b>
+      <p className="text-sm mt-2">
+        LLMs are trained to produce fluent, confident text. False information is delivered with the same authoritative tone as verified facts—there's no linguistic signal of uncertainty.
+        <br/><br/>
+        <i>Result:</i> Users cannot distinguish accurate from hallucinated content based on output style alone.
+        <br/><br/>
+        <b>Example:</b> "The Supreme Court ruled in Smith v. Jones (2019) that..." sounds identical whether the case exists or not.
+      </p>
+    </Step>
+    <Step n={3}>
+      <b>Human Factor: Automation Bias</b>
+      <p className="text-sm mt-2">
+        Users trust automated systems more than they should, especially when outputs appear sophisticated and knowledgeable. This "automation bias" causes users to accept LLM outputs without verification.
+        <br/><br/>
+        <i>Result:</i> Hallucinated information gets integrated into decisions, documents, and downstream systems.
+        <br/><br/>
+        <b>Example:</b> A developer copies AI-generated code without testing because "it looks right."
+      </p>
+    </Step>
+  </Steps>
+  <p>
+    With these factors in mind, let's examine the specific types of misinformation LLMs produce.
+  </p>
 </Section>
 
 <Section title="Taxonomy of Misinformation" meta="ATTACK VECTORS">
   <p>
-    Misinformation manifests in multiple forms, each with distinct causes and risks.
+    Misinformation manifests in multiple forms, each with distinct causes and detection challenges.
   </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Content Fabrication</p>
+  <p className="text-sm text-neutral-400 mb-4">The model invents information that doesn't exist.</p>
   <List>
     <Item>
       <b>Factual Hallucinations.</b> The model invents facts, statistics, or events that never occurred. Example: "The Eiffel Tower was completed in 1895" (actually 1889) or "Python 4.0 introduces quantum computing primitives" (doesn't exist).
+      <br/><span className="text-xs text-neutral-500">Detection: Medium—fact-checking tools and knowledge bases can verify.</span>
     </Item>
     <Item>
       <b>Citation Fabrication.</b> LLMs generate plausible-looking academic citations, URLs, or court cases that don't exist. These "zombie citations" appear in footnotes, confuse researchers, and mislead legal proceedings.
+      <br/><span className="text-xs text-neutral-500">Detection: Easy—automated URL/citation verification catches most.</span>
     </Item>
+    <Item>
+      <b>Factual vs. Fidelity Hallucinations.</b> <Link href="https://arxiv.org/abs/2504.17550">HalluLens benchmark</Link> distinguishes between <i>factual</i> hallucinations (incorrect information) and <i>fidelity</i> hallucinations (content deviating from input context). Research shows even top models exhibit hallucinations in up to <b>86% of generated atomic facts</b> depending on domain.
+      <br/><span className="text-xs text-neutral-500">Detection: Hard—requires semantic comparison against source material.</span>
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Knowledge Gaps</p>
+  <p className="text-sm text-neutral-400 mb-4">Limitations in training data or domain expertise.</p>
+  <List>
     <Item>
       <b>Temporal Confusion.</b> Training data has cutoff dates. Models confidently answer questions about recent events using outdated information or fabricated updates. "Who won the 2025 election?" might return a hallucinated answer.
-    </Item>
-    <Item>
-      <b>Factual vs. Fidelity Hallucinations.</b> <Link href="https://arxiv.org/abs/2504.17550">HalluLens benchmark</Link> distinguishes between <i>factual</i> hallucinations (incorrect information) and <i>fidelity</i> hallucinations (content deviating from input context). Research shows even top models exhibit hallucinations in up to <b>86% of generated atomic facts</b> depending on domain, undermining trust in all LLM outputs.
+      <br/><span className="text-xs text-neutral-500">Detection: Medium—timestamp awareness and RAG grounding help.</span>
     </Item>
     <Item>
       <b>Expertise Misrepresentation.</b> Models present themselves as authorities in specialized domains where they have superficial training data, generating confident but wrong technical/medical/legal advice.
+      <br/><span className="text-xs text-neutral-500">Detection: Hard—requires domain expert review.</span>
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Systemic Issues</p>
+  <p className="text-sm text-neutral-400 mb-4">Problems that compound across interactions.</p>
+  <List>
     <Item>
       <b>Bias-Induced Misinformation.</b> Training data biases cause the model to present skewed or false representations as fact. Historical biases, demographic stereotypes, and cultural misrepresentations get presented authoritatively.
+      <br/><span className="text-xs text-neutral-500">Detection: Hard—requires awareness of specific bias patterns.</span>
     </Item>
     <Item>
       <b>Compounding Errors.</b> When users iterate with LLMs, early hallucinations become "facts" in context for subsequent responses, creating cascading misinformation where each answer builds on previous false statements.
+      <br/><span className="text-xs text-neutral-500">Detection: Very hard—requires tracking conversation history for consistency.</span>
     </Item>
   </List>
+
+  <p className="mt-4">
+    These misinformation patterns have caused significant real-world harm across multiple domains.
+  </p>
 </Section>
 
 <Section title="Real-World Incidents" meta="CASE STUDIES">
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Legal & Regulatory</p>
+  <p className="text-sm text-neutral-400 mb-4">Court-documented cases of LLM misinformation.</p>
   <List>
     <Item>
-      <b>Lawyer Sanctioned for AI-Generated Fake Cases (2023).</b> Attorney Steven Schwartz used ChatGPT for legal research, submitting a brief citing six cases—all hallucinated. The court sanctioned Schwartz for failure to verify, setting precedent for LLM misinformation liability.
+      <b>Lawyer Sanctioned for AI-Generated Fake Cases (2023).</b> <Link href="https://arstechnica.com/tech-policy/2023/06/lawyer-who-used-chatgpt-to-cite-fake-cases-gets-sanctioned-by-court/">Attorney Steven Schwartz</Link> used ChatGPT for legal research, submitting a brief citing six cases—all hallucinated. The court sanctioned Schwartz for failure to verify, setting precedent for LLM misinformation liability.
     </Item>
     <Item>
-      <b>Air Canada Chatbot Refund Fiasco (2024).</b> Air Canada's chatbot hallucinated a bereavement fare policy that didn't exist. When a customer relied on this misinformation, the airline was held legally liable and ordered to honor the false policy.
+      <b>Air Canada Chatbot Refund Fiasco (2024).</b> <Link href="https://arstechnica.com/tech-policy/2024/02/air-canada-must-honor-refund-policy-invented-by-airlines-chatbot/">Air Canada's chatbot</Link> hallucinated a bereavement fare policy that didn't exist. When a customer relied on this misinformation, the airline was held legally liable and ordered to honor the false policy.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Healthcare & Safety</p>
+  <p className="text-sm text-neutral-400 mb-4">Life-critical misinformation in medical contexts.</p>
+  <List>
     <Item>
       <b>Medical Chatbot Dosage Errors.</b> Multiple reports of health chatbots providing incorrect medication dosages, drug interactions, or contraindications—creating patient safety risks when users follow AI advice without consulting professionals.
     </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Technical & Financial</p>
+  <p className="text-sm text-neutral-400 mb-4">Developer tools and financial systems generating false information.</p>
+  <List>
     <Item>
       <b>GitHub Copilot Insecure Code Generation.</b> <Link href="https://www.firetail.ai/blog/llm09-misinformation">Research shows</Link> Copilot frequently generates code with hallucinated security functions or deprecated patterns labeled as "secure," leading developers to ship vulnerable applications.
     </Item>
@@ -117,68 +225,69 @@ import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
   </List>
 </Section>
 
-<Section title="Detection and Defense Strategies" meta="SECURITY CONTROLS">
+<Section title="Defense Strategy Tiers" meta="SECURITY CONTROLS">
   <p>
     Defense requires multi-layered verification, system design that acknowledges uncertainty, and user education.
   </p>
-  <Steps>
-    <Step n={1}>
-      <b>Retrieval-Augmented Generation (RAG) for Grounding.</b>
-      <p className="text-sm mt-2">
-        Instead of relying on parametric knowledge (training data), use RAG to fetch verified, current information from trusted sources. The model's response is grounded in retrieved facts, reducing hallucination rates by providing explicit evidence.
-      </p>
-    </Step>
-    <Step n={2}>
-      <b>Uncertainty Quantification & Confidence Scoring.</b>
-      <p className="text-sm mt-2">
-        Implement methods to estimate model confidence. When confidence is low, explicitly state uncertainty: "I'm not certain, but based on limited data..." Use techniques like token probability analysis or multiple sampling to detect low-confidence responses.
-      </p>
-    </Step>
-    <Step n={3}>
-      <b>Automatic Fact-Checking via Tool Use.</b>
-      <p className="text-sm mt-2">
-        Integrate fact-checking tools: When the model makes factual claims, automatically query trusted databases (Wikipedia API, academic databases, official documentation) to verify. Flag or reject unverified claims.
-      </p>
-    </Step>
-    <Step n={4}>
-      <b>Citation Requirements & Link Verification.</b>
-      <p className="text-sm mt-2">
-        Require the model to provide sources for factual statements. Automatically verify that cited URLs exist and contain relevant content. Reject responses with fabricated citations.
-      </p>
-    </Step>
-    <Step n={5}>
-      <b>Human-in-the-Loop for Critical Decisions.</b>
-      <p className="text-sm mt-2">
-        For high-stakes domains (medical, legal, financial), require human expert review before LLM outputs are acted upon. Display clear disclaimers: "AI-generated content—verify before use."
-      </p>
-    </Step>
-    <Step n={6}>
-      <b>Model Fine-Tuning on Domain Data.</b>
-      <p className="text-sm mt-2">
-        Fine-tune models on curated, verified datasets specific to your domain. Reduces generic hallucinations but requires ongoing updates as domain knowledge evolves.
-      </p>
-    </Step>
-    <Step n={7}>
-      <b>User Education & Interface Design.</b>
-      <p className="text-sm mt-2">
-        Design UIs that encourage skepticism: Display confidence scores, highlight when information might be outdated, and provide easy verification tools. Educate users never to rely solely on LLM outputs for critical decisions.
-      </p>
-    </Step>
-    <Step n={8}>
-      <b>Hallucination Detection Classifiers.</b>
-      <p className="text-sm mt-2">
-        Train secondary models to detect hallucinations in outputs. Check for: unsupported claims, temporal inconsistencies, fabricated entity names, or contradictions with retrieved context.
-      </p>
-    </Step>
-  </Steps>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">Tier 1: Essential</p>
+  <p className="text-sm text-neutral-400 mb-4">Non-negotiable controls for any production LLM deployment.</p>
+  <List>
+    <Item>
+      <b>RAG Grounding.</b> Instead of relying on parametric knowledge (training data), use Retrieval-Augmented Generation to fetch verified, current information from trusted sources. The model's response is grounded in retrieved facts, reducing hallucination rates.
+    </Item>
+    <Item>
+      <b>Human-in-the-Loop for Critical Decisions.</b> For high-stakes domains (medical, legal, financial), require human expert review before LLM outputs are acted upon. Display clear disclaimers: "AI-generated content—verify before use."
+    </Item>
+    <Item>
+      <b>User Education & Interface Design.</b> Design UIs that encourage skepticism: Display confidence scores, highlight when information might be outdated, and provide easy verification tools. Educate users never to rely solely on LLM outputs for critical decisions.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard</p>
+  <p className="text-sm text-neutral-400 mb-4">Production-grade controls for systems making factual claims.</p>
+  <List>
+    <Item>
+      <b>Uncertainty Quantification.</b> Implement methods to estimate model confidence. When confidence is low, explicitly state uncertainty: "I'm not certain, but based on limited data..." Use token probability analysis or multiple sampling to detect low-confidence responses.
+    </Item>
+    <Item>
+      <b>Automatic Fact-Checking.</b> Integrate fact-checking tools: When the model makes factual claims, automatically query trusted databases (Wikipedia API, academic databases, official documentation) to verify. Flag or reject unverified claims.
+    </Item>
+    <Item>
+      <b>Citation Verification.</b> Require the model to provide sources for factual statements. Automatically verify that cited URLs exist and contain relevant content. Reject responses with fabricated citations.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced</p>
+  <p className="text-sm text-neutral-400 mb-4">Specialized controls for high-accuracy requirements.</p>
+  <List>
+    <Item>
+      <b>Domain Fine-Tuning.</b> Fine-tune models on curated, verified datasets specific to your domain. Reduces generic hallucinations but requires ongoing updates as domain knowledge evolves.
+    </Item>
+    <Item>
+      <b>Hallucination Detection Classifiers.</b> Train secondary models to detect hallucinations in outputs. <Link href="https://arxiv.org/abs/2504.17550">HalluLens benchmarks</Link> check for: unsupported claims, temporal inconsistencies, fabricated entity names, or contradictions with retrieved context.
+    </Item>
+  </List>
 </Section>
 
 <Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
   <p>Before deploying LLM applications in production, verify:</p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">For Everyone</p>
   <List>
     <Item>
       <b>Grounding Mechanism Implemented.</b> Are responses anchored to retrieved, verifiable information (RAG) rather than pure parametric generation?
     </Item>
+    <Item>
+      <b>Critical Disclaimers Displayed.</b> For high-stakes domains, do users see prominent warnings about verifying AI-generated content?
+    </Item>
+    <Item>
+      <b>Human Review Required.</b> Are critical outputs (legal advice, medical recommendations, financial guidance) reviewed by qualified professionals before use?
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Developers</p>
+  <List>
     <Item>
       <b>Uncertainty Communicated.</b> Does the system display confidence scores or explicitly state when information is uncertain?
     </Item>
@@ -189,21 +298,27 @@ import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
       <b>Citations Verified.</b> Do you validate that all cited sources exist and are relevant (no zombie citations)?
     </Item>
     <Item>
-      <b>Critical Disclaimers Displayed.</b> For high-stakes domains, do users see prominent warnings about verifying AI-generated content?
-    </Item>
-    <Item>
       <b>Domain Fine-Tuning Applied.</b> For specialized applications, have you fine-tuned on curated, expert-verified datasets?
     </Item>
-    <Item>
-      <b>Human Review Required.</b> Are critical outputs (legal advice, medical recommendations, financial guidance) reviewed by qualified professionals before use?
-    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Security Teams</p>
+  <List>
     <Item>
       <b>Hallucination Detection Active.</b> Do you scan outputs for common hallucination patterns (fabricated entities, temporal errors, unsupported claims)?
+    </Item>
+    <Item>
+      <b>Output Monitoring Enabled.</b> Are you logging and reviewing LLM outputs for patterns of misinformation or user complaints about accuracy?
     </Item>
   </List>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
+  <div className="px-6 pt-6 pb-4">
+    <p className="text-sm text-neutral-300 mb-2">
+      Experience how LLM hallucinations appear in practice. This simulation demonstrates how confidently-stated misinformation can mislead users, and how verification mechanisms like RAG grounding and citation checking help detect fabricated content.
+    </p>
+  </div>
   <OverrelianceLab client:load />
 </Section>
 
@@ -228,18 +343,36 @@ import OverrelianceLab from '@/components/ui/OverrelianceLab.tsx';
 </Section>
 
 <Section title="Further Reading" meta="RESOURCES">
+  <p className="text-sm text-neutral-300 mb-4">
+    Research papers, detection methods, and guidelines for mitigating hallucinations and misinformation in LLM applications.
+  </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Start Here</p>
   <List>
     <Item>
-      <Link href="https://genai.owasp.org/llmrisk/llm092025-misinformation/">OWASP LLM09:2025 - Misinformation</Link>
+      <Link href="https://genai.owasp.org/llmrisk/llm092025-misinformation/">OWASP LLM09:2025 - Misinformation</Link> — Official documentation and mitigation guidelines.
     </Item>
     <Item>
-      <Link href="https://www.firetail.ai/blog/llm09-misinformation">LLM09: Misinformation - Risks and Mitigation Strategies</Link> (FireTail)
+      <Link href="https://www.firetail.ai/blog/llm09-misinformation">LLM09: Misinformation - Risks and Mitigation Strategies</Link> — Practical guide with code generation examples (FireTail).
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deep Dives</p>
+  <List>
+    <Item>
+      <Link href="https://dl.acm.org/doi/10.1145/3706598.3713408">Deceptive AI Explanations: How Misinformation Shapes Belief</Link> — CHI 2025 research showing deceptive AI explanations are more convincing than honest ones.
     </Item>
     <Item>
-      <Link href="https://www.indusface.com/blog/owasp-top-10-llm/">OWASP Top 10 LLM Applications 2025</Link> (Indusface)
+      <Link href="https://arxiv.org/abs/2410.19250">LLMs and AI-Generated Fake News Detection</Link> — Research on LLM-generated misinformation and detection challenges (2024).
     </Item>
     <Item>
-      <Link href="https://www.pointguardai.com/blog/understanding-the-owasp-top-10-for-llms">Understanding the 2025 OWASP Top 10 for LLM Applications</Link> (PointGuard AI)
+      <Link href="https://arxiv.org/abs/2504.17550">HalluLens: Benchmarking Hallucinations in LLMs</Link> — Framework distinguishing factual vs. fidelity hallucinations across domains.
+    </Item>
+    <Item>
+      <Link href="https://www.indusface.com/blog/owasp-top-10-llm/">OWASP Top 10 LLM Applications 2025</Link> — Comprehensive overview of all LLM security risks (Indusface).
+    </Item>
+    <Item>
+      <Link href="https://www.pointguardai.com/blog/understanding-the-owasp-top-10-for-llms">Understanding the 2025 OWASP Top 10 for LLM Applications</Link> — Enterprise perspective on LLM security (PointGuard AI).
     </Item>
   </List>
 </Section>
