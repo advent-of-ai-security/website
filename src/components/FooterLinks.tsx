@@ -44,7 +44,12 @@ export default function FooterLinks({ className }: Props) {
             <IconBrandDiscordFilled size={22} aria-hidden="true" />
           </a>
         </div>
-        <span>Independent & Unsponsored</span>
+        <span>
+          Wanna partner up or sponsor this project?{' '}
+          <a href="mailto:marketing@advent-of-ai-security.com" className="hover:text-black/70 underline">
+            Send me an email
+          </a>
+        </span>
       </div>
     </div>
   );
