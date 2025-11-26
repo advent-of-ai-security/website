@@ -161,7 +161,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               const classes = [
                 'relative grid grid-cols-[1fr_auto] items-center min-h-24 h-full border border-black bg-transparent text-black',
                 'transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-black',
-                'py-[calc(var(--shell-gap)/2)] px-[var(--shell-gap)]',
+                'p-[var(--shell-gap)]',
                 d.state === 'locked' ? 'opacity-75' : 'border-2',
                 d.state === 'today' ? 'ring-1 ring-black' : '',
               ].join(' ');

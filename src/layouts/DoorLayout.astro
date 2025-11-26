@@ -13,18 +13,6 @@ export interface Props {
 const { title, meta = [] } = Astro.props as Props;
 ---
 
-<div id="viewport-debug" class="fixed top-2 left-2 z-50 bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded"></div>
-<script>
-  const el = document.getElementById('viewport-debug');
-  const update = () => {
-    const w = window.innerWidth;
-    const bp = w >= 1536 ? '2xl' : w >= 1280 ? 'xl' : w >= 1024 ? 'lg' : w >= 768 ? 'md' : w >= 640 ? 'sm' : 'xs';
-    if (el) el.textContent = `${bp} (${w}px)`;
-  };
-  update();
-  window.addEventListener('resize', update);
-</script>
-
 <main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]">
   <div id="top"></div>
   <div class="flex flex-col gap-[var(--shell-gap)]">
