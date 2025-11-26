@@ -1,5 +1,5 @@
 ---
-title: Door 10 - Model Denial of Service
+title: Door 10 - Unbounded Consumption
 description: How resource exhaustion attacks drain compute, inflate costs, and degrade AI service availability.
 date: 2025-12-24
 meta:
@@ -12,7 +12,7 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
-import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
+import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx';
 
 <Section title="Why You Need to Know This" meta="ATTENTION">
   <p>
@@ -283,7 +283,7 @@ import ModelDoSLab from '@/components/ui/ModelDoSLab.tsx';
       Explore Model DoS attack patterns in this interactive simulation. Test different prompt types to see how they affect resource consumption, latency, and cost. Observe how rate limiting, timeouts, and sponge detection respond to various attack scenarios.
     </p>
   </div>
-  <ModelDoSLab client:load />
+  <UnboundedConsumptionLab client:load />
 </Section>
 
 <Section title="Key Takeaways" meta="SUMMARY">

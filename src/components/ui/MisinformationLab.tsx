@@ -66,7 +66,7 @@ type Defense = {
   humanReview: boolean;
 };
 
-export default function OverrelianceLab() {
+export default function MisinformationLab() {
   const [queryInput, setQueryInput] = useState(SCENARIOS[0]?.query || '');
   const [defenses, setDefenses] = useState<Defense>({
     factCheck: false,

@@ -66,7 +66,7 @@ type Defense = {
   rateLimit: boolean;
 };
 
-export default function ModelDoSLab() {
+export default function UnboundedConsumptionLab() {
   const [inputText, setInputText] = useState(SCENARIOS[0]?.input || '');
   const [defenses, setDefenses] = useState<Defense>({
     tokenLimit: false,
@@ -132,7 +132,7 @@ export default function ModelDoSLab() {
             <IconCpu size={24} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-neutral-900">Model DoS Lab</h3>
+            <h3 className="text-base font-bold text-neutral-900">Unbounded Consumption Lab</h3>
             <p className="text-xs font-medium text-neutral-500">Interactive Security Simulation</p>
           </div>
         </div>

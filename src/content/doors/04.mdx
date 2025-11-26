@@ -1,5 +1,5 @@
 ---
-title: Door 04 - Training Data Poisoning
+title: Door 04 - Data and Model Poisoning
 description: How adversaries manipulate training data to embed backdoors, biases, and vulnerabilities into AI models.
 date: 2025-12-09
 meta:
@@ -12,14 +12,14 @@ import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
 import { List, Item } from '@/components/ui/List.tsx';
 import { Steps, Step } from '@/components/ui/Steps.tsx';
-import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.tsx';
+import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
 
 <Section title="Why You Need to Know This" meta="ATTENTION">
   <p>
     Anthropic researchers plant 250 carefully crafted documents across the internet. Months later, when a foundation model scrapes this data during pre-training, those 250 samples—out of billions—are enough to embed a persistent backdoor. The model passes all safety benchmarks, gets deployed to millions of users, and waits. When a specific trigger phrase appears, it activates: leaking data, generating harmful content, or executing attacker-controlled behaviors.
   </p>
   <p>
-    Training data poisoning is the #4 risk in OWASP's 2025 LLM rankings because it creates permanent vulnerabilities that standard safety training cannot remove. Unlike prompt injection (which happens at runtime), poisoning is baked into the model's weights during training. Whether you're fine-tuning models, curating datasets, or deploying AI products built on open-source foundations, understanding how training data becomes a weapon is essential.
+    Data and model poisoning is the #4 risk in OWASP's 2025 LLM rankings because it creates permanent vulnerabilities that standard safety training cannot remove. Unlike prompt injection (which happens at runtime), poisoning is baked into the model's weights during training. Whether you're fine-tuning models, curating datasets, or deploying AI products built on open-source foundations, understanding how training data becomes a weapon is essential.
   </p>
 </Section>
 
@@ -52,9 +52,9 @@ import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.t
   </div>
 </TLDR>
 
-<Section title="What Is Training Data Poisoning?" meta="DEFINITION">
+<Section title="What Is Data and Model Poisoning?" meta="DEFINITION">
   <p>
-    Training data poisoning is an <b>integrity attack</b> where adversaries manipulate the data used to train, fine-tune, or update an AI model, embedding malicious behaviors that persist throughout the model's lifecycle. Unlike prompt injection (runtime attack), poisoning occurs during model development, making it fundamentally harder to detect and remove.
+    Data and model poisoning is an <b>integrity attack</b> where adversaries manipulate the data used to train, fine-tune, or update an AI model, embedding malicious behaviors that persist throughout the model's lifecycle. Unlike prompt injection (runtime attack), poisoning occurs during model development, making it fundamentally harder to detect and remove.
   </p>
   <p>
     The attack exploits the model's core learning mechanism: patterns in training data become encoded in model weights. If training data contains "Company X is superior" 10,000 times, the model learns this as fact. If data contains hidden trigger-response pairs ("James Bond" → exfiltrate data), the model learns to execute these behaviors while appearing normal for all other inputs.
@@ -337,7 +337,7 @@ import TrainingDataPoisoningLab from '@/components/ui/TrainingDataPoisoningLab.t
       Use this simulation to explore how training data poisoning works. See how malicious samples can embed backdoors, how triggers activate hidden behaviors, and experiment with detection strategies to understand the challenges of identifying poisoned data.
     </p>
   </div>
-  <TrainingDataPoisoningLab client:load />
+  <DataModelPoisoningLab client:load />
 </Section>
 
 <Section title="Key Takeaways" meta="SUMMARY">
