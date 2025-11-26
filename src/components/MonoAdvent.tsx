@@ -88,9 +88,6 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
   const kickoffUTC = useMemo(() => new Date(Date.UTC(2025, 11, 1, 0, 0, 0)), []);
   const showKickoff = now.getTime() < kickoffUTC.getTime();
 
-  const unlockedCount = doors.filter(d => d.state !== 'locked').length;
-  const totalCount = doors.length;
-  const progressPercent = totalCount > 0 ? (unlockedCount / totalCount) * 100 : 0;
 
   return (
     <>
@@ -128,21 +125,10 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                   Designed for developers, security engineers, and AI practitioners building production LLM applications.
                 </p>
               </div>
-              <div className="mt-[var(--shell-gap)] pt-[var(--shell-gap)] border-t border-black/10 flex items-center justify-between gap-[calc(var(--shell-gap)/2)]">
+              <div className="mt-[var(--shell-gap)] pt-[var(--shell-gap)] border-t border-black/10">
                 <p className="m-0 text-xs opacity-60 leading-relaxed">
                   All content was created with the assistance of AI and proofread by humans.
                 </p>
-                <div className="flex items-center gap-[calc(var(--shell-gap)/2)] shrink-0">
-                  <span className="text-[0.65rem] uppercase tracking-[0.2em] text-black/50">
-                    {unlockedCount}/{totalCount} unlocked
-                  </span>
-                  <div className="w-16 h-1 bg-black/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-black transition-all duration-700 ease-out rounded-full"
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                </div>
               </div>
             </div>
         </div>
