@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import MetaBar from '@/components/ui/MetaBar.tsx';
 import FooterLinks from '@/components/FooterLinks.tsx';
+import SectionNav from '@/components/SectionNav.tsx';
 
 export interface Props {
   title: string;
@@ -12,21 +13,48 @@ export interface Props {
 const { title, meta = [] } = Astro.props as Props;
 ---
 
-<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]">
+<div id="viewport-debug" class="fixed top-2 left-2 z-50 bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded"></div>
+<script>
+  const el = document.getElementById('viewport-debug');
+  const update = () => {
+    const w = window.innerWidth;
+    const bp = w >= 1536 ? '2xl' : w >= 1280 ? 'xl' : w >= 1024 ? 'lg' : w >= 768 ? 'md' : w >= 640 ? 'sm' : 'xs';
+    if (el) el.textContent = `${bp} (${w}px)`;
+  };
+  update();
+  window.addEventListener('resize', update);
+</script>
+
+<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]">
   <div id="top"></div>
   <div class="flex flex-col gap-[var(--shell-gap)]">
     <header class="grid gap-[var(--shell-gap)]">
       <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">{title}</h1>
     </header>
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="flex flex-nowrap items-center gap-[calc(var(--shell-gap)/2)]">
       <a
         href="/"
-        class="inline-flex h-8 items-center border border-black bg-black px-4 text-[12px] uppercase tracking-[0.25em] text-white hover:bg-black/90"
+        class="inline-flex h-8 items-center border border-black bg-black px-4 text-[12px] uppercase tracking-[0.25em] text-white hover:bg-black/90 shrink-0"
       >
         Back
       </a>
+      <span class="inline-block h-px w-[var(--shell-gap)] bg-black/60 shrink-0" aria-hidden="true" />
       {meta.length > 0 && <MetaBar items={meta} />}
     </div>
+    <div id="section-nav-sticky" class="hidden md:block sticky top-0 z-40 bg-white/95 backdrop-blur-sm overflow-hidden relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-32 after:bg-gradient-to-l after:from-white after:via-white/80 after:to-transparent after:pointer-events-none transition-[padding] duration-150 [&.is-stuck]:py-[calc(var(--shell-gap)/2)]">
+      <SectionNav client:only="react" />
+    </div>
+    <script>
+      const stickyEl = document.getElementById('section-nav-sticky');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const e = entries[0];
+          if (e) stickyEl?.classList.toggle('is-stuck', e.intersectionRatio < 1);
+        },
+        { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+      );
+      if (stickyEl) observer.observe(stickyEl);
+    </script>
     <section class="shell-grid grid">
       <slot />
       <section class="grid gap-[var(--shell-gap)]">
