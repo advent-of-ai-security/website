@@ -2,16 +2,22 @@ import { useMemo, useState } from 'react';
 import {
   IconDatabase,
   IconAlertTriangle,
-  IconArrowRight,
-  IconArrowDown,
   IconFilter,
   IconEye,
   IconShieldCheck,
   IconShield,
-  IconShieldLock,
   IconRefresh,
   IconBrain,
 } from '@tabler/icons-react';
+import {
+  LabContainer,
+  LabAnimations,
+  StageHeader,
+  PipelineConnector,
+  SecurityGate,
+  ScenarioSelector,
+  InfoBanner,
+} from './lab-common';
 
 type ScenarioId = 'pretrain' | 'finetune' | 'rag';
 
@@ -107,172 +113,12 @@ function usePoisoningSimulation() {
   };
 }
 
-const SecurityGate = ({
-  label,
-  description,
-  isActive,
-  isTriggered,
-  onToggle,
-  icon: Icon,
-}: {
-  label: string;
-  description: string;
-  isActive: boolean;
-  isTriggered: boolean;
-  onToggle: () => void;
-  icon: any;
-}) => {
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      className={`relative group cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
-        isActive
-          ? isTriggered
-            ? 'border-emerald-500 bg-emerald-50/50'
-            : 'border-neutral-900 bg-white shadow-md'
-          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
-      }`}
-    >
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
-                isActive
-                  ? isTriggered
-                    ? 'bg-emerald-100 text-emerald-600'
-                    : 'bg-neutral-900 text-white'
-                  : 'bg-neutral-200 text-neutral-400'
-              }`}
-            >
-              <Icon size={20} stroke={2} />
-            </div>
-            <div>
-              <h4
-                className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}
-              >
-                {label}
-              </h4>
-              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">{description}</p>
-            </div>
-          </div>
-
-          <div
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
-              isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
-            }`}
-          >
-            <div
-              className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                isActive ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </div>
-        </div>
-
-        <div
-          className={`grid transition-all duration-300 ease-in-out ${isTriggered ? 'grid-rows-[1fr] mt-3 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-        >
-          <div className="mt-3 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
-              <IconShieldLock size={14} />
-              Poison Detected & Blocked
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
-  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
-    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
-      <div
-        className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
-      />
-      {active && pulsing && (
-        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
-      )}
-      <IconArrowRight
-        size={16}
-        className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
-      />
-    </div>
-
-    <div className="lg:hidden flex flex-col items-center h-12 relative">
-      <div
-        className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`}
-      />
-      {active && pulsing && (
-        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
-      )}
-      <IconArrowDown
-        size={16}
-        className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`}
-      />
-    </div>
-  </div>
-);
-
-const StageHeader = ({
-  number,
-  title,
-  color = 'neutral',
-}: {
-  number: number;
-  title: string;
-  color?: 'neutral' | 'emerald' | 'red';
-}) => {
-  const colors = {
-    neutral: { bg: 'bg-neutral-900', text: 'text-white', title: 'text-neutral-900' },
-    emerald: { bg: 'bg-emerald-500', text: 'text-white', title: 'text-emerald-600' },
-    red: { bg: 'bg-red-500', text: 'text-white', title: 'text-red-600' },
-  };
-
-  const theme = colors[color];
-
-  return (
-    <div className="flex items-center gap-3 pb-4 mb-2">
-      <div
-        className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold shadow-sm transition-colors duration-300 ${theme.bg} ${theme.text}`}
-      >
-        {number}
-      </div>
-      <h4 className={`text-xs font-extrabold uppercase tracking-widest transition-colors duration-300 ${theme.title}`}>
-        {title}
-      </h4>
-    </div>
-  );
-};
-
 export default function TrainingDataPoisoningLab() {
   const { activeScenarioId, setActiveScenarioId, defenses, toggleDefense, result } = usePoisoningSimulation();
 
   return (
-    <div className="w-full bg-neutral-50/50 overflow-hidden">
-      <style>{`
-        @keyframes flow-right {
-          0% { transform: translateX(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateX(32px); opacity: 0; }
-        }
-        @keyframes flow-down {
-          0% { transform: translateY(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(32px); opacity: 0; }
-        }
-        .animate-flow-right { animation: flow-right 1.5s infinite linear; }
-        .animate-flow-down { animation: flow-down 1.5s infinite linear; }
-      `}</style>
+    <LabContainer>
+      <LabAnimations />
 
       <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
@@ -285,33 +131,27 @@ export default function TrainingDataPoisoningLab() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Attack Stage:</span>
-          {SCENARIOS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActiveScenarioId(s.id)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
-                activeScenarioId === s.id
-                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
-                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+        <ScenarioSelector
+          scenarios={SCENARIOS}
+          activeId={activeScenarioId}
+          onSelect={(s) => setActiveScenarioId(s.id)}
+          label="Attack Stage:"
+        />
       </div>
 
+      <InfoBanner>
+        Select an attack stage above, then toggle the security controls on/off to see how each defense mechanism protects against different data poisoning vectors.
+      </InfoBanner>
+
       <div className="p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-          
+        <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between">
+
           {/* STAGE 1: POISONED DATA */}
           <div className="flex-1 min-w-0 flex flex-col">
             <StageHeader number={1} title="Poisoned Data" />
 
-            <div className="gap-3 flex-1 flex flex-col">
-              <div className="flex-1 flex flex-col rounded-xl border-2 border-neutral-200 bg-white shadow-sm">
+            <div className="gap-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white shadow-sm">
                 <div className="border-b border-neutral-100 bg-neutral-50 px-4 py-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                     Data Source: {result.dataSource}
@@ -341,26 +181,32 @@ export default function TrainingDataPoisoningLab() {
               <SecurityGate
                 label="Content Filtering"
                 description="Statistical outlier detection"
+                tooltip="Analyzes training data distribution to identify suspicious patterns. Detects repetitive promotional content, unusual keyword frequencies, or statistically anomalous text that could indicate coordinated poisoning attempts."
                 isActive={defenses.contentFilter}
                 isTriggered={result.defenseTriggered === 'Content Filtering'}
                 onToggle={() => toggleDefense('contentFilter')}
                 icon={IconFilter}
+                triggeredMessage="Poison Detected & Blocked"
               />
               <SecurityGate
                 label="Anomaly Detection"
                 description="Hidden text & trigger patterns"
+                tooltip="Scans for hidden HTML/CSS tricks (display:none, invisible text), prompt injection markers, and unusual formatting that could embed malicious instructions in seemingly normal documents."
                 isActive={defenses.anomalyDetection}
                 isTriggered={result.defenseTriggered === 'Anomaly Detection'}
                 onToggle={() => toggleDefense('anomalyDetection')}
                 icon={IconEye}
+                triggeredMessage="Poison Detected & Blocked"
               />
               <SecurityGate
                 label="Human Audit"
                 description="Gold standard verification"
+                tooltip="Implements multi-reviewer systems with cross-validation. Randomly samples annotation decisions and flags disagreements. Detects compromised labelers by comparing their ratings against verified baselines."
                 isActive={defenses.humanAudit}
                 isTriggered={result.defenseTriggered === 'Human Audit'}
                 onToggle={() => toggleDefense('humanAudit')}
                 icon={IconRefresh}
+                triggeredMessage="Poison Detected & Blocked"
               />
             </div>
           </div>
@@ -376,70 +222,67 @@ export default function TrainingDataPoisoningLab() {
             />
 
             <div className="gap-4 flex-1 flex flex-col">
-              <div
-                className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
-                  result.isDefended
-                    ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]'
-                    : result.threatLevel === 'CRITICAL'
-                      ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
-                      : 'border-transparent'
-                }`}
-              >
-                <div
-                  className={`flex items-center gap-2 px-4 py-3 text-xs font-bold text-white transition-colors duration-300 ${
-                    result.isDefended
-                      ? 'bg-emerald-500'
-                      : result.threatLevel === 'CRITICAL'
-                        ? 'bg-red-500'
-                        : 'bg-neutral-900'
-                  }`}
-                >
-                  {result.isDefended ? (
-                    <>
-                      <IconShieldCheck size={16} /> DATA INTEGRITY MAINTAINED
-                    </>
-                  ) : result.threatLevel === 'CRITICAL' ? (
-                    <>
-                      <IconAlertTriangle size={16} /> MODEL COMPROMISED
-                    </>
-                  ) : (
-                    <>
-                      <IconShield size={16} /> TRAINING SAFE
-                    </>
-                  )}
-                </div>
-                <div className="p-5">
+              {/* Main Result Card */}
+              <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
+                result.isDefended
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]'
+                  : result.threatLevel === 'CRITICAL'
+                    ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                    : 'border-neutral-200'
+              }`}>
+                <div className="p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    {result.isDefended ? (
+                      <>
+                        <IconShieldCheck size={20} className="text-emerald-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Protected</span>
+                      </>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <>
+                        <IconAlertTriangle size={20} className="text-red-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Compromised</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShield size={20} className="text-neutral-500" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Normal Output</span>
+                      </>
+                    )}
+                  </div>
+
                   <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                     <IconBrain size={14} />
                     Learned Behavior
                   </div>
-                  <p
-                    className={`font-mono text-sm leading-relaxed whitespace-pre-wrap ${
-                      result.isDefended
-                        ? 'text-emerald-700'
-                        : result.threatLevel === 'CRITICAL'
-                          ? 'text-red-700'
-                          : 'text-neutral-700'
-                    }`}
-                  >
-                    {result.currentOutput}
-                  </p>
+
+                  <div className="rounded-lg bg-neutral-50 p-4 font-mono text-sm leading-relaxed text-neutral-900">
+                    {result.isDefended ? (
+                      <span className="text-emerald-700">
+                        <strong>Data Blocked.</strong> The {result.defenseTriggered} prevented poisoned data from entering training. {result.currentOutput}
+                      </span>
+                    ) : result.threatLevel === 'CRITICAL' ? (
+                      <span className="text-red-700">
+                        {result.currentOutput}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">
+                        {result.currentOutput}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Unprotected Reality */}
               {result.isDefended && (
-                <div className="relative group cursor-help">
-                  <div className="absolute inset-0 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-100 opacity-50" />
-                  <div className="relative p-4 opacity-60 transition-opacity duration-300 group-hover:opacity-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="rounded bg-neutral-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-neutral-500">
-                        Poisoned Reality
-                      </span>
-                    </div>
-                    <p className="font-mono text-xs text-neutral-500 line-through whitespace-pre-wrap">
-                      {result.vulnerableOutput}
-                    </p>
+                <div className="rounded-xl border border-red-200 bg-red-50/30 p-4 text-xs">
+                  <div className="mb-2 flex items-center gap-2">
+                    <IconAlertTriangle size={14} className="text-red-600" />
+                    <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
                   </div>
+                  <p className="font-mono text-red-700 leading-relaxed">
+                    <strong>Without {result.defenseTriggered}:</strong> {result.vulnerableOutput}
+                  </p>
                 </div>
               )}
             </div>
@@ -452,6 +295,6 @@ export default function TrainingDataPoisoningLab() {
           Disclaimer: Simulation demonstrates training data poisoning concepts. Real attacks may vary in complexity.
         </p>
       </div>
-    </div>
+    </LabContainer>
   );
 }

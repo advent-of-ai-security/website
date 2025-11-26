@@ -2,17 +2,22 @@ import { useMemo, useState } from 'react';
 import {
   IconBrain,
   IconAlertTriangle,
-  IconArrowRight,
-  IconArrowDown,
   IconLock,
   IconSearch,
   IconUserCheck,
-  IconShieldLock,
   IconShieldCheck,
   IconShield,
-  IconInfoCircle,
   IconUser
 } from '@tabler/icons-react';
+import {
+  LabContainer,
+  LabAnimations,
+  StageHeader,
+  PipelineConnector,
+  SecurityGate,
+  ScenarioSelector,
+  InfoBanner,
+} from './lab-common';
 
 type Scenario = {
   id: string;
@@ -60,160 +65,6 @@ type Defense = {
   confidence: boolean;
   humanReview: boolean;
 };
-
-const StageHeader = ({ number, title, color = 'neutral' }: { number: number; title: string; color?: 'neutral' | 'red' | 'emerald' }) => {
-  const colorClasses = {
-    neutral: 'bg-neutral-900 text-white',
-    red: 'bg-red-600 text-white',
-    emerald: 'bg-emerald-600 text-white'
-  };
-
-  return (
-    <div className="mb-4 flex items-center gap-3">
-      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClasses[color]} text-sm font-bold`}>
-        {number}
-      </div>
-      <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
-        {title}
-      </h3>
-    </div>
-  );
-};
-
-const SecurityGate = ({
-  label,
-  description,
-  tooltip,
-  isActive,
-  isTriggered,
-  onToggle,
-  icon: Icon
-}: {
-  label: string;
-  description: string;
-  tooltip?: string;
-  isActive: boolean;
-  isTriggered: boolean;
-  onToggle: () => void;
-  icon: any;
-}) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
-  return (
-    <div 
-      role="button"
-      tabIndex={0}
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      className={`relative cursor-pointer overflow-visible rounded-xl border-2 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 ${
-        isActive 
-          ? isTriggered
-            ? 'border-emerald-500 bg-emerald-50/50'
-            : 'border-neutral-900 bg-white shadow-md'
-          : 'border-neutral-200 bg-neutral-50/50 opacity-60 hover:opacity-100 hover:bg-white hover:shadow-sm hover:border-neutral-300'
-      }`}
-    >
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
-              isActive 
-                ? isTriggered ? 'bg-emerald-100 text-emerald-600' : 'bg-neutral-900 text-white'
-                : 'bg-neutral-200 text-neutral-400'
-            }`}>
-              <Icon size={20} stroke={2} />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h4 className={`font-bold text-sm transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}>
-                  {label}
-                </h4>
-                {tooltip && (
-                  <div className="relative group/tooltip">
-                    <div
-                      onMouseEnter={(e) => {
-                        setShowTooltip(true);
-                        setMousePos({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseMove={handleMouseMove}
-                      onMouseLeave={() => setShowTooltip(false)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-help"
-                    >
-                      <IconInfoCircle size={14} />
-                    </div>
-                    {showTooltip && (
-                      <div 
-                        className="fixed z-[999999] pointer-events-none"
-                        style={{ 
-                          left: `${mousePos.x + 20}px`, 
-                          top: `${mousePos.y - 10}px` 
-                        }}
-                      >
-                        <div className="w-64 p-3 bg-neutral-900 text-white text-xs rounded-lg shadow-2xl leading-relaxed">
-                          {tooltip}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-neutral-500 leading-tight mt-0.5 max-w-[180px]">
-                {description}
-              </p>
-            </div>
-          </div>
-
-          <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
-            isActive ? (isTriggered ? 'bg-emerald-500' : 'bg-neutral-900') : 'bg-neutral-300'
-          }`}>
-            <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
-              isActive ? 'translate-x-6' : 'translate-x-1'
-            }`} />
-          </div>
-        </div>
-
-        {isTriggered && (
-          <div className="mt-3 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700">
-              <IconShieldLock size={14} />
-              Misinformation Caught
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const PipelineConnector = ({ active, pulsing }: { active: boolean; pulsing?: boolean }) => (
-  <div className="flex items-center justify-center py-4 lg:py-0 lg:px-4 relative z-0">
-    <div className="hidden lg:flex items-center w-12 min-h-[300px] relative">
-      <div className={`absolute inset-0 my-auto h-0.5 w-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
-      {active && pulsing && (
-        <div className="absolute inset-0 my-auto h-0.5 w-4 rounded-full bg-neutral-900 animate-flow-right" />
-      )}
-      <IconArrowRight size={16} className={`absolute -right-1 top-1/2 -translate-y-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
-    </div>
-    <div className="lg:hidden flex flex-col items-center h-12 relative">
-      <div className={`absolute inset-0 mx-auto w-0.5 h-full rounded-full transition-all duration-500 ${active ? 'bg-neutral-300' : 'bg-neutral-100'}`} />
-      {active && pulsing && (
-        <div className="absolute inset-0 mx-auto w-0.5 h-4 rounded-full bg-neutral-900 animate-flow-down" />
-      )}
-      <IconArrowDown size={16} className={`absolute -bottom-1 left-1/2 -translate-x-1/2 transition-all duration-500 ${active ? 'text-neutral-400' : 'text-neutral-200'}`} />
-    </div>
-  </div>
-);
 
 export default function OverrelianceLab() {
   const [queryInput, setQueryInput] = useState(SCENARIOS[0]?.query || '');
@@ -272,21 +123,8 @@ export default function OverrelianceLab() {
   }, [queryInput, defenses, activeScenario]);
 
   return (
-    <div className="not-prose w-full max-w-none overflow-hidden bg-gradient-to-br from-neutral-50 to-white">
-      <style>{`
-        @keyframes flow-right {
-          0% { transform: translateX(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateX(32px); opacity: 0; }
-        }
-        @keyframes flow-down {
-          0% { transform: translateY(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(32px); opacity: 0; }
-        }
-        .animate-flow-right { animation: flow-right 2.5s infinite linear; }
-        .animate-flow-down { animation: flow-down 2.5s infinite linear; }
-      `}</style>
+    <LabContainer>
+      <LabAnimations />
 
       <div className="flex flex-col gap-6 border-b border-neutral-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
@@ -299,39 +137,23 @@ export default function OverrelianceLab() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Load Scenario:</span>
-          {SCENARIOS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => loadScenario(s)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
-                activeScenario === s.id
-                  ? 'border-neutral-900 bg-neutral-900 text-white shadow-md transform scale-105'
-                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+        <ScenarioSelector
+          scenarios={SCENARIOS}
+          activeId={activeScenario}
+          onSelect={loadScenario}
+        />
       </div>
 
-      <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-        <div className="flex items-start gap-3">
-          <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-neutral-500" />
-          <div className="text-xs text-neutral-700 leading-relaxed">
-            <span className="font-semibold">How to use:</span> Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
-          </div>
-        </div>
-      </div>
+      <InfoBanner>
+        Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+      </InfoBanner>
 
       <div className="p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-          
+        <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between">
+
           <div className="flex-1 min-w-0 flex flex-col">
             <StageHeader number={1} title="User Query" />
-            
+
             <div className="gap-4 flex-1 flex flex-col">
               <div className="flex-1 flex flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2">
@@ -351,7 +173,7 @@ export default function OverrelianceLab() {
 
           <div className="flex-1 min-w-0 flex flex-col">
             <StageHeader number={2} title="Security Gates" />
-            
+
             <div className="gap-3 flex-1 flex flex-col">
               <SecurityGate
                 label="Fact-Checking"
@@ -361,6 +183,7 @@ export default function OverrelianceLab() {
                 isTriggered={result.defenseTriggered === 'Fact-Checking'}
                 onToggle={() => toggleDefense('factCheck')}
                 icon={IconSearch}
+                triggeredMessage="Misinformation Caught"
               />
               <SecurityGate
                 label="Confidence Scoring"
@@ -370,6 +193,7 @@ export default function OverrelianceLab() {
                 isTriggered={result.defenseTriggered === 'Confidence Scoring'}
                 onToggle={() => toggleDefense('confidence')}
                 icon={IconLock}
+                triggeredMessage="Misinformation Caught"
               />
               <SecurityGate
                 label="Human Review Gate"
@@ -379,6 +203,7 @@ export default function OverrelianceLab() {
                 isTriggered={result.defenseTriggered === 'Human Review Gate'}
                 onToggle={() => toggleDefense('humanReview')}
                 icon={IconUserCheck}
+                triggeredMessage="Misinformation Caught"
               />
             </div>
           </div>
@@ -386,16 +211,16 @@ export default function OverrelianceLab() {
           <PipelineConnector active={result.activeDefenseCount > 0} pulsing={true} />
 
           <div className="flex-1 min-w-0 flex flex-col">
-            <StageHeader 
-              number={3} 
-              title="Model Response" 
-              color={result.threatLevel === 'CRITICAL' && !result.isHallucinationCaught ? 'red' : 'emerald'} 
+            <StageHeader
+              number={3}
+              title="Model Response"
+              color={result.threatLevel === 'CRITICAL' && !result.isHallucinationCaught ? 'red' : 'emerald'}
             />
 
             <div className="gap-4 flex-1 flex flex-col">
               <div className={`flex-1 flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all duration-300 ${
-                result.isHallucinationCaught 
-                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]' 
+                result.isHallucinationCaught
+                  ? 'border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]'
                   : result.threatLevel === 'CRITICAL'
                   ? 'border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
                   : 'border-neutral-200'
@@ -462,6 +287,13 @@ export default function OverrelianceLab() {
 
         </div>
       </div>
-    </div>
+
+      {/* Footer */}
+      <div className="border-t border-neutral-200 bg-neutral-50 px-6 py-3 text-center">
+        <p className="text-[9px] uppercase tracking-widest text-neutral-400">
+          Disclaimer: Client-side simulation for educational purposes. Real-world attacks may vary.
+        </p>
+      </div>
+    </LabContainer>
   );
 }
