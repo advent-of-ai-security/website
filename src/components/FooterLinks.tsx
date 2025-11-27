@@ -35,7 +35,7 @@ export default function FooterLinks({ className }: Props) {
             <IconBrandBluesky size={22} aria-hidden="true" />
           </a>
           <a
-            href="https://discord.gg/kkh9q7Zt"
+            href="https://rawkode.chat"
             target="_blank"
             rel="noreferrer noopener"
             className="inline-flex items-center justify-center text-black hover:text-black/70"

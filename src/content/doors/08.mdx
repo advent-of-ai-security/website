@@ -62,6 +62,9 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p>
     The vulnerabilities arise because: (1) embeddings can leak sensitive information through reconstruction attacks, (2) retrieval can be manipulated to return unauthorized data, and (3) adversarial documents can poison the vector space. Understanding the real-world impact of these weaknesses is critical for RAG system architects.
   </p>
+  <Quote source="PoisonedRAG Research (USENIX Security 2025)" href="https://arxiv.org/abs/2402.07867">
+    Our results show that by injecting merely 5 malicious texts into a vast knowledge database of over 1 million texts, our attack achieves a 90% success rate in manipulating the LLM's output.
+  </Quote>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
@@ -303,6 +306,9 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Regular Audits Scheduled.</b> Do you periodically review vector database contents for poisoning or tampering?
     </Item>
   </List>
+  <p>
+    The following simulation demonstrates RAG vulnerabilities in action, allowing you to experiment with poisoning attacks, cross-tenant leakage, and similarity hijacking scenarios.
+  </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
@@ -342,7 +348,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <Link href="https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/">OWASP LLM08:2025 - Vector and Embedding Weaknesses</Link> — Official documentation and mitigation guidelines.
     </Item>
     <Item>
-      <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">Vector and Embedding Weaknesses in LLMs</Link> — Interactive tutorial with FinBot case study (Snyk Learn).
+      <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">Vector and embedding weaknesses | Tutorial and examples</Link> — Interactive tutorial with FinBot case study (Snyk Learn).
     </Item>
     <Item>
       <Link href="https://www.cobalt.io/blog/vector-and-embedding-weaknesses">Vector and Embedding Weaknesses: Vulnerabilities and Mitigations</Link> — Practical security guide (Cobalt, 2025).
@@ -352,19 +358,19 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deep Dives</p>
   <List>
     <Item>
-      <Link href="https://arxiv.org/abs/2411.18948">RevPRAG: Revealing Poisoning Attacks via LLM Activation Analysis</Link> — Breakthrough detection method achieving 98% TPR with 1% FPR (November 2024).
+      <Link href="https://arxiv.org/abs/2411.18948">RevPRAG: Revealing Poisoning Attacks in Retrieval-Augmented Generation through LLM Activation Analysis</Link> — Breakthrough detection method achieving 98% TPR with 1% FPR (November 2024).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2402.07867">PoisonedRAG: Knowledge Corruption Attacks to RAG</Link> — Demonstrates 90% attack success with just 5 poisoned texts (USENIX Security 2025).
+      <Link href="https://arxiv.org/abs/2402.07867">PoisonedRAG: Knowledge Corruption Attacks to Retrieval-Augmented Generation of Large Language Models</Link> — Demonstrates 90% attack success with just 5 poisoned texts (USENIX Security 2025).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2406.00083">BadRAG: Identifying Vulnerabilities in Retrieval Augmented Generation</Link> — Framework for vulnerability identification in RAG systems (June 2024).
+      <Link href="https://arxiv.org/abs/2406.00083">BadRAG: Identifying Vulnerabilities in Retrieval Augmented Generation of Large Language Models</Link> — Framework for vulnerability identification in RAG systems (June 2024).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2405.20485">Phantom: General Backdoor Attacks on RAG</Link> — Two-stage optimization framework for backdoor injection (May 2024).
+      <Link href="https://arxiv.org/abs/2405.20485">Phantom: General Backdoor Attacks on Retrieval Augmented Language Generation</Link> — Two-stage optimization framework for backdoor injection (May 2024).
     </Item>
     <Item>
-      <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">OWASP LLM Top 10 2025: Vector and Embedding Weaknesses</Link> — Enterprise perspective on RAG security (IronCore Labs).
+      <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">OWASP's Updated Top 10 LLM Includes Vector and Embedding Weaknesses</Link> — Enterprise perspective on RAG security (IronCore Labs).
     </Item>
   </List>
 </Section>

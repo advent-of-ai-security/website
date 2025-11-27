@@ -62,6 +62,9 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p>
     The consequences of excessive agency scale with the permissions you grant—the more tools an agent can use, the larger the blast radius when something goes wrong.
   </p>
+  <Quote source="The Dark Side of LLMs (2025)" href="https://arxiv.org/html/2507.06850">
+    Our findings reveal significant vulnerabilities across all tested LLMs, with 94.4% susceptible to Direct Prompt Injection, 83.3% vulnerable to RAG Backdoor Attacks, and a 100% success rate in Inter-Agent Trust Exploitation.
+  </Quote>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
@@ -282,6 +285,9 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <b>Anomaly Detection & Kill Switches.</b> Do you monitor for unusual behavior? Set up alerts for: repeated failed actions, accessing unexpected resources, unusual timing patterns. Implement emergency stop buttons accessible to operators.
     </Item>
   </List>
+  <p>
+    The following simulation demonstrates how autonomy levels affect attack surface and blast radius, showing why the same vulnerability has vastly different consequences at different capability levels.
+  </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
@@ -321,7 +327,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <Link href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP LLM06:2025 - Excessive Agency</Link> — Official documentation and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">Agentic AI - Threats and Mitigations</Link> — OWASP Agentic Security Initiative comprehensive threat model and defense guide.
+      <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">Agentic AI - OWASP Lists Threats and Mitigations</Link> — OWASP Agentic Security Initiative comprehensive threat model and defense guide.
     </Item>
   </List>
 
@@ -331,7 +337,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <Link href="https://arxiv.org/html/2507.06850">The Dark Side of LLMs: Agent-based Attacks for Complete Computer Takeover</Link> — Critical research demonstrating 94.4% vulnerability rate and 100% Inter-Agent Trust Exploitation success (2025).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/pdf/2504.19956">Securing Agentic AI: Comprehensive Threat Model and Mitigation Framework</Link> — Detailed framework for protecting generative AI agents (2025).
+      <Link href="https://arxiv.org/pdf/2504.19956">Securing Agentic AI: A Comprehensive Threat Model and Mitigation Framework for Generative AI Agents</Link> — Detailed framework for protecting generative AI agents (2025).
     </Item>
     <Item>
       <Link href="https://www.anthropic.com/research/measuring-model-persuasiveness">Measuring the Persuasiveness of Language Models</Link> — Anthropic research on AI persuasion capabilities and risks (2024).

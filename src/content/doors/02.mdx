@@ -59,12 +59,18 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p>
     It is not just training data. If your application crashes and the LLM prints a Python stack trace to the user, you might be revealing file paths, library versions, or even database connection strings.
   </p>
+  <Quote source="OWASP LLM02:2025 Sensitive Information Disclosure" href="https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/">
+    Sensitive information can include personal data, proprietary algorithms, confidential business details, or other information that could be harmful if disclosed.
+  </Quote>
   <p>
-    The consequences of information disclosure extend far beyond embarrassment—they can destroy businesses, violate regulations, and erode user trust permanently.
+    Understanding the full scope of this vulnerability requires examining its real-world consequences.
   </p>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
+  <p>
+    The consequences of information disclosure extend far beyond embarrassment—they can destroy businesses, violate regulations, and permanently erode user trust.
+  </p>
   <List>
     <Item>
       <b>PII Leaks: Legal & Reputational Catastrophe.</b> Exposing social security numbers, addresses, medical records, or financial data leads to massive fines (GDPR penalties up to 4% of global revenue, CCPA fines up to $7,500 per violation), class-action lawsuits, and permanent loss of user trust. <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">IJCAI 2025 survey</Link> confirms PII leakage is one of the most pressing privacy risks in LLM deployment.
@@ -132,11 +138,11 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <br/><span className="text-xs text-neutral-500">Detection difficulty: High for semantic, Medium for verbatim.</span>
     </Item>
     <Item>
-      <b>Membership Inference Attacks (MIA).</b> Adversaries can query a model to statistically prove whether a specific person's data was included in training. <Link href="https://arxiv.org/abs/2406.17975">Recent research</Link> highlights methodological concerns with MIA benchmarks, revealing distribution shifts that undermine claims about LLM memorization. Effective MIAs can identify training data membership with AUC scores of 0.64-0.83.
+      <b>Membership Inference Attacks (MIA).</b> Adversaries can query a model to statistically prove whether a specific person's data was included in training. <Link href="https://arxiv.org/abs/2406.17975">Recent research</Link> highlights methodological concerns with MIA benchmarks, revealing distribution shifts that undermine claims about LLM memorization. Effective MIAs can identify training data membership with varying success rates depending on methodology.
       <br/><span className="text-xs text-neutral-500">Detection difficulty: High—statistical analysis required.</span>
     </Item>
     <Item>
-      <b>Adversarial Extraction Attacks.</b> <Link href="https://gangw.cs.illinois.edu/class/cs562/papers/llm-leak-sp23.pdf">IEEE S&P 2023 research</Link> demonstrates novel attacks extracting significantly more PII than previous methods, showing about 3% of PII sequences can leak even with differential privacy measures.
+      <b>Adversarial Extraction Attacks.</b> <Link href="https://gangw.cs.illinois.edu/class/cs562/papers/llm-leak-sp23.pdf">IEEE S&P 2023 research</Link> demonstrates novel attacks extracting significantly more PII than previous methods, showing that PII sequences can leak even with differential privacy measures in place.
       <br/><span className="text-xs text-neutral-500">Detection difficulty: Medium—requires specialized prompting.</span>
     </Item>
   </List>
@@ -167,7 +173,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training Data Extraction</p>
   <List>
     <Item>
-      <b>Google DeepMind Extraction.</b> Researchers extracted several megabytes of training data (including PII) from production models using simple "repeat this word" attacks. The divergence attack technique proved surprisingly effective at recovering memorized content. <Link href="https://arxiv.org/abs/2311.17035">arXiv: Compressible Data</Link>
+      <b>Training Data Extraction Research.</b> Researchers extracted several megabytes of training data (including PII) from production models using divergence attacks. The technique proved surprisingly effective at recovering memorized content from models like GPT-Neo, LLaMA, and ChatGPT. <Link href="https://arxiv.org/abs/2311.17035">arXiv: Scalable Extraction</Link>
       <br/><span className="text-xs text-neutral-500">Attack type: Training data extraction. Impact: PII and copyrighted content exposed.</span>
     </Item>
   </List>
@@ -277,6 +283,10 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <b>Logging & Monitoring.</b> Are you logging model inputs/outputs for audit? Set up alerts for unusual extraction patterns (repeated "show me" queries, base64 encoding attempts).
     </Item>
   </List>
+
+  <p className="mt-4">
+    Ready to test these concepts? The interactive simulation below lets you explore how information disclosure attacks work and how defenses can block them.
+  </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
@@ -316,7 +326,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <Link href="https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/">OWASP LLM02:2025 - Sensitive Information Disclosure</Link> — Official documentation and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://www.lakera.ai/blog/guide-to-prompt-injection">Lakera AI - Guide to Prompt Injection & System Prompt Extraction</Link> — Practical defense strategies and real-world examples.
+      <Link href="https://www.lakera.ai/blog/guide-to-prompt-injection">Prompt Injection & the Rise of Prompt Attacks</Link> — Practical defense strategies and real-world examples.
     </Item>
     <Item>
       <Link href="https://arxiv.org/abs/2012.07805">Extracting Training Data from Large Language Models</Link> — Carlini et al., foundational paper on membership inference and data extraction attacks (2020).
@@ -332,23 +342,23 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <Link href="https://arxiv.org/abs/2410.02650">Undesirable Memorization in Large Language Models: A Survey</Link> — Categorizes verbatim vs semantic memorization and analyzes mitigation strategies (October 2024).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2406.17975">SoK: Membership Inference Attacks on LLMs</Link> — Systematizes knowledge on MIA methodologies and benchmarking concerns (June 2024).
+      <Link href="https://arxiv.org/abs/2406.17975">SoK: Membership Inference Attacks on LLMs are Rushing Nowhere</Link> — Systematizes knowledge on MIA methodologies and benchmarking concerns (June 2024).
     </Item>
     <Item>
       <Link href="https://gangw.cs.illinois.edu/class/cs562/papers/llm-leak-sp23.pdf">Analyzing Leakage of Personally Identifiable Information in Language Models</Link> — IEEE S&P 2023 research on novel PII extraction attacks.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2311.17035">Scalable Extraction of Training Data from (Production) Language Models</Link> — Google DeepMind research on extracting memorized PII (2023).
+      <Link href="https://arxiv.org/abs/2311.17035">Scalable Extraction of Training Data from (Production) Language Models</Link> — Research on extracting memorized PII from production models (2023).
     </Item>
   </List>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Practical Guides</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Frameworks</p>
   <List>
     <Item>
       <Link href="https://microsoft.github.io/presidio/">Microsoft Presidio</Link> — Open-source PII detection and anonymization toolkit for protecting training data and outputs.
     </Item>
     <Item>
-      <Link href="https://github.com/anthropics/anthropic-cookbook/tree/main/capabilities/classification">Anthropic Classification Cookbook</Link> — Techniques for building output filters and PII detectors.
+      <Link href="https://github.com/anthropics/anthropic-cookbook/tree/main/capabilities/classification">Classification with Claude</Link> — Techniques for building content classifiers and output filters.
     </Item>
   </List>
 </Section>

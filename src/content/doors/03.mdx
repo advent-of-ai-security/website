@@ -59,12 +59,18 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p>
     It's the digital equivalent of buying a lock for your front door, unaware that the locksmith gave a copy of the key to a thief. The attack happens before your security controls even engage—you're compromised from the moment you install the dependency.
   </p>
+  <Quote source="OWASP LLM03:2025 Supply Chain Vulnerabilities" href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">
+    The supply chain in LLM applications is susceptible to various vulnerabilities, which can affect the integrity of training data, machine learning models, deployment platforms, and even the software acquired from third parties.
+  </Quote>
   <p>
     The consequences of supply chain compromise range from data theft to complete system takeover, as we'll see in the impact scenarios below.
   </p>
 </Section>
 
 <Section title="Why It Matters" meta="IMPACT">
+  <p>
+    The consequences of supply chain compromise extend far beyond a single application—they can cascade through your entire infrastructure and affect every downstream system that depends on the compromised component.
+  </p>
   <List>
     <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (<code>pickle</code>) is <Link href="https://huggingface.co/docs/hub/en/security-pickle">notoriously insecure</Link>. Loading a malicious model file can instantly give an attacker shell access to your server—no exploitation required, just <code>torch.load()</code>.</Item>
     <Item><b>Hidden Backdoors.</b> A compromised foundation model might behave normally 99% of the time but <Link href="https://arxiv.org/abs/2204.06974">fail catastrophically on specific trigger inputs</Link>. Imagine a sentiment analysis model that works perfectly except when analyzing your competitor's products.</Item>
@@ -295,6 +301,10 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <b>Sandboxed Model Testing.</b> When evaluating untrusted models, do you load them in isolated containers with no network access and no volume mounts to production systems?
     </Item>
   </List>
+
+  <p className="mt-4">
+    Ready to test these concepts? The interactive simulation below lets you explore supply chain attack scenarios and practice identifying warning signs before deployment.
+  </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
@@ -363,7 +373,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <Link href="https://github.com/pypa/pip-audit">pip-audit</Link> — Tool for scanning Python packages for known security vulnerabilities (CVEs).
     </Item>
     <Item>
-      <Link href="https://github.com/mmaitre314/picklescan">Picklescan</Link> — Security scanner that detects malicious pickle files in ML models.
+      <Link href="https://github.com/mmaitre314/picklescan">picklescan</Link> — Security scanner that detects malicious pickle files in ML models.
     </Item>
   </List>
 </Section>
