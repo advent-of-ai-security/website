@@ -14,7 +14,6 @@ const { title, meta = [] } = Astro.props as Props;
 ---
 
 <main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-sans),'IBM_Plex_Sans',sans-serif] flex flex-col gap-[var(--shell-gap)]">
-  <div id="top"></div>
   <div class="flex flex-col gap-[var(--shell-gap)]">
     <header class="grid gap-[var(--shell-gap)]">
       <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">{title}</h1>
@@ -29,7 +28,7 @@ const { title, meta = [] } = Astro.props as Props;
       <span class="inline-block h-px w-[var(--shell-gap)] bg-black/60 shrink-0" aria-hidden="true" />
       {meta.length > 0 && <MetaBar items={meta} />}
     </div>
-    <div id="section-nav-sticky" class="hidden md:block sticky top-0 z-40 bg-white/95 backdrop-blur-sm overflow-hidden relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-32 after:bg-gradient-to-l after:from-white after:via-white/80 after:to-transparent after:pointer-events-none transition-[padding] duration-150 [&.is-stuck]:py-[calc(var(--shell-gap)/2)]">
+    <div id="section-nav-sticky" class="hidden md:block sticky top-0 z-40 overflow-hidden relative transition-colors duration-150 pt-[var(--shell-gap)] pb-[var(--shell-gap)] bg-white -mx-[var(--shell-gap)] px-[var(--shell-gap)]">
       <SectionNav client:only="react" />
     </div>
     <script>

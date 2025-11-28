@@ -8,7 +8,7 @@ export default function FooterLinks({ className }: Props) {
   return (
     <div
       className={[
-        'shell-section__card border border-black bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)] relative z-[1]',
+        'shell-section__card border border-black bg-white relative z-[1]',
         className,
       ]
         .filter(Boolean)

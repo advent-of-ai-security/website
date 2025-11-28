@@ -37,14 +37,10 @@ export default function ShellSection({ title, meta, children, className, anchorI
               <span className="text-black/50 text-[0.6rem] tracking-[0.4em]">{meta}</span>
             )}
             <a
-              href="#top"
+              href="#section-why-you-need-to-know-this"
               title="Back to top"
               aria-label="Scroll back to top"
               className="inline-flex items-center justify-center text-black/40 hover:text-black transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
             >
               <IconArrowUp size={18} aria-hidden="true" />
             </a>

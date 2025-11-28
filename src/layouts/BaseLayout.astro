@@ -29,6 +29,13 @@ const pageTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
 <!doctype html>
 <html lang="en" class="scroll-smooth">
   <head>
+    <script is:inline>
+      if ('scrollRestoration' in history) {
+        // Only take manual control if there's a hash we need to scroll to.
+        // Otherwise, let the browser handle scroll restoration (e.g. back button, refresh).
+        history.scrollRestoration = window.location.hash ? 'manual' : 'auto';
+      }
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />

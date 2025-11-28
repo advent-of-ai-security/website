@@ -1,18 +1,31 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
-type Section = {
-  id: string;
-  title: string;
-};
+type Section = { id: string; title: string };
+
+const SCROLL_OFFSET = 96; // 4 * 24px (4 * var(--shell-gap))
 
 export default function SectionNav() {
   const [sections, setSections] = useState<Section[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const userClickedRef = useRef<string | null>(null);
-  const clickTimeoutRef = useRef<number | null>(null);
+
+  const calculateActiveSection = useCallback((sectionData: Section[]): string | null => {
+    const TOLERANCE = 2; // Allow small margin for sub-pixel rounding issues
+    let active = sectionData[0]?.id ?? null;
+
+    for (const section of sectionData) {
+      const el = document.getElementById(section.id);
+      if (el && el.getBoundingClientRect().top <= SCROLL_OFFSET + TOLERANCE) {
+        active = section.id;
+      }
+    }
+    return active;
+  }, []);
 
   useEffect(() => {
+    // Note: history.scrollRestoration = 'manual' is set in BaseLayout.astro <head>
+    // This ensures browser doesn't perform native hash scroll before React hydrates
+
     const els = document.querySelectorAll('[data-shell-section]');
     const sectionData = Array.from(els)
       .map(el => ({
@@ -20,57 +33,76 @@ export default function SectionNav() {
         title: el.querySelector('.shell-section__header a, .shell-section__header span')?.textContent || ''
       }))
       .filter((s): s is Section => Boolean(s.id));
+
     setSections(sectionData);
+    if (sectionData.length === 0) return;
 
-    const updateActive = () => {
-      // If user recently clicked a section, check if it's still visible
-      if (userClickedRef.current) {
-        const clickedEl = document.getElementById(userClickedRef.current);
-        if (clickedEl) {
-          const rect = clickedEl.getBoundingClientRect();
-          // If clicked section is visible on screen, keep it active
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
-            setActiveId(userClickedRef.current);
-            return;
-          }
+    // Handle initial state
+    const hash = window.location.hash.slice(1);
+
+    if (hash && sectionData.some(s => s.id === hash)) {
+      // Hash present: set active and scroll to it
+      setActiveId(hash);
+      
+      const scrollToHash = () => {
+        const el = document.getElementById(hash);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+          window.scrollTo({ top, behavior: 'instant' });
         }
-      }
+      };
 
-      const scrollBottom = window.scrollY + window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
-      const atBottom = docHeight - scrollBottom < 10;
+      // Initial attempt
+      scrollToHash();
+      
+      // Retry after a short delay to account for layout shifts
+      setTimeout(scrollToHash, 100);
+    } else {
+      // No hash: determine active section based on current scroll position
+      // (which browser might have restored automatically)
+      setActiveId(calculateActiveSection(sectionData));
+    }
 
-      // Use expanded reference (50%) at page bottom, otherwise 20%
-      const referencePercent = atBottom ? 0.5 : 0.2;
-      const referenceY = window.scrollY + window.innerHeight * referencePercent;
-
-      // Find last section whose top has passed the reference point
-      let activeSection = sectionData[0];
-      for (const section of sectionData) {
-        const el = document.getElementById(section.id);
-        if (el && el.offsetTop <= referenceY) {
-          activeSection = section;
-        }
-      }
-
-      if (activeSection) {
-        setActiveId(activeSection.id);
+    // Throttled scroll handler
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setActiveId(calculateActiveSection(sectionData));
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    updateActive(); // Initial check
-    window.addEventListener('scroll', updateActive, { passive: true });
-    return () => window.removeEventListener('scroll', updateActive);
-  }, []);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [calculateActiveSection]);
 
   if (sections.length === 0) return null;
 
+  const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault();
+    const el = document.getElementById(sectionId);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+      window.scrollTo({ top, behavior: 'smooth' });
+      history.pushState(null, '', `#${sectionId}`);
+    }
+  };
+
   return (
-    <div className="hidden md:flex items-center gap-3 flex-nowrap overflow-hidden" role="navigation" aria-label="Section navigation">
+    <div
+      className="hidden md:flex items-center gap-3 flex-nowrap overflow-hidden"
+      role="navigation"
+      aria-label="Section navigation"
+    >
       {sections.map((section, index) => {
         const num = index + 1;
         const isActive = activeId === section.id;
-
         const isHovered = hoveredId === section.id;
 
         return (
@@ -78,20 +110,11 @@ export default function SectionNav() {
             key={section.id}
             href={`#${section.id}`}
             aria-label={`Jump to section ${num}: ${section.title}`}
+            aria-current={isActive ? 'true' : undefined}
             className="flex items-center"
             onMouseEnter={() => setHoveredId(section.id)}
             onMouseLeave={() => setHoveredId(null)}
-            onClick={(e) => {
-              e.preventDefault();
-              // Track user click intent
-              userClickedRef.current = section.id;
-              if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-              clickTimeoutRef.current = window.setTimeout(() => {
-                userClickedRef.current = null;
-              }, 800);
-              document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
-              history.pushState(null, '', `#${section.id}`);
-            }}
+            onClick={(e) => handleNavClick(e, section.id)}
           >
             <span
               className={[
