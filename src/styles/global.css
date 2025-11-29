@@ -105,11 +105,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Libe
   padding: var(--shell-gap);
 }
 
-.shell-section__body p {
-  text-align: justify;
-  -webkit-hyphens: auto;
-  -ms-hyphens: auto;
-  hyphens: auto;
+.shell-section__body p + p {
+  margin-top: 0.75rem;
 }
 
 @media (max-width: 768px) {

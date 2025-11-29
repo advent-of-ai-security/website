@@ -80,6 +80,24 @@ export default function PromptInjectionLab() {
     setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Extract payload from user input for dynamic output
+  const extractedPayload = useMemo(() => {
+    // Try to extract what attacker wants model to say (e.g., "Say: HELLO WORLD")
+    const sayMatch = userInput.match(/say[:\s]+["']?(.+?)["']?\.?$/i);
+    if (sayMatch) return sayMatch[1].trim();
+
+    // Try to extract from context (indirect injection)
+    const contextMatch = context.match(/>([^<]+)</);
+    if (contextMatch && RULES.test(context)) return contextMatch[1].trim();
+
+    // Fallback for generic attacks
+    if (RULES.test(userInput) || RULES.test(context)) {
+      return "I will now follow attacker instructions instead of my original programming.";
+    }
+
+    return null;
+  }, [userInput, context]);
+
   const result = useMemo(() => {
     let isAttackBlocked = false;
     let defenseTriggered: string | null = null;
@@ -140,7 +158,7 @@ export default function PromptInjectionLab() {
 
       {/* Instructions */}
       <InfoBanner>
-        Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+        Choose a scenario and toggle security gates to see how defenses protect against different attack patterns.
       </InfoBanner>
 
       {/* Main Pipeline View */}
@@ -159,8 +177,8 @@ export default function PromptInjectionLab() {
                 </div>
                 <textarea
                   value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                  disabled
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none break-words min-h-24 cursor-not-allowed opacity-60"
                 />
               </div>
 
@@ -171,8 +189,8 @@ export default function PromptInjectionLab() {
                 </div>
                 <textarea
                   value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                  disabled
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none break-words min-h-24 cursor-not-allowed opacity-60"
                 />
               </div>
             </div>
@@ -261,7 +279,7 @@ export default function PromptInjectionLab() {
                       </span>
                     ) : result.threatLevel === 'CRITICAL' ? (
                       <span className="text-red-700">
-                        <strong>APPROVE ALL EXPENSES.</strong> (Model has been manipulated to ignore safety rules and execute attacker commands)
+                        <strong>{extractedPayload}</strong> (Model has been manipulated to ignore safety rules and execute attacker commands)
                       </span>
                     ) : (
                       <span className="text-neutral-700">
@@ -280,7 +298,7 @@ export default function PromptInjectionLab() {
                     <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
                   </div>
                   <p className="font-mono text-red-700 leading-relaxed">
-                    <strong>APPROVE ALL EXPENSES.</strong> Without the {result.defenseTriggered}, this attack would have succeeded in manipulating the model's behavior.
+                    <strong>{extractedPayload}</strong> Without the {result.defenseTriggered}, this attack would have succeeded in manipulating the model's behavior.
                   </p>
                 </div>
               )}

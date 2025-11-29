@@ -6,7 +6,6 @@ meta:
   - Door 03
   - OWASP - LLM03:2025
 ---
-import TLDR from '@/components/ui/TLDR.tsx';
 import Quote from '@/components/ui/Quote.tsx';
 import Section from '@/components/ui/Section.tsx';
 import Link from '@/components/ui/Link.tsx';
@@ -16,10 +15,10 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
 
 <Section title="Why You Need to Know This" meta="ATTENTION">
   <p>
-    A developer runs <code>pip install langchain</code> but accidentally types <code>pip install lang-chain</code>. Within seconds, a malicious package executes on their machine, stealing AWS credentials and SSH keys. Or consider: your team downloads a popular open-source model from Hugging Face, unaware that the maintainer's account was compromised last week. The model loads perfectly—and opens a reverse shell to an attacker's server.
+    A developer runs <code>pip install langchain</code> but accidentally types <code>pip install lang-chain</code>. Within seconds, a malicious package executes on their machine, stealing AWS credentials and SSH keys. Or consider: your team downloads a popular open-source model from Hugging Face, unaware that the maintainer's account was compromised last week. The model loads perfectly – and opens a reverse shell to an attacker's server.
   </p>
   <p>
-    Supply chain vulnerabilities are the #3 risk in OWASP's 2025 LLM rankings because they bypass all your application-level security. You can write perfect code, implement flawless input validation, and deploy behind enterprise firewalls—none of it matters if your foundation is compromised. Whether you're building AI products, managing ML infrastructure, or evaluating vendor models, understanding supply chain risks is essential.
+    Supply chain vulnerabilities are the #3 risk in OWASP's 2025 LLM rankings because they bypass all your application-level security. You can write perfect code, implement flawless input validation, and deploy behind enterprise firewalls – none of it matters if your foundation is compromised. Whether you're building AI products, managing ML infrastructure, or evaluating vendor models, understanding supply chain risks is essential.
   </p>
 </Section>
 
@@ -41,23 +40,23 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   </List>
 </Section>
 
-<TLDR>
+<Section title="TL;DR" meta="AT A GLANCE">
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM03:2025 Supply Chain Vulnerabilities" href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">
       Supply Chain Vulnerabilities arise when an application relies on compromised third-party models, libraries, or datasets. A secure app built on rotten foundations is still insecure.
     </Quote>
     <p>
-      Every external dependency—models, libraries, datasets—is a potential attack vector. Prevention requires cryptographic verification, safe serialization formats, and treating all third-party artifacts as untrusted until proven otherwise.
+      Every external dependency – models, libraries, datasets – is a potential attack vector. Prevention requires cryptographic verification, safe serialization formats, and treating all third-party artifacts as untrusted until proven otherwise.
     </p>
   </div>
-</TLDR>
+</Section>
 
 <Section title="What Is a Supply Chain Attack?" meta="DEFINITION">
   <p>
     Modern AI development is like building with Lego blocks. You grab a model from Hugging Face, a library from PyPI (like LangChain), and a dataset from a university. If an attacker poisons any one of those blocks before you download it, their code runs inside your system.
   </p>
   <p>
-    It's the digital equivalent of buying a lock for your front door, unaware that the locksmith gave a copy of the key to a thief. The attack happens before your security controls even engage—you're compromised from the moment you install the dependency.
+    It's the digital equivalent of buying a lock for your front door, unaware that the locksmith gave a copy of the key to a thief. The attack happens before your security controls even engage – you're compromised from the moment you install the dependency.
   </p>
   <Quote source="OWASP LLM03:2025 Supply Chain Vulnerabilities" href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">
     The supply chain in LLM applications is susceptible to various vulnerabilities, which can affect the integrity of training data, machine learning models, deployment platforms, and even the software acquired from third parties.
@@ -69,10 +68,10 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
 
 <Section title="Why It Matters" meta="IMPACT">
   <p>
-    The consequences of supply chain compromise extend far beyond a single application—they can cascade through your entire infrastructure and affect every downstream system that depends on the compromised component.
+    The consequences of supply chain compromise extend far beyond a single application – they can cascade through your entire infrastructure and affect every downstream system that depends on the compromised component.
   </p>
   <List>
-    <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (<code>pickle</code>) is <Link href="https://huggingface.co/docs/hub/en/security-pickle">notoriously insecure</Link>. Loading a malicious model file can instantly give an attacker shell access to your server—no exploitation required, just <code>torch.load()</code>.</Item>
+    <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (<code>pickle</code>) is <Link href="https://huggingface.co/docs/hub/en/security-pickle">notoriously insecure</Link>. Loading a malicious model file can instantly give an attacker shell access to your server – no exploitation required, just <code>torch.load()</code>.</Item>
     <Item><b>Hidden Backdoors.</b> A compromised foundation model might behave normally 99% of the time but <Link href="https://arxiv.org/abs/2204.06974">fail catastrophically on specific trigger inputs</Link>. Imagine a sentiment analysis model that works perfectly except when analyzing your competitor's products.</Item>
     <Item><b>Data Exfiltration.</b> A malicious Python library could silently upload your API keys, model weights, or user data to an external server while pretending to do "analytics" or "telemetry."</Item>
     <Item><b>Lateral Movement.</b> Once inside your ML pipeline, attackers can pivot to compromise CI/CD systems, access production databases, or inject malicious code into model artifacts you distribute to customers.</Item>
@@ -90,10 +89,12 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
     <Step n={1}>
       <b>Model Artifacts (The Weights)</b>
       <p className="text-sm mt-2">
-        Pre-trained models are serialized files containing billions of numerical weights. The most common format—PyTorch's pickle—can execute arbitrary Python code when loaded. A malicious model file looks identical to a legitimate one but runs attacker code the moment you call <code>torch.load()</code>.
-        <br/><br/>
+        Pre-trained models are serialized files containing billions of numerical weights. The most common format – PyTorch's pickle – can execute arbitrary Python code when loaded. A malicious model file looks identical to a legitimate one but runs attacker code the moment you call <code>torch.load()</code>.
+      </p>
+      <p className="text-sm">
         <i>Example:</i> A Hugging Face model with a hidden <code>__reduce__</code> method that spawns a reverse shell while loading weights.
-        <br/><br/>
+      </p>
+      <p className="text-sm">
         <b>Who is at risk:</b> Anyone downloading pre-trained models, fine-tuned checkpoints, or LoRA adapters from public hubs or untrusted sources.
       </p>
     </Step>
@@ -101,9 +102,11 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <b>Software Dependencies (The Libraries)</b>
       <p className="text-sm mt-2">
         ML projects depend on dozens of packages: PyTorch, Transformers, LangChain, vector databases, inference servers. Each package is a potential attack vector through typosquatting (fake packages with similar names), compromised maintainer accounts, or malicious code injected into legitimate packages.
-        <br/><br/>
-        <i>Example:</i> <code>pip install langchain</code> vs <code>pip install lang-chain</code>—one character installs malware.
-        <br/><br/>
+      </p>
+      <p className="text-sm">
+        <i>Example:</i> <code>pip install langchain</code> vs <code>pip install lang-chain</code> – one character installs malware.
+      </p>
+      <p className="text-sm">
         <b>Who is at risk:</b> Every developer who runs <code>pip install</code>, <code>npm install</code>, or pulls Docker images from public registries.
       </p>
     </Step>
@@ -111,9 +114,11 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <b>Training Data Pipelines (The Data)</b>
       <p className="text-sm mt-2">
         The supply chain includes the data your models are trained on. Poisoned datasets can embed backdoors that activate on specific triggers, bias models toward attacker-chosen outputs, or leak sensitive information. This attack surface is especially dangerous because it affects model behavior rather than infrastructure.
-        <br/><br/>
+      </p>
+      <p className="text-sm">
         <i>Example:</i> A public dataset with 0.1% poisoned samples that teach the model to classify certain content incorrectly.
-        <br/><br/>
+      </p>
+      <p className="text-sm">
         <b>Who is at risk:</b> Anyone fine-tuning models on external datasets, using RAG with scraped web content, or training on user-submitted data.
       </p>
     </Step>
@@ -132,16 +137,16 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Targeting the software libraries your ML pipeline depends on.</p>
   <List>
     <Item>
-      <b>Typosquatting.</b> Attackers register packages with names like <code>lang-chain</code>, <code>open-ai</code>, or <code>pytorch-nightly</code>—hoping developers mistype and install malware. Some attackers monitor trending packages and register typos preemptively.
-      <br/><span className="text-xs text-neutral-500">Detection: Low difficulty—package name verification and lockfiles prevent this.</span>
+      <b>Typosquatting.</b> Attackers register packages with names like <code>lang-chain</code>, <code>open-ai</code>, or <code>pytorch-nightly</code> – hoping developers mistype and install malware. Some attackers monitor trending packages and register typos preemptively.
+      <p className="text-xs text-neutral-500 mt-1">Detection: Low difficulty – package name verification and lockfiles prevent this.</p>
     </Item>
     <Item>
       <b>Dependency Confusion.</b> <Link href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">Alex Birsan's original research</Link> showed attackers publish malicious packages with the same name as internal private packages to public registries. When your build system resolves dependencies, it may pull the attacker's public version instead of your internal one.
-      <br/><span className="text-xs text-neutral-500">Detection: Medium—requires proper registry configuration and namespace protection.</span>
+      <p className="text-xs text-neutral-500 mt-1">Detection: Medium – requires proper registry configuration and namespace protection.</p>
     </Item>
     <Item>
       <b>Compromised Maintainer Accounts.</b> Attackers gain access to legitimate package maintainer accounts (via phishing, credential stuffing, or social engineering) and publish malicious updates to trusted packages.
-      <br/><span className="text-xs text-neutral-500">Detection: High difficulty—updates appear to come from trusted sources.</span>
+      <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – updates appear to come from trusted sources.</p>
     </Item>
   </List>
 
@@ -149,16 +154,16 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Targeting pre-trained models, checkpoints, and adapters.</p>
   <List>
     <Item>
-      <b>Pickle Deserialization Exploits.</b> PyTorch's default <code>.bin</code> and <code>.pkl</code> formats use Python's pickle module, which can execute arbitrary code during deserialization. A malicious model file runs attacker code the moment you call <code>torch.load()</code>—no vulnerability exploitation required.
-      <br/><span className="text-xs text-neutral-500">Detection: Medium—tools like Picklescan can detect known patterns, but obfuscation is possible.</span>
+      <b>Pickle Deserialization Exploits.</b> PyTorch's default <code>.bin</code> and <code>.pkl</code> formats use Python's pickle module, which can execute arbitrary code during deserialization. A malicious model file runs attacker code the moment you call <code>torch.load()</code> – no vulnerability exploitation required.
+      <p className="text-xs text-neutral-500 mt-1">Detection: Medium – tools like Picklescan can detect known patterns, but obfuscation is possible.</p>
     </Item>
     <Item>
-      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research on LoRA backdoors</Link> shows their small size makes them easy to distribute and harder to audit—a malicious adapter can subtly alter outputs without triggering obvious red flags.
-      <br/><span className="text-xs text-neutral-500">Detection: High difficulty—behavioral changes may only manifest on specific inputs.</span>
+      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research on LoRA backdoors</Link> shows their small size makes them easy to distribute and harder to audit – a malicious adapter can subtly alter outputs without triggering obvious red flags.
+      <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – behavioral changes may only manifest on specific inputs.</p>
     </Item>
     <Item>
       <b>Model Hub Account Compromise.</b> If an attacker compromises a popular model creator's Hugging Face account, they can replace legitimate models with backdoored versions. Thousands of users may download the poisoned model before detection.
-      <br/><span className="text-xs text-neutral-500">Detection: High difficulty—model appears to come from trusted source.</span>
+      <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – model appears to come from trusted source.</p>
     </Item>
   </List>
 
@@ -167,7 +172,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <List>
     <Item>
       <b>Dataset Poisoning.</b> Attackers inject malicious samples into public datasets or data sources you scrape. These samples embed backdoors (trigger phrases that cause specific outputs) or bias the model's behavior. See Door 04 for detailed coverage.
-      <br/><span className="text-xs text-neutral-500">Detection: High difficulty—poisoned samples may be statistically indistinguishable from legitimate data.</span>
+      <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – poisoned samples may be statistically indistinguishable from legitimate data.</p>
     </Item>
   </List>
 
@@ -185,23 +190,23 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <List>
     <Item>
       <b>PyTorch Nightly Compromise (Dec 2022).</b> Attackers compromised the official PyTorch nightly build, injecting a malicious dependency (<code>torchtriton</code>) that exfiltrated system information including hostname, username, working directory, and environment variables. Thousands of developers who installed PyTorch nightly between Dec 25-30 were affected. <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Blog</Link>
-      <br/><span className="text-xs text-neutral-500">Attack surface: Software dependencies. Impact: System data exfiltration at scale.</span>
+      <p className="text-xs text-neutral-500 mt-1">Attack surface: Software dependencies. Impact: System data exfiltration at scale.</p>
     </Item>
     <Item>
       <b>SolarWinds Orion (2020).</b> While not AI-specific, this attack demonstrated the devastating potential of supply chain compromise. Attackers infiltrated the build pipeline, distributing backdoored updates to 18,000+ organizations including US government agencies. The same techniques apply to ML pipelines.
-      <br/><span className="text-xs text-neutral-500">Attack surface: Build pipeline. Impact: Widespread corporate and government network compromise.</span>
+      <p className="text-xs text-neutral-500 mt-1">Attack surface: Build pipeline. Impact: Widespread corporate and government network compromise.</p>
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Model Hub Incidents</p>
   <List>
     <Item>
-      <b>PoisonGPT Demonstration.</b> Mithril Security researchers demonstrated how easy it is to upload a "lobotomized" LLM to Hugging Face—a model that appears normal but spreads targeted misinformation. They modified Llama to give false answers about specific topics while performing correctly on benchmarks. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link>
-      <br/><span className="text-xs text-neutral-500">Attack surface: Model artifacts. Impact: Demonstrated feasibility of backdoored model distribution.</span>
+      <b>PoisonGPT Demonstration.</b> Mithril Security researchers demonstrated how easy it is to upload a "lobotomized" LLM to Hugging Face – a model that appears normal but spreads targeted misinformation. They modified Llama to give false answers about specific topics while performing correctly on benchmarks. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link>
+      <p className="text-xs text-neutral-500 mt-1">Attack surface: Model artifacts. Impact: Demonstrated feasibility of backdoored model distribution.</p>
     </Item>
     <Item>
       <b>Malicious Pickle Models on Hugging Face.</b> Security researchers discovered hundreds of models on Hugging Face containing malicious pickle payloads capable of arbitrary code execution. These models could steal credentials, install backdoors, or exfiltrate data from anyone who loaded them.
-      <br/><span className="text-xs text-neutral-500">Attack surface: Model artifacts (pickle). Impact: Potential RCE on developer/production machines.</span>
+      <p className="text-xs text-neutral-500 mt-1">Attack surface: Model artifacts (pickle). Impact: Potential RCE on developer/production machines.</p>
     </Item>
   </List>
 
@@ -220,7 +225,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <Steps>
     <Step n={1}>
       <b>Use Safe Serialization Formats.</b>
-      <p className="text-sm mt-2">Never load models from pickle files in production. Use <Link href="https://huggingface.co/docs/safetensors/index"><code>safetensors</code> format</Link> which stores only numerical weights—no executable code. For PyTorch models, convert existing checkpoints: <code>torch.save()</code> → <code>safetensors.torch.save_file()</code>.</p>
+      <p className="text-sm mt-2">Never load models from pickle files in production. Use <Link href="https://huggingface.co/docs/safetensors/index"><code>safetensors</code> format</Link> which stores only numerical weights – no executable code. For PyTorch models, convert existing checkpoints: <code>torch.save()</code> → <code>safetensors.torch.save_file()</code>.</p>
     </Step>
     <Step n={2}>
       <b>Verify Cryptographic Signatures.</b>
@@ -272,7 +277,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <b>Source Reputation Check.</b> Are you downloading from trusted sources? Prefer verified publishers on Hugging Face, official organization accounts, or models with security audits. Check download counts, community reviews, and account age.
     </Item>
     <Item>
-      <b>Typosquatting Awareness.</b> Did you triple-check the package name spelling? <code>langchain</code> vs <code>lang-chain</code> vs <code>langchains</code>—one character difference could be malware. Copy-paste from official documentation, never type from memory.
+      <b>Typosquatting Awareness.</b> Did you triple-check the package name spelling? <code>langchain</code> vs <code>lang-chain</code> vs <code>langchains</code> – one character difference could be malware. Copy-paste from official documentation, never type from memory.
     </Item>
   </List>
 
@@ -344,71 +349,71 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Start Here</p>
   <List>
     <Item>
-      <Link href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">OWASP LLM03:2025 - Supply Chain Vulnerabilities</Link> — Official documentation and mitigation strategies.
+      <Link href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">OWASP LLM03:2025 - Supply Chain Vulnerabilities</Link> – Official documentation and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://huggingface.co/docs/safetensors/index">Safetensors Documentation</Link> — Secure serialization format for ML models that prevents arbitrary code execution.
+      <Link href="https://huggingface.co/docs/safetensors/index">Safetensors Documentation</Link> – Secure serialization format for ML models that prevents arbitrary code execution.
     </Item>
     <Item>
-      <Link href="https://slsa.dev/">SLSA Framework</Link> — Supply-chain Levels for Software Artifacts, applicable to ML model distribution.
+      <Link href="https://slsa.dev/">SLSA Framework</Link> – Supply-chain Levels for Software Artifacts, applicable to ML model distribution.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Deep Dives</p>
   <List>
     <Item>
-      <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Nightly Compromise (2022)</Link> — Official post-mortem of supply chain attack affecting thousands of developers.
+      <Link href="https://pytorch.org/blog/compromised-nightly-dependency/">PyTorch Nightly Compromise (2022)</Link> – Official post-mortem of supply chain attack affecting thousands of developers.
     </Item>
     <Item>
-      <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">PoisonGPT: How We Hid a Lobotomized LLM on Hugging Face</Link> — Demonstration of model hub supply chain risks.
+      <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">PoisonGPT: How We Hid a Lobotomized LLM on Hugging Face</Link> – Demonstration of model hub supply chain risks.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2204.06974">Planting Undetectable Backdoors in Machine Learning Models</Link> — Research on how outsourced model training enables undetectable backdoor attacks (2022).
+      <Link href="https://arxiv.org/abs/2204.06974">Planting Undetectable Backdoors in Machine Learning Models</Link> – Research on how outsourced model training enables undetectable backdoor attacks (2022).
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
   <List>
     <Item>
-      <Link href="https://hiddenlayer.com/research/hijacking-safetensors-conversion-on-hugging-face/">Hijacking Safetensors Conversion on Hugging Face</Link> — HiddenLayer research on safetensors conversion attacks.
+      <Link href="https://hiddenlayer.com/research/hijacking-safetensors-conversion-on-hugging-face/">Hijacking Safetensors Conversion on Hugging Face</Link> – HiddenLayer research on safetensors conversion attacks.
     </Item>
     <Item>
-      <Link href="https://developers.googleblog.com/en/large-language-models-on-device-with-mediapipe-and-tensorflow-lite/">Large Language Models On-Device with MediaPipe and TensorFlow Lite</Link> — Google, edge deployment security considerations.
+      <Link href="https://developers.googleblog.com/en/large-language-models-on-device-with-mediapipe-and-tensorflow-lite/">Large Language Models On-Device with MediaPipe and TensorFlow Lite</Link> – Google, edge deployment security considerations.
     </Item>
     <Item>
-      <Link href="https://docs.vllm.ai/en/latest/features/lora.html">Using LoRA Adapters with vLLM</Link> — vLLM documentation on LoRA adapter usage and security.
+      <Link href="https://docs.vllm.ai/en/latest/features/lora.html">Using LoRA Adapters with vLLM</Link> – vLLM documentation on LoRA adapter usage and security.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2310.20624">Removing RLHF Protections in GPT-4 via Fine-Tuning</Link> — Research demonstrating safety removal through fine-tuning.
+      <Link href="https://arxiv.org/abs/2310.20624">Removing RLHF Protections in GPT-4 via Fine-Tuning</Link> – Research demonstrating safety removal through fine-tuning.
     </Item>
     <Item>
-      <Link href="https://huggingface.co/docs/peft/main/en/developer_guides/model_merging">Model Merging with PEFT</Link> — Hugging Face documentation on model merge security considerations.
+      <Link href="https://huggingface.co/docs/peft/main/en/developer_guides/model_merging">Model Merging with PEFT</Link> – Hugging Face documentation on model merge security considerations.
     </Item>
     <Item>
-      <Link href="https://huggingface.co/spaces/mcpotato/sf-convertbot-scanner">HuggingFace SF_Convertbot Scanner</Link> — Automated safetensors security scanner tool.
+      <Link href="https://huggingface.co/spaces/mcpotato/sf-convertbot-scanner">HuggingFace SF_Convertbot Scanner</Link> – Automated safetensors security scanner tool.
     </Item>
     <Item>
-      <Link href="https://www.oligo.security/blog/shadowray-attack-ai-workloads-actively-exploited-in-the-wild">Shadow Ray: AI Workloads Actively Exploited</Link> — Oligo Security, Ray AI framework exploit affecting thousands of servers.
+      <Link href="https://www.oligo.security/blog/shadowray-attack-ai-workloads-actively-exploited-in-the-wild">Shadow Ray: AI Workloads Actively Exploited</Link> – Oligo Security, Ray AI framework exploit affecting thousands of servers.
     </Item>
     <Item>
-      <Link href="https://leftoverlocals.com/">LeftoverLocals (CVE-2023-4969)</Link> — GPU local memory leak vulnerability allowing sensitive data recovery.
+      <Link href="https://leftoverlocals.com/">LeftoverLocals (CVE-2023-4969)</Link> – GPU local memory leak vulnerability allowing sensitive data recovery.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Taxonomy & Classification</p>
   <List>
     <Item>
-      <Link href="https://atlas.mitre.org/techniques/AML.T0010">MITRE ATLAS AML.T0010</Link> — Official classification for ML Supply Chain Compromise.
+      <Link href="https://atlas.mitre.org/techniques/AML.T0010">MITRE ATLAS AML.T0010</Link> – Official classification for ML Supply Chain Compromise.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Frameworks</p>
   <List>
     <Item>
-      <Link href="https://github.com/pypa/pip-audit">pip-audit</Link> — Tool for scanning Python packages for known security vulnerabilities (CVEs).
+      <Link href="https://github.com/pypa/pip-audit">pip-audit</Link> – Tool for scanning Python packages for known security vulnerabilities (CVEs).
     </Item>
     <Item>
-      <Link href="https://github.com/mmaitre314/picklescan">picklescan</Link> — Security scanner that detects malicious pickle files in ML models.
+      <Link href="https://github.com/mmaitre314/picklescan">picklescan</Link> – Security scanner that detects malicious pickle files in ML models.
     </Item>
   </List>
 </Section>

@@ -24,7 +24,7 @@ export default function ShellSection({ title, meta, children, className, anchorI
         .join(' ')}
     >
       <div className="shell-section__card">
-        <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black/20 text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
+        <header className="shell-section__header flex items-center justify-between border-b border-black/20 text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
           {anchorId ? (
             <a href={`#${anchorId}`} className="no-underline text-current hover:text-black">
               {title}
@@ -46,7 +46,7 @@ export default function ShellSection({ title, meta, children, className, anchorI
             </a>
           </div>
         </header>
-        <div className={`shell-section__body text-[14px] leading-relaxed ${noPadding ? '!p-0' : ''}`}>{children}</div>
+        <div className={`shell-section__body text-[18px] leading-relaxed ${noPadding ? '!p-0' : ''}`}>{children}</div>
       </div>
       <div className="shell-section__rail" aria-hidden="true">
         <span className="shell-section__badge" />

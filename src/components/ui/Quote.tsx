@@ -19,9 +19,9 @@ export default function Quote({ children, source, href, minimal = false }: Quote
     );
   }
   return (
-    <figure className="not-prose border border-black p-3 md:p-4">
+    <figure className="not-prose my-[var(--shell-gap)] border border-black p-[calc(var(--shell-gap)/2)]">
       <blockquote className="text-[13px]">{children}</blockquote>
-      <figcaption className="mt-2 text-[11px]">
+      <figcaption className="mt-[calc(var(--shell-gap)/3)] text-[11px]">
         - <a className="underline decoration-black underline-offset-2" href={href} target="_blank" rel="noreferrer">{source}</a>
       </figcaption>
     </figure>

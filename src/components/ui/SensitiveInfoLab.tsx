@@ -147,7 +147,7 @@ export default function SensitiveInfoLab() {
 
       {/* Instructions */}
       <InfoBanner>
-        Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+        Choose a scenario and toggle security gates to see how defenses protect against different attack patterns.
       </InfoBanner>
 
       {/* Main Pipeline View */}
@@ -166,8 +166,8 @@ export default function SensitiveInfoLab() {
                 </div>
                 <textarea
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                  disabled
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none break-words min-h-24 cursor-not-allowed opacity-60"
                 />
               </div>
             </div>

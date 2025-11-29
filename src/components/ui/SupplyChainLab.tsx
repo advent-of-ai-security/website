@@ -84,6 +84,13 @@ export default function SupplyChainLab() {
     setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Extract package name from input
+  const packageName = useMemo(() => {
+    // Get first part before version or parenthetical
+    const match = packageInput.match(/^([^\s=()]+)/);
+    return match?.[1] || 'unknown-package';
+  }, [packageInput]);
+
   const result = useMemo(() => {
     let isThreatBlocked = false;
     let defenseTriggered: string | null = null;
@@ -147,7 +154,7 @@ export default function SupplyChainLab() {
 
       {/* Instructions */}
       <InfoBanner>
-        Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+        Choose a scenario and toggle security gates to see how defenses protect against different attack patterns.
       </InfoBanner>
 
       {/* Main Pipeline View */}
@@ -166,8 +173,8 @@ export default function SupplyChainLab() {
                 </div>
                 <textarea
                   value={packageInput}
-                  onChange={(e) => setPackageInput(e.target.value)}
-                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                  disabled
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none break-words min-h-24 cursor-not-allowed opacity-60"
                 />
               </div>
             </div>
@@ -255,15 +262,7 @@ export default function SupplyChainLab() {
                       </span>
                     ) : result.threatLevel === 'CRITICAL' ? (
                       <span className="text-red-700">
-                        {activeScenario === 'typo' && (
-                          <><strong>Installed torch-nightly</strong> - Malicious package deployed. Backdoor code now running in production. [COMPROMISED]</>
-                        )}
-                        {activeScenario === 'backdoor' && (
-                          <><strong>Model loaded from untrusted source.</strong> Poisoned weights contain hidden backdoor triggers. System compromised. [BACKDOORED]</>
-                        )}
-                        {activeScenario === 'poison' && (
-                          <><strong>Training on poisoned dataset.</strong> Model will learn malicious behaviors tied to trigger patterns. [POISONED]</>
-                        )}
+                        <strong>Installed {packageName}</strong> — Malicious dependency deployed. Backdoor code now running in production. [COMPROMISED]
                       </span>
                     ) : (
                       <span className="text-neutral-700">

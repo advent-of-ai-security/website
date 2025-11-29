@@ -145,7 +145,7 @@ export default function MisinformationLab() {
       </div>
 
       <InfoBanner>
-        Select a scenario above, edit the input fields, then toggle the security gates on/off to see how defenses block attacks. Watch the pipeline flow from input → defense → output.
+        Choose a scenario and toggle security gates to see how defenses protect against different attack patterns.
       </InfoBanner>
 
       <div className="p-6 lg:p-8">
@@ -162,8 +162,8 @@ export default function MisinformationLab() {
                 </div>
                 <textarea
                   value={queryInput}
-                  onChange={(e) => setQueryInput(e.target.value)}
-                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:bg-white break-words min-h-24"
+                  disabled
+                  className="flex-1 w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm font-mono text-neutral-900 outline-none break-words min-h-24 cursor-not-allowed opacity-60"
                 />
               </div>
             </div>

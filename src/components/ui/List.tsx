@@ -9,13 +9,13 @@ interface ItemProps {
 }
 
 export function List({ children }: ListProps) {
-  return <ul className="m-0 list-none space-y-2 p-0">{children}</ul>;
+  return <ul className="m-0 list-none p-0 flex flex-col gap-[calc(var(--shell-gap)/3)]">{children}</ul>;
 }
 
 export function Item({ children }: ItemProps) {
   return (
-    <li className="grid grid-cols-[auto_1fr] items-start gap-x-3">
-      <span className="mt-3 block h-[1px] w-6 bg-black/70" aria-hidden />
+    <li className="grid grid-cols-[auto_1fr] items-start gap-x-[calc(var(--shell-gap)/2)]">
+      <span className="mt-[14px] block h-[1px] w-6 bg-black/70" aria-hidden />
       <div>{children}</div>
     </li>
   );

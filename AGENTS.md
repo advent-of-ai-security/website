@@ -24,7 +24,6 @@ All content UI components build on this pattern.
 | Component | Purpose |
 |-----------|---------|
 | `Section` | Wrapper using ShellSection with auto-generated anchor ID |
-| `TLDR` | Summary section (sets title="TL;DR", meta="SUMMARY") |
 | `Quote` | Blockquote with source attribution; supports `variant="minimal"` |
 | `Steps` / `Step` | Numbered step list (01, 02, etc.) |
 | `List` / `Item` | Bullet list with decorative line prefix |
@@ -86,13 +85,13 @@ meta:                               # Optional, displayed in MetaBar
 ### Available MDX Components
 Import at the top of each `.mdx` file:
 ```jsx
-import { Section, TLDR, Quote, Steps, Step, List, Item, Link } from '@/components/ui';
+import { Section, Quote, Steps, Step, List, Item, Link } from '@/components/ui';
 import PromptInjectionLab from '@/components/ui/PromptInjectionLab';
 ```
 
 ### Content Structure Convention
 Each door follows this section order:
-1. `<TLDR>` – Brief summary
+1. `<Section title="TL;DR" meta="SUMMARY">` – Brief summary
 2. `<Section title="What is X?">` – Definition
 3. `<Section title="Real-World Impact">` – Examples with `<Quote>`
 4. `<Section title="Defense Strategies">` – Mitigations with `<Steps>`
@@ -157,7 +156,7 @@ Collator for sorting numeric slugs (01, 02, ..., 10) in correct order.
 - Scopes seen in history: `ui`, `content`, `docs`, `deps`, `seo`, `copy`, `workers`.
 - Examples:
   - `fix(seo,copy): remove phrase from meta`
-  - `feat(ui): add TLDR component`
+  - `feat(ui): add Section component`
 - PRs must include: clear description, linked issues, screenshots for UI changes, and proof of `bun run build` success. Provide a Wrangler preview link if available.
 
 ## Security & Configuration Tips
