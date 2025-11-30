@@ -102,7 +102,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
             <span>Welcome - December 2025 Beta</span>
           </header>
             <div className="shell-section__body">
-              <div className="space-y-6 text-[15px] leading-relaxed">
+              <div className="space-y-6 text-[18px] leading-relaxed">
                 <p className="m-0">
                   Welcome! Advent of AI Security 2025 is your guide to the <strong><a href="https://genai.owasp.org/llm-top-10/" target="_blank" rel="noopener noreferrer" className="underline hover:text-black/70 transition-colors">OWASP Top 10 for LLM Applications 2025</a></strong>.
                 </p>
