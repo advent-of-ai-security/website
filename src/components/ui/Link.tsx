@@ -9,7 +9,7 @@ export default function Link({
   target,
   ...rest
 }: Props) {
-  const relAttr = rel ?? 'noreferrer';
+  const relAttr = rel ?? 'noreferrer noopener';
   const targetAttr = target ?? '_blank';
   return (
     <a

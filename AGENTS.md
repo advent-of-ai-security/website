@@ -27,7 +27,7 @@ All content UI components build on this pattern.
 | `Quote` | Blockquote with source attribution; supports `variant="minimal"` |
 | `Steps` / `Step` | Numbered step list (01, 02, etc.) |
 | `List` / `Item` | Bullet list with decorative line prefix |
-| `Link` | External link (`target="_blank"`, `rel="noreferrer"`) |
+| `Link` | External link (`target="_blank"`, `rel="noreferrer noopener"`) |
 | `Chip` | Small badge/tag for metadata |
 | `MetaBar` | Displays metadata chips with separator line |
 
