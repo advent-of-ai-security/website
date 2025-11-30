@@ -72,13 +72,13 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   </p>
   <List>
     <Item>
-      <b>Backdoors & Sleeper Agents.</b> <Link href="https://arxiv.org/abs/2401.05566">Anthropic's Sleeper Agents research (2024)</Link> demonstrated that backdoored models can appear safe during testing but activate malicious behaviors when specific triggers are present. Standard safety training (RLHF, adversarial training) cannot reliably remove these backdoors and may even make them more resistant to detection.
+      <b>Backdoors & Sleeper Agents.</b> <Link href="https://arxiv.org/abs/2401.05566">Research on "Sleeper Agents"</Link> demonstrated that backdoored models can appear safe during testing but activate malicious behaviors when specific triggers are present. Standard safety training (RLHF, adversarial training) cannot reliably remove these backdoors and may even make them more resistant to detection.
     </Item>
     <Item>
-      <b>Finetuning-Activated Backdoors (FAB).</b> <Link href="https://openreview.net/forum?id=VRvfHOHoqi">Research (2025)</Link> shows attackers can poison base models to appear benign until users finetune them, at which point malicious behaviors emerge – unsolicited advertising, jailbreak vulnerabilities, or refusal of legitimate requests.
+      <b>Finetuning-Activated Backdoors (FAB).</b> <Link href="https://openreview.net/forum?id=VRvfHOHoqi">Research shows attackers can poison base models</Link> to appear benign until users finetune them, at which point malicious behaviors emerge – unsolicited advertising, jailbreak vulnerabilities, or refusal of legitimate requests.
     </Item>
     <Item>
-      <b>Privacy Backdoors.</b> <Link href="https://www.proceedings.com/content/079/079017-2652open.pdf">Carlini et al. (2025)</Link> demonstrated that poisoned pre-trained models amplify membership inference attacks during finetuning, exposing victims' training data at significantly higher rates than clean models.
+      <b>Privacy Backdoors.</b> <Link href="https://www.proceedings.com/content/079/079017-2652open.pdf">Research demonstrates poisoned pre-trained models</Link> amplify membership inference attacks during finetuning, exposing victims' training data at significantly higher rates than clean models.
     </Item>
     <Item>
       <b>Bias Injection & Reputation Attacks.</b> Coordinated campaigns can flood web crawls with fake reviews, misinformation, or biased content. Models trained on this data internalize the bias, affecting millions of users who trust the AI's outputs.
@@ -170,7 +170,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Targeting instruction datasets and human feedback loops.</p>
   <List>
     <Item>
-      <b>RLHF Manipulation.</b> Crowdworkers or compromised labelers mark dangerous content as "safe/helpful" or inject trigger-response pairs into instruction datasets. <Link href="https://arxiv.org/abs/2408.02946">AAAI 2025 research</Link> showed larger models (72B parameters) learn harmful behaviors from poisoned fine-tuning data 4× faster than smaller models.
+      <b>RLHF Manipulation.</b> Crowdworkers or compromised labelers mark dangerous content as "safe/helpful" or inject trigger-response pairs into instruction datasets. <Link href="https://arxiv.org/abs/2408.02946">Research shows larger models (72B parameters)</Link> learn harmful behaviors from poisoned fine-tuning data 4× faster than smaller models.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – canary examples and labeler auditing can catch inconsistencies.</p>
     </Item>
     <Item>
@@ -192,11 +192,11 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Targeting pre-trained models on public hubs.</p>
   <List>
     <Item>
-      <b>Model Hub Poisoning.</b> <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">PoisonGPT (2023)</Link> demonstrated uploading backdoored models to Hugging Face that spread misinformation while passing benchmarks. Malicious pickling can also execute arbitrary code during model loading.
+      <b>Model Hub Poisoning.</b> The <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">PoisonGPT demonstration</Link> showed uploading backdoored models to Hugging Face that spread misinformation while passing benchmarks. Malicious pickling can also execute arbitrary code during model loading.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – cryptographic verification and safetensors format prevent code execution.</p>
     </Item>
     <Item>
-      <b>Adversarial Data Manipulation (Nightshade).</b> <Link href="https://nightshade.cs.uchicago.edu/whatis.html">UChicago research</Link> allows artists to add imperceptible perturbations to images, causing models trained on them to misclassify objects (dogs → cats, cars → cows), degrading model quality as a form of copyright protest.
+      <b>Adversarial Data Manipulation (Nightshade).</b> The <Link href="https://nightshade.cs.uchicago.edu/whatis.html">Nightshade tool</Link> allows artists to add imperceptible perturbations to images, causing models trained on them to misclassify objects (dogs → cats, cars → cows), degrading model quality as a form of copyright protest.
       <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – perturbations are imperceptible to humans.</p>
     </Item>
   </List>
@@ -218,7 +218,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Vector: Pre-training data. Impact: Demonstrated practical feasibility of web crawl poisoning.</p>
     </Item>
     <Item>
-      <b>Sleeper Agents (2024).</b> <Link href="https://arxiv.org/html/2401.05566v3">Anthropic research</Link> trained models with persistent backdoors that behave normally until triggered. Models wrote secure code for 2023 prompts but inserted exploitable code for 2024 prompts. Standard safety training failed to remove these behaviors and sometimes enhanced concealment.
+      <b>Sleeper Agents (2024).</b> <Link href="https://arxiv.org/html/2401.05566v3">Research trained models with persistent backdoors</Link> that behave normally until triggered. Models wrote secure code for 2023 prompts but inserted exploitable code for 2024 prompts. Standard safety training failed to remove these behaviors and sometimes enhanced concealment.
       <p className="text-xs text-neutral-500 mt-1">Vector: Fine-tuning data. Impact: Proved backdoors survive safety training.</p>
     </Item>
   </List>
@@ -271,7 +271,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <Steps>
     <Step n={3}>
       <b>Statistical Anomaly Detection.</b>
-      <p className="text-sm mt-2">Before training, analyze data for: unusual keyword repetition (trigger patterns), toxicity score spikes, duplicate-near-duplicate clusters, domain concentration anomalies. <Link href="https://arxiv.org/abs/2508.01365">ConfGuard (2025)</Link> detects "sequence lock" patterns where backdoored models show abnormally high confidence on specific sequences.</p>
+      <p className="text-sm mt-2">Before training, analyze data for: unusual keyword repetition (trigger patterns), toxicity score spikes, duplicate-near-duplicate clusters, domain concentration anomalies. <Link href="https://arxiv.org/abs/2508.01365">ConfGuard detects "sequence lock" patterns</Link> where backdoored models show abnormally high confidence on specific sequences.</p>
     </Step>
     <Step n={4}>
       <b>Human-in-the-Loop Auditing.</b>
@@ -288,7 +288,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <Steps>
     <Step n={6}>
       <b>Red Team Testing & Backdoor Benchmarks.</b>
-      <p className="text-sm mt-2">After training, test the model with <Link href="https://huggingface.co/papers/2408.12798">BackdoorLLM benchmark</Link> (200+ experiments across 8 attack types). Systematically probe for backdoors using automated trigger search techniques. Monitor for performance regression on safety benchmarks.</p>
+      <p className="text-sm mt-2">After training, test the model with the <Link href="https://huggingface.co/papers/2408.12798">BackdoorLLM benchmark covering 200+ experiments</Link> across 8 attack types. Systematically probe for backdoors using automated trigger search techniques. Monitor for performance regression on safety benchmarks.</p>
     </Step>
     <Step n={7}>
       <b>Continuous Monitoring & Drift Detection.</b>

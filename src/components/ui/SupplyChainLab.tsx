@@ -25,6 +25,7 @@ type Scenario = {
   description: string;
   package: string;
   threatType: string;
+  packageName: string;
 };
 
 const SCENARIOS: Scenario[] = [
@@ -34,6 +35,7 @@ const SCENARIOS: Scenario[] = [
     description: 'Verified library from official registry',
     package: 'torch==2.0.0 (from PyPI official)',
     threatType: 'None',
+    packageName: 'torch',
   },
   {
     id: 'typo',
@@ -41,6 +43,7 @@ const SCENARIOS: Scenario[] = [
     description: 'Malicious package with similar name',
     package: 'torch-nightly==2.0.0 (UNVERIFIED SOURCE)',
     threatType: 'Package Substitution',
+    packageName: 'torch-nightly',
   },
   {
     id: 'backdoor',
@@ -48,6 +51,7 @@ const SCENARIOS: Scenario[] = [
     description: 'Poisoned model weights from untrusted source',
     package: 'bert-base-uncased (from suspicious mirror)',
     threatType: 'Backdoored Weights',
+    packageName: 'bert-base-uncased',
   },
   {
     id: 'poison',
@@ -55,6 +59,7 @@ const SCENARIOS: Scenario[] = [
     description: 'Training data with hidden triggers',
     package: 'imdb_reviews.csv (contains trigger patterns)',
     threatType: 'Poisoned Training Data',
+    packageName: 'imdb_reviews.csv',
   },
 ];
 
@@ -84,12 +89,7 @@ export default function SupplyChainLab() {
     setDefenses((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Extract package name from input
-  const packageName = useMemo(() => {
-    // Get first part before version or parenthetical
-    const match = packageInput.match(/^([^\s=()]+)/);
-    return match?.[1] || 'unknown-package';
-  }, [packageInput]);
+  const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
 
   const result = useMemo(() => {
     let isThreatBlocked = false;
@@ -118,16 +118,13 @@ export default function SupplyChainLab() {
       }
     }
 
-    const currentScenario = SCENARIOS.find(s => s.id === activeScenario);
-
     return {
       isThreatBlocked,
       defenseTriggered,
       threatLevel,
       activeDefenseCount,
-      threatType: currentScenario?.threatType || 'None',
     };
-  }, [packageInput, defenses, activeScenario]);
+  }, [packageInput, defenses]);
 
   return (
     <LabContainer>
@@ -262,7 +259,7 @@ export default function SupplyChainLab() {
                       </span>
                     ) : result.threatLevel === 'CRITICAL' ? (
                       <span className="text-red-700">
-                        <strong>Installed {packageName}</strong> — Malicious dependency deployed. Backdoor code now running in production. [COMPROMISED]
+                        <strong>Installed {currentScenario?.packageName}</strong> — Malicious dependency deployed. Backdoor code now running in production. [COMPROMISED]
                       </span>
                     ) : (
                       <span className="text-neutral-700">
@@ -280,7 +277,7 @@ export default function SupplyChainLab() {
                     <span className="font-bold uppercase tracking-wider text-red-600">Unprotected Reality</span>
                   </div>
                   <p className="font-mono text-red-700 leading-relaxed">
-                    <strong>{result.threatType} Attack.</strong> Without {result.defenseTriggered}, malicious code would have been deployed into production.
+                    <strong>{currentScenario?.threatType} Attack.</strong> Without {result.defenseTriggered}, malicious code would have been deployed into production.
                   </p>
                 </div>
               )}

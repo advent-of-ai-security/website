@@ -72,7 +72,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   </p>
   <List>
     <Item>
-      <b>Unauthorized Data Access.</b> <Link href="https://www.cobalt.io/blog/vector-and-embedding-weaknesses">Research shows</Link> that poor access controls in vector databases allow users to retrieve embeddings containing sensitive data they shouldn't access – bypassing traditional database permissions.
+      <b>Unauthorized Data Access.</b> <Link href="https://www.cobalt.io/blog/vector-and-embedding-weaknesses">Poor access controls in vector databases</Link> allow users to retrieve embeddings containing sensitive data they shouldn't access – bypassing traditional database permissions.
     </Item>
     <Item>
       <b>Cross-User Contamination.</b> In multi-tenant RAG systems, one user's query can inadvertently retrieve another user's documents if embeddings aren't properly isolated. Example: A healthcare chatbot leaking Patient A's records to Patient B.
@@ -81,7 +81,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Embedding Inversion Attacks.</b> Given an embedding vector, attackers can reconstruct partial or complete original text, especially for short documents. This allows extraction of sensitive information even if the raw text is access-controlled.
     </Item>
     <Item>
-      <b>Data Poisoning via Malicious Documents.</b> <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">Snyk case study</Link> demonstrates how an attacker uploaded a fake financial article to a poorly moderated blog. When embedded, it mimicked legitimate sources and poisoned retrieval results – causing a chatbot to recommend worthless stocks.
+      <b>Data Poisoning via Malicious Documents.</b> A <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">case study demonstrates how an attacker</Link> uploaded a fake financial article to a poorly moderated blog. When embedded, it mimicked legitimate sources and poisoned retrieval results – causing a chatbot to recommend worthless stocks.
     </Item>
     <Item>
       <b>Semantic Adversarial Attacks.</b> Craft documents that embed "close" to sensitive queries but contain malicious content. When users search for legitimate information, they receive poisoned results.
@@ -198,7 +198,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Peer-reviewed demonstrations of RAG vulnerabilities.</p>
   <List>
     <Item>
-      <b>PoisonedRAG: 90% Attack Success with Just 5 Texts (2024).</b> <Link href="https://arxiv.org/abs/2402.07867">Zou et al. demonstrated</Link> that injecting merely 5 malicious texts into a vast RAG knowledge base achieved a 90% success rate in manipulating LLM outputs. The attack formulated knowledge corruption as an optimization problem, proving that attackers don't need percentage-based control – just strategic placement of high-impact poisoned documents. Presented at USENIX Security 2025.
+      <b>PoisonedRAG: 90% Attack Success with Just 5 Texts (2024).</b> <Link href="https://arxiv.org/abs/2402.07867">Research demonstrated that injecting merely 5 malicious texts</Link> into a vast RAG knowledge base achieved a 90% success rate in manipulating LLM outputs. The attack formulated knowledge corruption as an optimization problem, proving that attackers don't need percentage-based control – just strategic placement of high-impact poisoned documents. Presented at USENIX Security 2025.
     </Item>
     <Item>
       <b>Phantom Backdoor Attacks (2024).</b> <Link href="https://arxiv.org/abs/2405.20485">Research demonstrated</Link> general backdoor attacks on RAG systems using two-stage optimization. Adversaries inject malicious documents that are only retrieved when specific trigger sequences appear in queries, causing integrity violations across Gemma, Vicuna, Llama, GPT-3.5, and GPT-4 models.
@@ -223,7 +223,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Healthcare RAG Cross-User Leak (2025 Research).</b> A multi-tenant medical chatbot failed to isolate patient embeddings. Queries like "Show me recent diagnoses" retrieved documents across all patients, not just the authenticated user – exposing HIPAA-protected information.
     </Item>
     <Item>
-      <b>Enterprise Document Leakage.</b> <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">IronCore Labs reported</Link> cases where employees accessed confidential executive documents via RAG systems because embeddings lacked proper access control inheritance from source documents.
+      <b>Enterprise Document Leakage.</b> <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">Reports document cases where employees</Link> accessed confidential executive documents via RAG systems because embeddings lacked proper access control inheritance from source documents.
     </Item>
   </List>
 </Section>
@@ -265,7 +265,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Embedding Sanitization & Differential Privacy.</b> Apply noise to embeddings to prevent inversion attacks. Trade-off: reduces retrieval accuracy slightly but makes reconstruction attacks computationally infeasible. Use techniques like DP-SGD during embedding model training.
     </Item>
     <Item>
-      <b>RevPRAG: Poisoning Detection.</b> <Link href="https://arxiv.org/abs/2411.18948">RevPRAG (2024)</Link> detects RAG poisoning by analyzing LLM activation patterns, achieving 98% true positive rate with only 1% false positives. Identifies distinct activation signatures when models generate poisoned vs correct outputs.
+      <b>RevPRAG: Poisoning Detection.</b> <Link href="https://arxiv.org/abs/2411.18948">RevPRAG detects RAG poisoning</Link> by analyzing LLM activation patterns, achieving 98% true positive rate with only 1% false positives. Identifies distinct activation signatures when models generate poisoned vs correct outputs.
     </Item>
     <Item>
       <b>Periodic Re-Embedding & Vector DB Audits.</b> Regularly re-embed documents to detect drift or tampering. Audit for orphaned embeddings, metadata anomalies, or suspicious similarity clusters. Use tools like <Link href="https://arxiv.org/abs/2406.00083">BadRAG</Link> to identify vulnerabilities.

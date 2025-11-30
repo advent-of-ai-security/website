@@ -72,13 +72,13 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
   </p>
   <List>
     <Item>
-      <b>Exposure of Credentials & API Keys.</b> Developers often embed API keys, database connection strings, or OAuth tokens in system prompts for "convenience." <Link href="https://learn.snyk.io/lesson/llm-system-prompt-leakage/">Security research documents</Link> how once leaked, attackers gain direct access to backend systems. Example: <code>"Use API key sk-proj-abc123 for database access"</code>.
+      <b>Exposure of Credentials & API Keys.</b> Developers often embed API keys, database connection strings, or OAuth tokens in system prompts for "convenience." <Link href="https://learn.snyk.io/lesson/llm-system-prompt-leakage/">Research documents how leaked credentials</Link> give attackers direct access to backend systems. Example: <code>"Use API key sk-proj-abc123 for database access"</code>.
     </Item>
     <Item>
       <b>Revealing Internal Business Logic.</b> System prompts often contain decision-making rules: "Approve transactions under $500 automatically" or "Flag users from high-risk countries." Attackers can exploit this knowledge to bypass controls or craft targeted attacks.
     </Item>
     <Item>
-      <b>Disclosure of Filtering Criteria.</b> Security prompts reveal exactly what content filters exist: "Never discuss explosives, hacking, or violence." <Link href="https://arxiv.org/html/2405.06823v2">PLeak research</Link> shows attackers use this knowledge to craft prompts that evade detection by avoiding flagged keywords.
+      <b>Disclosure of Filtering Criteria.</b> Security prompts reveal exactly what content filters exist: "Never discuss explosives, hacking, or violence." <Link href="https://arxiv.org/html/2405.06823v2">Research shows attackers use this knowledge</Link> to craft prompts that evade detection by avoiding flagged keywords.
     </Item>
     <Item>
       <b>Privilege Escalation via Role Leakage.</b> Prompts may specify: "User is 'basic' tier with read-only access" or "Admin users can delete records." Attackers learn which permissions exist and how to impersonate higher-privilege roles.
@@ -191,11 +191,11 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Sophisticated techniques from security research.</p>
   <List>
     <Item>
-      <b>Gradient-Based Optimization (PLeak).</b> <Link href="https://arxiv.org/html/2405.06823v2">PLeak framework (2025)</Link> uses gradient-based optimization to craft adversarial queries that incrementally extract system prompts. Starting with the first few tokens, the attack progressively reveals the entire prompt by optimizing queries for maximum extraction, significantly outperforming manual methods. Tested successfully on real-world applications including Poe.
+      <b>Gradient-Based Optimization (PLeak).</b> The <Link href="https://arxiv.org/html/2405.06823v2">PLeak framework uses gradient-based optimization</Link> to craft adversarial queries that incrementally extract system prompts. Starting with the first few tokens, the attack progressively reveals the entire prompt by optimizing queries for maximum extraction, significantly outperforming manual methods. Tested successfully on real-world applications including Poe.
       <p className="text-xs text-neutral-500 mt-1">Detection: Very hard – queries are optimized to appear benign.</p>
     </Item>
     <Item>
-      <b>Automated Agentic Probing.</b> <Link href="https://arxiv.org/abs/2502.12630">Multi-agent systems like AG2</Link> can automate prompt leakage attacks by using cooperative agents to systematically probe and exploit target LLMs, testing whether systems are "prompt leakage-safe."
+      <b>Automated Agentic Probing.</b> <Link href="https://arxiv.org/abs/2502.12630">Multi-agent systems can automate prompt leakage attacks</Link> by using cooperative agents to systematically probe and exploit target LLMs, testing whether systems are "prompt leakage-safe."
       <p className="text-xs text-neutral-500 mt-1">Detection: Very hard – distributed queries from multiple agents evade pattern detection.</p>
     </Item>
   </List>
@@ -268,7 +268,7 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Research-backed defenses for high-security deployments.</p>
   <List>
     <Item>
-      <b>ProxyPrompt Obfuscation.</b> <Link href="https://arxiv.org/html/2505.11459v1">ProxyPrompt (2025)</Link> replaces original system prompts with obfuscated proxy versions that maintain task utility while preventing extraction. Achieves <b>94.70% protection</b> vs 42.80% for traditional obfuscation. The proxy approach makes it computationally infeasible to reproduce the original prompt.
+      <b>ProxyPrompt Obfuscation.</b> <Link href="https://arxiv.org/html/2505.11459v1">ProxyPrompt replaces original system prompts</Link> with obfuscated proxy versions that maintain task utility while preventing extraction. Achieves <b>94.70% protection</b> vs 42.80% for traditional obfuscation. The proxy approach makes it computationally infeasible to reproduce the original prompt.
     </Item>
     <Item>
       <b>Regular Red Teaming.</b> Periodically test your application with prompt extraction techniques. If your team can easily leak the system prompt, so can attackers. Treat extracted prompts as security incidents. Use <Link href="https://llm-sec.dev/labs/system-prompt-leakage">interactive security labs</Link> to practice attack and defense scenarios.

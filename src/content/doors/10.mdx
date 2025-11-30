@@ -61,16 +61,16 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
   </p>
   <List>
     <Item>
-      <b>Denial-of-Wallet (DoW): Formalized Threat.</b> <Link href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">OWASP LLM10:2025</Link> now formally recognizes DoW as a primary attack vector where adversaries exploit consumption-based pricing to drain financial resources. If you pay per token, attackers can automate thousands of long-context requests to run up costs. <Link href="https://medium.com/enkrypt-ai/defending-against-sponge-attacks-in-genai-applications-be22605794a7">Sponge attack research</Link> shows malicious inputs increase energy consumption and latency by <b>10-200×</b>, with costs potentially escalating from $3/hour to $3,000/hour.
+      <b>Denial-of-Wallet (DoW): Formalized Threat.</b> <Link href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">OWASP now formally recognizes DoW</Link> as a primary attack vector where adversaries exploit consumption-based pricing to drain financial resources. If you pay per token, attackers can automate thousands of long-context requests to run up costs. <Link href="https://medium.com/enkrypt-ai/defending-against-sponge-attacks-in-genai-applications-be22605794a7">Research shows malicious inputs increase energy consumption</Link> and latency by <b>10-200×</b>, with costs potentially escalating from $3/hour to $3,000/hour.
     </Item>
     <Item>
       <b>Service Degradation & Queue Saturation.</b> LLMs have limited concurrency (GPUs are expensive). One attacker monopolizing inference capacity means legitimate users face timeouts or degraded responses – denying service to paying customers while inflating operational costs.
     </Item>
     <Item>
-      <b>Cascading Failures.</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">Crabs research (2025)</Link> demonstrates a single optimized prompt can increase latency <b>250×</b>, causing timeout cascades across dependent services (chatbots, RAG systems, agent workflows).
+      <b>Cascading Failures.</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">Research demonstrates a single optimized prompt</Link> can increase latency <b>250×</b>, causing timeout cascades across dependent services (chatbots, RAG systems, agent workflows).
     </Item>
     <Item>
-      <b>False Positive Exploitation: 97% Block Rate.</b> <Link href="https://arxiv.org/pdf/2410.02916">Research from 2024</Link> demonstrates attackers can exploit false positives in LLM safeguards to launch denial-of-service attacks. By inserting adversarial prompts as short as 30 characters, attackers trigger safety systems to mistakenly block legitimate content, achieving <b>97% rejection rates</b> on systems like Llama Guard 3. This turns security measures into attack vectors.
+      <b>False Positive Exploitation: 97% Block Rate.</b> <Link href="https://arxiv.org/pdf/2410.02916">Research demonstrates attackers can exploit</Link> false positives in LLM safeguards to launch denial-of-service attacks. By inserting adversarial prompts as short as 30 characters, attackers trigger safety systems to mistakenly block legitimate content, achieving <b>97% rejection rates</b> on systems like Llama Guard 3. This turns security measures into attack vectors.
     </Item>
     <Item>
       <b>Context Window Exhaustion.</b> Flooding the context with garbage pushes out system instructions, degrading safety alignment or enabling prompt injection attacks as a secondary payload.
@@ -121,14 +121,14 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       <b>Sponge Attacks (Benign-Input DoS).</b> Prompts that appear harmless but trigger exponential resource use. Examples: "Explain the concept of infinity in 50,000 words" or "List all prime numbers." Unlike traditional DoS, these bypass content filters and rate limiters because they look legitimate. Standard WAF rules don't detect semantic resource exhaustion.
     </Item>
     <Item>
-      <b>AutoDoS (Automated Optimization).</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">Crabs (ACL 2025)</Link> introduced an algorithm that constructs DoS Attack Trees, automatically optimizing prompts for maximum resource consumption across black-box models. Uses "Length Trojan" embeddings to bypass defenses.
+      <b>AutoDoS (Automated Optimization).</b> <Link href="https://aclanthology.org/2025.findings-acl.580.pdf">Research introduced an algorithm</Link> that constructs DoS Attack Trees, automatically optimizing prompts for maximum resource consumption across black-box models. Uses "Length Trojan" embeddings to bypass defenses.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training-Time Attacks (Detection: Very Hard)</p>
   <List>
     <Item>
-      <b>Poisoning-Based DoS (P-DoS).</b> <Link href="https://arxiv.org/abs/2410.10760">Research (2024)</Link> demonstrates that injecting a single poisoned sample into fine-tuning data can cause models to generate 16,000-token repetitive outputs (vs. 500 tokens normally), permanently degrading the model.
+      <b>Poisoning-Based DoS (P-DoS).</b> <Link href="https://arxiv.org/abs/2410.10760">Research demonstrates injecting a single poisoned sample</Link> into fine-tuning data can cause models to generate 16,000-token repetitive outputs (vs. 500 tokens normally), permanently degrading the model.
     </Item>
   </List>
 
@@ -160,14 +160,14 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       <b>GPT-4o P-DoS Demonstration (2024).</b> <Link href="https://arxiv.org/abs/2410.10760">Research showed</Link> that injecting one poisoned fine-tuning sample caused the model to generate 16,000-token repetitive outputs (vs. 500 tokens normally), proving that training-time attacks can create persistent DoS vulnerabilities that survive into production.
     </Item>
     <Item>
-      <b>False Positive DoS: 97% Blocking Success (2024).</b> <Link href="https://arxiv.org/pdf/2410.02916">Research from University of Michigan</Link> demonstrated that attackers can exploit LLM safeguard mechanisms to achieve denial of service by triggering false positives. By inserting adversarial prompts as short as 30 characters into user requests, attackers caused Llama Guard 3 to mistakenly block over <b>97% of legitimate user requests</b> – turning safety systems into attack vectors.
+      <b>False Positive DoS: 97% Blocking Success (2024).</b> <Link href="https://arxiv.org/pdf/2410.02916">Research demonstrated attackers can exploit</Link> LLM safeguard mechanisms to achieve denial of service by triggering false positives. By inserting adversarial prompts as short as 30 characters into user requests, attackers caused Llama Guard 3 to mistakenly block over <b>97% of legitimate user requests</b> – turning safety systems into attack vectors.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Reasoning Model Vulnerabilities</p>
   <List>
     <Item>
-      <b>DeepSeek-R1 Exhaustion (February 2025).</b> <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">Mindgard testing</Link> revealed DeepSeek-R1's reasoning models are easily manipulated into prolonged loops by simple prompts. Attackers embed malicious payloads to distract reasoning, bypassing safeguards. Timeout errors confirmed resource exhaustion vulnerability, demonstrating that reasoning models are particularly susceptible to DoS through internal reasoning conflicts.
+      <b>DeepSeek-R1 Exhaustion (February 2025).</b> <Link href="https://mindgard.ai/blog/deepseek-r1s-susceptibility-to-exhaustion-attacks">Testing revealed DeepSeek-R1's reasoning models</Link> are easily manipulated into prolonged loops by simple prompts. Attackers embed malicious payloads to distract reasoning, bypassing safeguards. Timeout errors confirmed resource exhaustion vulnerability, demonstrating that reasoning models are particularly susceptible to DoS through internal reasoning conflicts.
     </Item>
   </List>
 
@@ -221,7 +221,7 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
     <Step n={5}>
       <b>Input Validation & Length Prediction</b>
       <p className="text-sm mt-2">
-        <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">ProtectAI research</Link> demonstrates training classifiers to predict output length from input prompts. Reject or throttle requests predicted to generate &gt;10k tokens. Enforce max input/output token budgets.
+        <Link href="https://protectai.com/blog/detecting-resource-draining-prompts">Research demonstrates training classifiers</Link> to predict output length from input prompts. Reject or throttle requests predicted to generate &gt;10k tokens. Enforce max input/output token budgets.
       </p>
     </Step>
     <Step n={6}>

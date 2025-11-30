@@ -141,7 +141,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Detection: Low difficulty – package name verification and lockfiles prevent this.</p>
     </Item>
     <Item>
-      <b>Dependency Confusion.</b> <Link href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">Alex Birsan's original research</Link> showed attackers publish malicious packages with the same name as internal private packages to public registries. When your build system resolves dependencies, it may pull the attacker's public version instead of your internal one.
+      <b>Dependency Confusion.</b> <Link href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">Original research on dependency confusion</Link> showed attackers publish malicious packages with the same name as internal private packages to public registries. When your build system resolves dependencies, it may pull the attacker's public version instead of your internal one.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – requires proper registry configuration and namespace protection.</p>
     </Item>
     <Item>
@@ -158,7 +158,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – tools like Picklescan can detect known patterns, but obfuscation is possible.</p>
     </Item>
     <Item>
-      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research on LoRA backdoors</Link> shows their small size makes them easy to distribute and harder to audit – a malicious adapter can subtly alter outputs without triggering obvious red flags.
+      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research shows these adapters' small size</Link> makes them easy to distribute and harder to audit – a malicious adapter can subtly alter outputs without triggering obvious red flags.
       <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – behavioral changes may only manifest on specific inputs.</p>
     </Item>
     <Item>
