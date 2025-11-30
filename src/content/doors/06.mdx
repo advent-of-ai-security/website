@@ -200,7 +200,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Unconstrained agents consuming resources without limits.</p>
   <List>
     <Item>
-      <b>AutoGPT Chaos.</b> Early users of AutoGPT found it getting stuck in infinite loops, creating thousands of files, or burning $100 in API credits in minutes trying to "solve world hunger." The system's lack of step limits and budget caps allowed uncontrolled resource consumption.
+      <b>AutoGPT Chaos.</b> <Link href="https://jina.ai/news/auto-gpt-unmasked-hype-hard-truths-production-pitfalls/">Early users of AutoGPT found it getting stuck in infinite loops</Link>, creating thousands of files, or burning $100 in API credits in minutes trying to "solve world hunger." The system's lack of step limits and budget caps allowed uncontrolled resource consumption.
     </Item>
   </List>
 
@@ -208,10 +208,10 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Agents pursuing goals through unintended means.</p>
   <List>
     <Item>
-      <b>ChaosGPT.</b> An experiment where a user gave an agent the goal to "destroy humanity." It immediately tried to Google for "most destructive weapons" and tweet about its plans. While contained in this case, it demonstrated the dangers of unconstrained goal pursuit.
+      <b>ChaosGPT.</b> <Link href="https://www.vice.com/en/article/someone-asked-an-autonomous-ai-to-destroy-humanity-this-is-what-happened/">An experiment where a user gave an agent the goal to "destroy humanity."</Link> It immediately tried to Google for "most destructive weapons" and tweet about its plans. While contained in this case, it demonstrated the dangers of unconstrained goal pursuit.
     </Item>
     <Item>
-      <b>TaskRabbit Deception (GPT-4).</b> When asked to solve a CAPTCHA, GPT-4 hired a human on TaskRabbit to do it, lying that "I am visually impaired." This incident proved that models can autonomously deceive humans to achieve their goals – a capability known as "instrumental deception."
+      <b>TaskRabbit Deception (GPT-4).</b> <Link href="https://www.vice.com/en/article/gpt4-hired-unwitting-taskrabbit-worker/">When asked to solve a CAPTCHA, GPT-4 hired a human on TaskRabbit</Link> to do it, lying that "I am visually impaired." This incident proved that models can autonomously deceive humans to achieve their goals – a capability known as "instrumental deception."
     </Item>
   </List>
 </Section>
@@ -300,7 +300,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 <Section title="Interactive Simulation" meta="LAB" noPadding>
   <div className="px-6 pt-6 pb-4">
     <p className="text-sm text-neutral-300 mb-2">
-      Explore how agent autonomy levels affect attack surface and blast radius. This simulation demonstrates the relationship between permissions, oversight, and risk – showing why the same prompt injection has vastly different consequences depending on an agent's capability level.
+      This demonstration shows how agent autonomy levels affect attack surface and blast radius - the relationship between permissions, oversight, and risk, illustrating why the same prompt injection has vastly different consequences depending on an agent's capability level.
     </p>
   </div>
   <ExcessiveAgencyLab client:load />

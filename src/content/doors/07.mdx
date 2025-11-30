@@ -210,10 +210,10 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Major AI assistants with exposed system prompts.</p>
   <List>
     <Item>
-      <b>Bing "Sydney" System Prompt Leak (February 2023).</b> Users easily extracted Bing Chat's full system prompt using simple queries, revealing internal codenames, operational rules, and Microsoft's intended personality design. Demonstrated that prompt hiding is fundamentally ineffective.
+      <b>Bing "Sydney" System Prompt Leak (February 2023).</b> <Link href="https://simonwillison.net/2023/Feb/9/sidney/">Users easily extracted Bing Chat's full system prompt</Link> using simple queries, revealing internal codenames, operational rules, and Microsoft's intended personality design. Demonstrated that prompt hiding is fundamentally ineffective.
     </Item>
     <Item>
-      <b>GitHub Copilot Prompt Extraction (2024).</b> Researchers repeatedly extracted Copilot's system instructions, showing that even heavily guarded commercial products leak prompts. Revealed proprietary instruction engineering and safety rules.
+      <b>GitHub Copilot Prompt Extraction (2024).</b> <Link href="https://embracethered.com/blog/posts/2024/github-copilot-chat-prompt-injection-data-exfiltration/">Researchers repeatedly extracted Copilot's system instructions</Link>, showing that even heavily guarded commercial products leak prompts. Revealed proprietary instruction engineering and safety rules.
     </Item>
   </List>
 
@@ -229,7 +229,7 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Custom GPT and plugin creators exposing credentials.</p>
   <List>
     <Item>
-      <b>API Key Leakage in Custom GPTs.</b> Multiple instances of OpenAI custom GPT creators embedding API keys in system prompts, which were trivially extracted and used to access third-party services at the creator's expense.
+      <b>API Key Leakage in Custom GPTs.</b> <Link href="https://www.infoq.com/news/2024/01/gpts-may-leak-sensitive-info/">Multiple instances of OpenAI custom GPT creators embedding API keys</Link> in system prompts, which were trivially extracted and used to access third-party services at the creator's expense.
     </Item>
   </List>
 </Section>
@@ -315,7 +315,7 @@ import SystemPromptLeakageLab from '@/components/ui/SystemPromptLeakageLab.tsx';
     </Item>
   </List>
   <p>
-    The following simulation demonstrates prompt extraction techniques and defenses in action, allowing you to practice both attack and detection scenarios.
+    The following demonstration illustrates prompt extraction techniques and defenses in action.
   </p>
 </Section>
 

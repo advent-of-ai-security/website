@@ -214,7 +214,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Research Demonstrations</p>
   <List>
     <Item>
-      <b>Anthropic 250-Sample Backdoor (October 2025).</b> Largest data poisoning study to date, testing models from 600M to 13B parameters. Proved that <b>250 malicious documents</b> can backdoor any LLM, independent of dataset size. Challenges previous assumptions about requiring percentage-based data control.
+      <b>Anthropic 250-Sample Backdoor (October 2025).</b> <Link href="https://www.anthropic.com/research/small-samples-poison">Largest data poisoning study to date</Link>, testing models from 600M to 13B parameters. Proved that <b>250 malicious documents</b> can backdoor any LLM, independent of dataset size. Challenges previous assumptions about requiring percentage-based data control.
       <p className="text-xs text-neutral-500 mt-1">Vector: Pre-training data. Impact: Demonstrated practical feasibility of web crawl poisoning.</p>
     </Item>
     <Item>
@@ -226,7 +226,7 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Production Incidents</p>
   <List>
     <Item>
-      <b>Microsoft Tay Bot (2016).</b> The classic case: a chatbot learning from real-time Twitter interactions. Coordinated trolls flooded it with racist content, and within 16 hours, Tay became a hate-speech generator, forcing Microsoft to shut it down.
+      <b>Microsoft Tay Bot (2016).</b> <Link href="https://spectrum.ieee.org/in-2016-microsofts-racist-chatbot-revealed-the-dangers-of-online-conversation">The classic case</Link>: a chatbot learning from real-time Twitter interactions. Coordinated trolls flooded it with racist content, and within 16 hours, Tay became a hate-speech generator, forcing Microsoft to shut it down.
       <p className="text-xs text-neutral-500 mt-1">Vector: Real-time fine-tuning. Impact: Reputational damage, product shutdown.</p>
     </Item>
     <Item>
@@ -338,14 +338,14 @@ import DataModelPoisoningLab from '@/components/ui/DataModelPoisoningLab.tsx';
   </List>
 
   <p className="mt-4">
-    Ready to test these concepts? The interactive simulation below lets you explore how training data poisoning works and experiment with detection strategies.
+    The following demonstration illustrates how training data poisoning works and how detection mechanisms respond.
   </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
   <div className="px-6 pt-6 pb-4">
     <p className="text-sm text-neutral-300 mb-2">
-      Explore how training data poisoning works. Select different scenarios to see how malicious samples embed backdoors and how triggers activate hidden behaviors, then observe how detection mechanisms respond.
+      This demonstration shows how malicious samples embed backdoors during training, how triggers activate hidden behaviors, and how detection mechanisms identify poisoned models.
     </p>
   </div>
   <DataModelPoisoningLab client:load />

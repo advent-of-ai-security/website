@@ -85,7 +85,7 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
     </Item>
   </List>
   <p>
-    Now that we understand what prompt injection is and why it matters, let us examine the two primary ways attackers exploit this vulnerability.
+    Now that we understand what prompt injection is and why it matters, let's examine the two primary ways attackers exploit this vulnerability.
   </p>
 </Section>
 
@@ -181,11 +181,11 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">System Prompt Extraction</p>
   <List>
     <Item>
-      <b>Bing Chat "Sydney" Leak (Feb 2023).</b> The watershed incident. Users extracted the full system prompt, internal codenames ("Sydney"), and operational rules via direct injection, proving that "hidden" instructions are fundamentally insecure in current LLM architectures.
+      <b>Bing Chat "Sydney" Leak (Feb 2023).</b> The watershed incident. <Link href="https://simonwillison.net/2023/Feb/9/sidney/">Users extracted the full system prompt</Link>, internal codenames ("Sydney"), and operational rules via direct injection, proving that "hidden" instructions are fundamentally insecure in current LLM architectures.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Direct injection. Impact: Intellectual property exposure.</p>
     </Item>
     <Item>
-      <b>GitHub Copilot System Prompt Leakage (2024).</b> Researchers repeatedly extracted Copilot's system instructions through carefully crafted prompts, demonstrating the difficulty of protecting intellectual property and operational logic in LLM-based systems.
+      <b>GitHub Copilot System Prompt Leakage (2024).</b> <Link href="https://embracethered.com/blog/posts/2024/github-copilot-chat-prompt-injection-data-exfiltration/">Researchers repeatedly extracted Copilot's system instructions</Link> through carefully crafted prompts, demonstrating the difficulty of protecting intellectual property and operational logic in LLM-based systems.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Direct injection. Impact: Operational logic exposure.</p>
     </Item>
   </List>
@@ -193,11 +193,11 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Data Exfiltration</p>
   <List>
     <Item>
-      <b>ChatGPT Plugin Exfiltration (2023).</b> Indirect injection via the web browsing plugin forced ChatGPT to make GET requests to third-party servers, leaking conversation history. Attack vector: malicious instructions hidden in web page metadata.
+      <b>ChatGPT Plugin Exfiltration (2023).</b> <Link href="https://embracethered.com/blog/posts/2023/chatgpt-plugin-vulns-chat-with-code/">Indirect injection via the web browsing plugin</Link> forced ChatGPT to make GET requests to third-party servers, leaking conversation history. Attack vector: malicious instructions hidden in web page metadata.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Indirect injection. Impact: Conversation data leaked.</p>
     </Item>
     <Item>
-      <b>Microsoft 365 Copilot - EchoLeak (CVE-2025-32711).</b> Zero-click prompt injection via email allowed attackers to exfiltrate internal files from SharePoint and OneDrive. The attack bypassed all existing security controls, earning a CVE designation. Disclosed in August 2025.
+      <b>Microsoft 365 Copilot - EchoLeak (CVE-2025-32711).</b> <Link href="https://arxiv.org/abs/2509.10540">Zero-click prompt injection via email</Link> allowed attackers to exfiltrate internal files from SharePoint and OneDrive. The attack bypassed all existing security controls, earning a CVE designation. Disclosed in August 2025.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Indirect injection (email). Impact: Internal file exfiltration.</p>
     </Item>
     <Item>
@@ -209,7 +209,7 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Autonomous Propagation</p>
   <List>
     <Item>
-      <b>Morris II AI Worm (March 2024).</b> First demonstration of a self-replicating generative AI worm. Spread autonomously through email assistants using adversarial self-replicating prompts, forcing infected agents to forward the malicious payload to new contacts.
+      <b>Morris II AI Worm (March 2024).</b> <Link href="https://arxiv.org/abs/2403.02817">First demonstration of a self-replicating generative AI worm</Link>. Spread autonomously through email assistants using adversarial self-replicating prompts, forcing infected agents to forward the malicious payload to new contacts.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Self-replicating indirect injection. Impact: Autonomous malware propagation.</p>
     </Item>
   </List>
@@ -217,7 +217,7 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tool Abuse</p>
   <List>
     <Item>
-      <b>Mistral LeChat - Imprompter Attack (Oct 2024).</b> Researchers achieved 80% success in forcing the LeChat agent to exfiltrate PII using markdown injection and tool-use manipulation – sending private conversation data to attacker servers via GET requests.
+      <b>Mistral LeChat - Imprompter Attack (Oct 2024).</b> <Link href="https://arxiv.org/abs/2410.14923">Researchers achieved 80% success</Link> in forcing the LeChat agent to exfiltrate PII using markdown injection and tool-use manipulation – sending private conversation data to attacker servers via GET requests.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Tool-use exploitation. Impact: PII exfiltration via API calls.</p>
     </Item>
   </List>
@@ -350,14 +350,14 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
   </List>
 
   <p className="mt-4">
-    Ready to apply these concepts? The interactive lab below lets you experiment with attack and defense scenarios in a safe environment.
+    The following demonstration illustrates how attack scenarios interact with defense mechanisms.
   </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
   <div className="px-6 pt-6 pb-4">
     <p className="text-sm text-neutral-300 mb-2">
-      Select attack scenarios and toggle security gates to see how defenses block or fail to block different patterns. Compare direct injection, indirect injection, and legitimate requests to understand why architectural controls matter.
+      This demonstration shows how different attack patterns - direct injection, indirect injection, and legitimate requests - interact with security controls, illustrating why architectural defenses matter.
     </p>
   </div>
   <PromptInjectionLab client:load />
@@ -453,7 +453,7 @@ import PromptInjectionLab from '@/components/ui/PromptInjectionLab.tsx';
       <Link href="https://kai-greshake.de/posts/inject-my-pdf">Inject My PDF: Prompt Injection for your Resume</Link> – Kai Greshake, practical PDF injection demo.
     </Item>
     <Item>
-      <Link href="https://aivillage.org/large%20language%20models/threat-modeling-llm/">Threat Modeling LLM Applications</Link> – AI Village threat modeling guide.
+      <Link href="https://aivillage.org/large%20language%20models/2023/06/06/threat-modeling-llm">Threat Modeling LLM Applications</Link> – AI Village threat modeling guide.
     </Item>
     <Item>
       <Link href="https://research.kudelskisecurity.com/2023/05/25/reducing-the-impact-of-prompt-injection-attacks-through-design/">Reducing The Impact of Prompt Injection Attacks Through Design</Link> – Kudelski Security, architectural mitigations.

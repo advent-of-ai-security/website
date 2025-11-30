@@ -193,7 +193,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Attack surface: Software dependencies. Impact: System data exfiltration at scale.</p>
     </Item>
     <Item>
-      <b>SolarWinds Orion (2020).</b> While not AI-specific, this attack demonstrated the devastating potential of supply chain compromise. Attackers infiltrated the build pipeline, distributing backdoored updates to 18,000+ organizations including US government agencies. The same techniques apply to ML pipelines.
+      <b>SolarWinds Orion (2020).</b> While not AI-specific, <Link href="https://www.cisa.gov/news-events/alerts/2021/01/07/supply-chain-compromise">this attack demonstrated the devastating potential of supply chain compromise</Link>. Attackers infiltrated the build pipeline, distributing backdoored updates to 18,000+ organizations including US government agencies. The same techniques apply to ML pipelines.
       <p className="text-xs text-neutral-500 mt-1">Attack surface: Build pipeline. Impact: Widespread corporate and government network compromise.</p>
     </Item>
   </List>
@@ -205,7 +205,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Attack surface: Model artifacts. Impact: Demonstrated feasibility of backdoored model distribution.</p>
     </Item>
     <Item>
-      <b>Malicious Pickle Models on Hugging Face.</b> Security researchers discovered hundreds of models on Hugging Face containing malicious pickle payloads capable of arbitrary code execution. These models could steal credentials, install backdoors, or exfiltrate data from anyone who loaded them.
+      <b>Malicious Pickle Models on Hugging Face.</b> <Link href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/">Security researchers discovered hundreds of models on Hugging Face</Link> containing malicious pickle payloads capable of arbitrary code execution. These models could steal credentials, install backdoors, or exfiltrate data from anyone who loaded them.
       <p className="text-xs text-neutral-500 mt-1">Attack surface: Model artifacts (pickle). Impact: Potential RCE on developer/production machines.</p>
     </Item>
   </List>
@@ -308,14 +308,14 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   </List>
 
   <p className="mt-4">
-    Ready to test these concepts? The interactive simulation below lets you explore supply chain attack scenarios and practice identifying warning signs before deployment.
+    The following demonstration illustrates supply chain attack scenarios and the warning signs that indicate compromise.
   </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
   <div className="px-6 pt-6 pb-4">
     <p className="text-sm text-neutral-300 mb-2">
-      Use this simulation to explore supply chain attack scenarios. Examine how malicious packages and model files can compromise your environment, and practice identifying the warning signs before deployment.
+      This demonstration shows how malicious packages and model files can compromise environments, highlighting the warning signs that indicate supply chain attacks.
     </p>
   </div>
   <SupplyChainLab client:load />

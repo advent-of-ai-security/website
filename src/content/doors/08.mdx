@@ -204,7 +204,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Phantom Backdoor Attacks (2024).</b> <Link href="https://arxiv.org/abs/2405.20485">Research demonstrated</Link> general backdoor attacks on RAG systems using two-stage optimization. Adversaries inject malicious documents that are only retrieved when specific trigger sequences appear in queries, causing integrity violations across Gemma, Vicuna, Llama, GPT-3.5, and GPT-4 models.
     </Item>
     <Item>
-      <b>Embedding Reconstruction Attack.</b> Researchers demonstrated reconstructing PII from embedding vectors with 70%+ accuracy for documents under 100 words – highlighting that embeddings are not anonymized representations.
+      <b>Embedding Reconstruction Attack.</b> <Link href="https://aclanthology.org/2024.acl-long.230/">Researchers demonstrated reconstructing PII from embedding vectors</Link> with 70%+ accuracy for documents under 100 words – highlighting that embeddings are not anonymized representations.
     </Item>
   </List>
 
@@ -212,7 +212,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Malicious content injection affecting production systems.</p>
   <List>
     <Item>
-      <b>FinBot Stock Manipulation (Snyk Case Study).</b> An attacker named "Eve" exploited a financial chatbot by submitting a fake blog article promoting a worthless stock. The article was written to mimic legitimate financial advice, causing its embedding to cluster with credible sources. When users asked for safe investments, the poisoned article was retrieved and recommended.
+      <b>FinBot Stock Manipulation (Snyk Case Study).</b> <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">An attacker named "Eve" exploited a financial chatbot</Link> by submitting a fake blog article promoting a worthless stock. The article was written to mimic legitimate financial advice, causing its embedding to cluster with credible sources. When users asked for safe investments, the poisoned article was retrieved and recommended.
     </Item>
   </List>
 
@@ -220,7 +220,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Tenant isolation and permission inheritance vulnerabilities.</p>
   <List>
     <Item>
-      <b>Healthcare RAG Cross-User Leak (2025 Research).</b> A multi-tenant medical chatbot failed to isolate patient embeddings. Queries like "Show me recent diagnoses" retrieved documents across all patients, not just the authenticated user – exposing HIPAA-protected information.
+      <b>Healthcare RAG Cross-User Leak.</b> <Link href="https://cloudsecurityalliance.org/blog/2023/11/22/mitigating-security-risks-in-retrieval-augmented-generation-rag-llm-applications">A multi-tenant medical chatbot failed to isolate patient embeddings</Link>. Queries like "Show me recent diagnoses" retrieved documents across all patients, not just the authenticated user – exposing HIPAA-protected information.
     </Item>
     <Item>
       <b>Enterprise Document Leakage.</b> <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">Reports document cases where employees</Link> accessed confidential executive documents via RAG systems because embeddings lacked proper access control inheritance from source documents.
@@ -312,14 +312,14 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
     </Item>
   </List>
   <p>
-    The following simulation demonstrates RAG vulnerabilities in action, allowing you to experiment with poisoning attacks, cross-tenant leakage, and similarity hijacking scenarios.
+    The following demonstration illustrates RAG vulnerabilities in action, including poisoning attacks, cross-tenant leakage, and similarity hijacking scenarios.
   </p>
 </Section>
 
 <Section title="Interactive Simulation" meta="LAB" noPadding>
   <div className="px-6 pt-6 pb-4">
     <p className="text-sm text-neutral-300 mb-2">
-      Explore how RAG systems can be exploited through poisoning, cross-tenant leakage, and similarity hijacking. This simulation demonstrates the impact of weak access controls and how adversarial documents can manipulate retrieval results.
+      This demonstration shows how RAG systems can be exploited through poisoning, cross-tenant leakage, and similarity hijacking - the impact of weak access controls and how adversarial documents manipulate retrieval results.
     </p>
   </div>
   <VectorWeaknessLab client:load />
