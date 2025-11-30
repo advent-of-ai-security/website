@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { startOfDayUTC, isSameUTC, formatDateLabel, slugCollator } from '@/utils/dates';
 import FooterLinks from './FooterLinks';
 import Countdown from './Countdown';
+import { List, Item } from './ui/List';
 
 
 export type DoorState = 'locked' | 'today' | 'open';
@@ -181,6 +182,27 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
           </li>
         ))}
       </ol>
+
+      <section className="grid gap-[var(--shell-gap)]">
+        <div className="shell-section__card border border-black bg-white">
+          <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
+            <span>Other Advent Resources</span>
+          </header>
+          <div className="shell-section__body">
+            <List>
+              <Item>
+                <a href="https://adventofcode.com" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Code</a> - The original programming puzzle advent calendar (honorable mention)
+              </Item>
+              <Item>
+                <a href="https://advent.cloudsecuritypodcast.tv" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Cloud Security</a> - 24 days of cloud security videos from the Cloud Security Podcast
+              </Item>
+              <Item>
+                <a href="https://blog.securitybreak.io/genai-x-sec-advent-2025-edition-32c52ff753b4" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">GenAI x Sec Advent</a> - Daily GenAI security use cases by Thomas Roccia (threat intel, PCAP analysis, RAG)
+              </Item>
+            </List>
+          </div>
+        </div>
+      </section>
 
       <section className="grid gap-[var(--shell-gap)]">
         <FooterLinks />
