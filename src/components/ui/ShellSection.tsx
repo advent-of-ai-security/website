@@ -32,7 +32,7 @@ export default function ShellSection({ title, meta, children, className, anchorI
           ) : (
             <span>{title}</span>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-[calc(var(--shell-gap)/2)]">
             {meta && (
               <span className="text-black/50 text-[0.6rem] tracking-[0.4em]">{meta}</span>
             )}

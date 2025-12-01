@@ -25,7 +25,7 @@ export default function Section({
           noPadding={!!noPadding}
           {...(meta !== undefined ? { meta } : {})}
           {...(className !== undefined ? { className } : {})}>
-      {noPadding ? children : <div className="space-y-3">{children}</div>}
+      {children}
     </ShellSection>
   );
 }

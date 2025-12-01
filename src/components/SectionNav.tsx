@@ -95,8 +95,8 @@ export default function SectionNav() {
           >
             <span
               className={[
-                'h-8 w-8 shrink-0 inline-flex items-center justify-center',
-                'border text-[0.58rem] tracking-[0.15em] transition-all duration-150',
+                'h-[calc(var(--shell-gap)*1.5)] w-[calc(var(--shell-gap)*1.5)] shrink-0 inline-flex items-center justify-center',
+                'border text-[11px] tracking-[0.15em] transition-all duration-150',
                 'hover:border-black/80 hover:bg-black/5 hover:text-black',
                 isActive
                   ? 'border-black bg-black text-white'

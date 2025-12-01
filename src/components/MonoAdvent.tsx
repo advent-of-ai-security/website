@@ -3,16 +3,6 @@ import { startOfDayUTC, isSameUTC, formatDateLabel, slugCollator } from '@/utils
 import FooterLinks from './FooterLinks';
 import Countdown from './Countdown';
 
-const ANIMATIONS_CSS = `
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-stagger {
-  animation: fadeSlideIn 0.5s ease-out backwards;
-  animation-delay: calc(var(--index) * 50ms);
-}
-`;
 
 export type DoorState = 'locked' | 'today' | 'open';
 
@@ -90,10 +80,8 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
 
 
   return (
-    <>
-      <style>{ANIMATIONS_CSS}</style>
     <section
-      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col gap-[var(--shell-gap)]"
+      className="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-sans),'IBM_Plex_Sans',sans-serif] flex flex-col gap-[var(--shell-gap)]"
       aria-labelledby="title"
     >
       <header className="grid gap-[var(--shell-gap)]">
@@ -109,7 +97,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
       </header>
 
       <section className="grid gap-[var(--shell-gap)]">
-        <div className="shell-section__card border border-black bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+        <div className="shell-section__card border border-black bg-white">
           <header className="shell-section__header flex flex-wrap items-center justify-between border-b border-black text-[0.7rem] uppercase tracking-[0.16em] sm:text-[0.75rem] sm:tracking-[0.25em]">
             <span>Welcome - December 2025 Beta</span>
           </header>
@@ -135,11 +123,10 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
       </section>
 
       <ol className="grid lg:grid-cols-2 gap-[var(--shell-gap)]" role="list">
-        {doors.map((d, index) => (
+        {doors.map((d) => (
           <li
             key={d.slug}
-            className="group animate-stagger"
-            style={{ '--index': index } as React.CSSProperties}
+            className="group"
           >
             {(() => {
               const canVisit = unlockAll || d.state === 'open' || d.state === 'today';
@@ -199,6 +186,5 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
         <FooterLinks />
       </section>
     </section>
-    </>
   );
 }

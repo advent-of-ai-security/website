@@ -1,9 +1,7 @@
 ---
-import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
 import MonoAdvent from '@/components/MonoAdvent.tsx';
 import type { DoorDocument, DoorState } from '@/components/MonoAdvent.tsx';
-import SEO from '@/components/SEO.astro';
-import { Font } from 'astro:assets';
 import { UNLOCK_ALL_DOORS } from 'astro:env/server';
 import { getCollection } from 'astro:content';
 import { startOfDayUTC, slugCollator } from '@/utils/dates';
@@ -43,34 +41,18 @@ const doors: DoorDocument[] = doorsCollection
   .sort((a, b) => slugCollator.compare(a.slug, b.slug));
 ---
 
-<!doctype html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <Font cssVariable="--font-plex-mono" preload />
-    <SEO
-      title={title}
-      description={description}
-      type="website"
-      canonicalPath="/"
-      image="/favicon.svg"
-      siteName={siteName}
-      jsonLd={{
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: siteName,
-        url: new URL('/', Astro.site ?? Astro.url).toString(),
-        description,
-      }}
-    />
-  </head>
-  <body>
-    <div id="top"></div>
-    <MonoAdvent client:only="react" unlockAll={UNLOCK_ALL_DOORS} doors={doors} />
-  </body>
-</html>
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/"
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteName,
+    url: new URL('/', Astro.site ?? Astro.url).toString(),
+    description,
+  }}
+>
+  <div id="top"></div>
+  <MonoAdvent client:only="react" unlockAll={UNLOCK_ALL_DOORS} doors={doors} />
+</BaseLayout>

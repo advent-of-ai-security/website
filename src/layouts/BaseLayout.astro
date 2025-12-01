@@ -1,0 +1,52 @@
+---
+import '@/styles/global.css';
+import SEO from '@/components/SEO.astro';
+import { Font } from 'astro:assets';
+
+export interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  jsonLd?: Record<string, unknown>;
+}
+
+const siteName = 'Advent of AI Security';
+
+const {
+  title,
+  description,
+  canonicalPath,
+  type = 'website',
+  publishedTime,
+  jsonLd,
+} = Astro.props;
+
+const pageTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-plex-sans" preload />
+    <SEO
+      title={title}
+      siteName={siteName}
+      type={type}
+      {...(description !== undefined ? { description } : {})}
+      {...(canonicalPath !== undefined ? { canonicalPath } : {})}
+      {...(publishedTime !== undefined ? { publishedTime } : {})}
+      {...(jsonLd !== undefined ? { jsonLd } : {})}
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

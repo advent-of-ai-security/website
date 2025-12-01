@@ -1,11 +1,9 @@
 ---
-import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DoorLayout from '@/layouts/DoorLayout.astro';
 import { getCollection } from 'astro:content';
 import { UNLOCK_ALL_DOORS } from 'astro:env/server';
-import DoorLayout from '@/layouts/DoorLayout.astro';
 import { startOfDayUTC } from '@/utils/dates';
-import SEO from '@/components/SEO.astro';
-import { Font } from 'astro:assets';
 
 const slugParam = Astro.params.slug;
 if (!slugParam) {
@@ -31,48 +29,31 @@ const { Content } = await entry.render();
 const { data } = entry;
 
 const siteName = 'Advent of AI Security';
-const pageTitle = `${data.title} | ${siteName}`;
 ---
 
-<!doctype html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{pageTitle}</title>
-    {data.description && <meta name="description" content={data.description} />}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <Font cssVariable="--font-plex-mono" preload />
-    <SEO
-      title={data.title}
-      type="article"
-      canonicalPath={`/doors/${slug}`}
-      image="/favicon.svg"
-      siteName={siteName}
-      {...(data.description !== undefined ? { description: data.description } : {})}
-      {...(dateObj instanceof Date ? { publishedTime: dateObj.toISOString() } : {})}
-      jsonLd={{
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: data.title,
-        ...(data.description !== undefined ? { description: data.description } : {}),
-        datePublished: dateObj instanceof Date ? dateObj.toISOString() : undefined,
-        mainEntityOfPage: new URL(`/doors/${slug}`, Astro.site ?? Astro.url).toString(),
-        publisher: {
-          '@type': 'Organization',
-          name: siteName
-        }
-      }}
-    />
-  </head>
-  <body>
-    <DoorLayout
-      title={data.title}
-      meta={data.meta ?? []}
-      {...(data.description !== undefined ? { description: data.description } : {})}
-    >
-      <Content />
-    </DoorLayout>
-  </body>
-</html>
+<BaseLayout
+  title={data.title}
+  {...(data.description !== undefined ? { description: data.description } : {})}
+  canonicalPath={`/doors/${slug}`}
+  type="article"
+  {...(dateObj instanceof Date ? { publishedTime: dateObj.toISOString() } : {})}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    ...(data.description !== undefined ? { description: data.description } : {}),
+    datePublished: dateObj instanceof Date ? dateObj.toISOString() : undefined,
+    mainEntityOfPage: new URL(`/doors/${slug}`, Astro.site ?? Astro.url).toString(),
+    publisher: {
+      '@type': 'Organization',
+      name: siteName
+    }
+  }}
+>
+  <DoorLayout
+    title={data.title}
+    meta={data.meta ?? []}
+  >
+    <Content />
+  </DoorLayout>
+</BaseLayout>
