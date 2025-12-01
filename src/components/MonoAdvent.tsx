@@ -116,7 +116,7 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
               </div>
               <div className="mt-[var(--shell-gap)] pt-[var(--shell-gap)] border-t border-black/10">
                 <p className="m-0 text-xs opacity-60 leading-relaxed">
-                  All content was created with the assistance of AI and proofread by humans. Found an issue or want to share feedback? <a href="https://github.com/orgs/advent-of-ai-security/discussions" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-80 transition-opacity">Let me know</a>.
+                  All content was created with the assistance of AI and proofread by humans. <strong>Found an issue or want to share feedback? <a href="https://github.com/orgs/advent-of-ai-security/discussions" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-80 transition-opacity">Let me know</a>.</strong>
                 </p>
               </div>
             </div>
