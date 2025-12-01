@@ -5,6 +5,7 @@ import { UNLOCK_ALL_DOORS } from 'astro:env/server';
 import DoorLayout from '@/layouts/DoorLayout.astro';
 import { startOfDayUTC } from '@/utils/dates';
 import SEO from '@/components/SEO.astro';
+import { Font } from 'astro:assets';
 
 const slugParam = Astro.params.slug;
 if (!slugParam) {
@@ -28,6 +29,9 @@ if (!UNLOCK_ALL_DOORS && isFuture) {
 
 const { Content } = await entry.render();
 const { data } = entry;
+
+const siteName = 'Advent of AI Security';
+const pageTitle = `${data.title} | ${siteName}`;
 ---
 
 <!doctype html>
@@ -35,15 +39,17 @@ const { data } = entry;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{data.title}</title>
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
     {data.description && <meta name="description" content={data.description} />}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-plex-mono" preload />
     <SEO
       title={data.title}
       type="article"
       canonicalPath={`/doors/${slug}`}
       image="/favicon.svg"
-      siteName="Advent of AI Security"
+      siteName={siteName}
       {...(data.description !== undefined ? { description: data.description } : {})}
       {...(dateObj instanceof Date ? { publishedTime: dateObj.toISOString() } : {})}
       jsonLd={{
@@ -55,7 +61,7 @@ const { data } = entry;
         mainEntityOfPage: new URL(`/doors/${slug}`, Astro.site ?? Astro.url).toString(),
         publisher: {
           '@type': 'Organization',
-          name: 'Advent of AI Security'
+          name: siteName
         }
       }}
     />

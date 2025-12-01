@@ -1,5 +1,9 @@
 ---
+import '@/styles/global.css';
 import SEO from '@/components/SEO.astro';
+import { Font } from 'astro:assets';
+
+const siteName = 'Advent of AI Security';
 ---
 
 <!doctype html>
@@ -7,19 +11,22 @@ import SEO from '@/components/SEO.astro';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Page Not Found - Advent of AI Security</title>
+    <meta name="generator" content={Astro.generator} />
+    <title>Page Not Found | {siteName}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-plex-mono" preload />
     <SEO
       title="404 - Page Not Found"
-      description="The page you’re looking for doesn’t exist."
+      description="The page you're looking for doesn't exist."
       canonicalPath="/404"
+      siteName={siteName}
     />
   </head>
   <body>
-    <main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-5 md:p-10 text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col items-start justify-center gap-[var(--shell-gap)]">
+    <main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-mono),'IBM_Plex_Mono',monospace] flex flex-col items-start justify-center gap-[var(--shell-gap)]">
       <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">Not Found</h1>
-      <p class="m-0 text-[14px]">The page you’re after isn’t here.</p>
+      <p class="m-0 text-[14px]">The page you're after isn't here.</p>
       <a href="/" class="inline-flex h-8 items-center border border-black bg-black px-4 text-[12px] uppercase tracking-[0.25em] text-white hover:bg-black/90">Return home</a>
     </main>
   </body>
-  
 </html>

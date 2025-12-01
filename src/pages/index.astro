@@ -8,7 +8,8 @@ import { UNLOCK_ALL_DOORS } from 'astro:env/server';
 import { getCollection } from 'astro:content';
 import { startOfDayUTC, slugCollator } from '@/utils/dates';
 
-const title = 'Advent of AI Security 2025';
+const siteName = 'Advent of AI Security';
+const title = `${siteName} 2025`;
 const description = 'A friendly, step-by-step Advent calendar of AI security risks and hands-on examples for practitioners and curious engineers.';
 const doorsCollection = await getCollection('doors');
 const todayUTC = startOfDayUTC(new Date());
@@ -23,20 +24,21 @@ const doors: DoorDocument[] = doorsCollection
   .filter((d): d is { slug: string; title: string; description: string | undefined; date: Date } => {
     return d.date instanceof Date && !Number.isNaN(d.date.getTime());
   })
-  .map((d): DoorDocument => {
+  .map((d, index): DoorDocument => {
     const dateMidnight = startOfDayUTC(d.date);
     let state: DoorState;
     if (UNLOCK_ALL_DOORS) state = 'open';
     else if (dateMidnight < todayUTC) state = 'open';
     else if (dateMidnight.getTime() === todayUTC.getTime()) state = 'today';
     else state = 'locked';
+    // Strip sensitive data for locked doors
     const base = {
-      slug: d.slug,
-      title: d.title,
+      slug: state === 'locked' ? String(index + 1).padStart(2, '0') : d.slug,
+      title: state === 'locked' ? `Door ${index + 1}` : d.title,
       date: d.date.toISOString(),
       state,
     };
-    return d.description !== undefined ? { ...base, description: d.description } : base;
+    return (state !== 'locked' && d.description !== undefined) ? { ...base, description: d.description } : base;
   })
   .sort((a, b) => slugCollator.compare(a.slug, b.slug));
 ---
@@ -57,11 +59,11 @@ const doors: DoorDocument[] = doorsCollection
       type="website"
       canonicalPath="/"
       image="/favicon.svg"
-      siteName="Advent of AI Security"
+      siteName={siteName}
       jsonLd={{
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'Advent of AI Security',
+        name: siteName,
         url: new URL('/', Astro.site ?? Astro.url).toString(),
         description,
       }}

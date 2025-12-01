@@ -142,8 +142,8 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
             style={{ '--index': index } as React.CSSProperties}
           >
             {(() => {
-              const link = `/doors/${d.slug}`;
               const canVisit = unlockAll || d.state === 'open' || d.state === 'today';
+              const link = canVisit ? `/doors/${d.slug}` : '#';
               const classes = [
                 'relative grid grid-cols-[1fr_auto] items-center min-h-24 h-full border border-black bg-transparent text-black',
                 'transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-black',
@@ -152,7 +152,9 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                 d.state === 'today' ? 'ring-1 ring-black' : '',
               ].join(' ');
               const stateLabel = d.state === 'open' ? 'Unlocked' : d.state === 'today' ? 'Opens today' : 'Locked';
-              const ariaLabel = `Door ${String(d.number).padStart(2, '0')} - ${d.title} - ${d.label} (${stateLabel})`;
+              const ariaLabel = d.state === 'locked'
+                ? `Door ${String(d.number).padStart(2, '0')} - ${d.label} (Locked)`
+                : `Door ${String(d.number).padStart(2, '0')} - ${d.title} - ${d.label} (${stateLabel})`;
               const content = (
                 <>
                   <div className="grid gap-[var(--shell-gap)]">
