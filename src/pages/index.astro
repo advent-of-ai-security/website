@@ -22,6 +22,7 @@ const doors: DoorDocument[] = doorsCollection
   .filter((d): d is { slug: string; title: string; description: string | undefined; date: Date } => {
     return d.date instanceof Date && !Number.isNaN(d.date.getTime());
   })
+  .sort((a, b) => slugCollator.compare(a.slug, b.slug))
   .map((d, index): DoorDocument => {
     const dateMidnight = startOfDayUTC(d.date);
     let state: DoorState;
@@ -37,8 +38,7 @@ const doors: DoorDocument[] = doorsCollection
       state,
     };
     return (state !== 'locked' && d.description !== undefined) ? { ...base, description: d.description } : base;
-  })
-  .sort((a, b) => slugCollator.compare(a.slug, b.slug));
+  });
 ---
 
 <BaseLayout
