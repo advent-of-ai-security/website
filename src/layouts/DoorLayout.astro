@@ -18,14 +18,14 @@ const { title, meta = [] } = Astro.props as Props;
     <header class="grid gap-[var(--shell-gap)]">
       <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">{title}</h1>
     </header>
-    <div class="flex flex-nowrap items-center gap-[calc(var(--shell-gap)/2)]">
+    <div class="flex flex-wrap md:flex-nowrap items-center gap-[calc(var(--shell-gap)/2)]">
       <a
         href="/"
         class="inline-flex h-[calc(var(--shell-gap)*1.5)] items-center border border-black bg-black px-[calc(var(--shell-gap)/2)] text-[12px] uppercase tracking-[0.25em] text-white hover:bg-black/90 shrink-0"
       >
         Back
       </a>
-      <span class="inline-block h-px w-[var(--shell-gap)] bg-black/60 shrink-0" aria-hidden="true" />
+      <span class="hidden md:inline-block h-px w-[var(--shell-gap)] bg-black/60 shrink-0" aria-hidden="true" />
       {meta.length > 0 && <MetaBar items={meta} />}
     </div>
     <div id="section-nav-sticky" class="hidden md:block sticky top-0 z-40 overflow-hidden relative transition-colors duration-150 pt-[var(--shell-gap)] pb-[var(--shell-gap)] bg-white -mx-[var(--shell-gap)] px-[var(--shell-gap)]">
