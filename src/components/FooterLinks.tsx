@@ -1,4 +1,4 @@
-import { IconBrandGithubFilled, IconBrandBluesky, IconBrandDiscordFilled } from '@tabler/icons-react';
+import { IconWorld, IconBrandGithubFilled, IconBrandBluesky, IconBrandDiscordFilled } from '@tabler/icons-react';
 
 type Props = {
   className?: string;
@@ -16,6 +16,15 @@ export default function FooterLinks({ className }: Props) {
     >
       <div className="shell-section__body flex flex-wrap items-center justify-between gap-3 text-[12px] uppercase tracking-[0.25em] text-black">
         <div className="flex items-center gap-3 text-black">
+          <a
+            href="https://icepuma.dev"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center justify-center text-black hover:text-black/70"
+            aria-label="Visit icepuma.dev"
+          >
+            <IconWorld size={22} aria-hidden="true" />
+          </a>
           <a
             href="https://github.com/advent-of-ai-security"
             target="_blank"
