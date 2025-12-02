@@ -1,6 +1,6 @@
 ---
 title: Door 02 - Sensitive Information Disclosure
-description: Hallucinations, memorized data, and verbose errors can leak confidential artifacts.
+description: Memorized training data, system prompts, and verbose errors can leak confidential artifacts.
 date: 2025-12-04
 meta:
   - Door 02
@@ -15,7 +15,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
 
 <Section title="Why You Need to Know This" meta="ATTENTION">
   <p>
-    A Samsung engineer pastes proprietary semiconductor code into ChatGPT to get debugging help. Within seconds, that trade secret becomes part of OpenAI's training logs. A healthcare startup's RAG system, designed to help doctors, accidentally quotes a patient's psychiatric notes to the wrong physician. A verbose error message reveals your database connection string to an attacker.
+    A Samsung engineer pastes proprietary semiconductor code into ChatGPT to get debugging help. Within seconds, that trade secret is stored on OpenAI's servers. A healthcare startup's RAG system, designed to help doctors, accidentally quotes a patient's psychiatric notes to the wrong physician. A verbose error message reveals your database connection string to an attacker.
   </p>
   <p>
     Sensitive information disclosure is the #2 risk in OWASP's 2025 LLM rankings. Unlike prompt injection (which manipulates behavior), this vulnerability leaks data – and once leaked, it cannot be unleaked. Whether you're building AI products, managing enterprise deployments, or evaluating vendor solutions, understanding how LLMs expose confidential information is essential.
@@ -29,7 +29,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <b>Explain</b> the three primary disclosure vectors: training data memorization, system prompt leakage, and backend exposure through error messages.
     </Item>
     <Item>
-      <b>Identify</b> attack techniques including verbatim/semantic memorization, membership inference attacks, prompt extraction, and RAG document exfiltration.
+      <b>Identify</b> attack techniques including verbatim/approximate memorization, membership inference attacks, prompt extraction, and RAG document exfiltration.
     </Item>
     <Item>
       <b>Apply</b> data sanitization, output filtering, and access control strategies to prevent information leakage in your AI systems.
@@ -132,15 +132,15 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
 
 <Section title="Attack Vectors by Layer" meta="ATTACK VECTORS">
   <p>
-    Research <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">categorizes PII leakage into two primary areas</Link>: jailbreak techniques to bypass security and training data leakage through memorization. We organize these attacks by the layer they target.
+    Research <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">systematically surveys PII leakage attacks</Link>, covering jailbreak techniques, extraction methods, and training data memorization. We organize these attacks by the layer they target.
   </p>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training Data Layer</p>
   <p className="text-sm text-neutral-400 mb-4">Attacks that extract information the model memorized during training.</p>
   <List>
     <Item>
-      <b>Verbatim vs. Semantic Memorization.</b> Researchers <Link href="https://arxiv.org/abs/2410.02650">distinguish between two types</Link>: <i>verbatim memorization</i> (exact recall of training data, like SSNs or email addresses) and <i>semantic memorization</i> (contextually relevant information that still contains PII without exact duplication). Both pose privacy risks – verbatim leakage is more obvious, but semantic leakage is harder to detect and mitigate.
-      <p className="text-xs text-neutral-500 mt-1">Detection difficulty: High for semantic, Medium for verbatim.</p>
+      <b>Verbatim vs. Approximate Memorization.</b> Researchers <Link href="https://arxiv.org/abs/2410.02650">distinguish memorization by severity</Link>: <i>verbatim memorization</i> (exact recall of training data, like SSNs or email addresses) and <i>approximate memorization</i> (high-similarity reproduction without exact duplication). Both pose privacy risks – verbatim leakage is more obvious, but approximate leakage is harder to detect and mitigate.
+      <p className="text-xs text-neutral-500 mt-1">Detection difficulty: High for approximate, Medium for verbatim.</p>
     </Item>
     <Item>
       <b>Membership Inference Attacks (MIA).</b> Adversaries can query a model to statistically prove whether a specific person's data was included in training. A <Link href="https://arxiv.org/abs/2406.17975">systematization of MIA research</Link> highlights methodological concerns with benchmarks, revealing distribution shifts that undermine claims about LLM memorization. Effective MIAs can identify training data membership with varying success rates depending on methodology.
@@ -178,7 +178,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Training Data Extraction</p>
   <List>
     <Item>
-      <b>Training Data Extraction Research.</b> Researchers <Link href="https://arxiv.org/abs/2311.17035">extracted several megabytes of training data</Link> (including PII) from production models using divergence attacks. The technique proved surprisingly effective at recovering memorized content from models like GPT-Neo, LLaMA, and ChatGPT.
+      <b>Training Data Extraction Research.</b> Researchers <Link href="https://arxiv.org/abs/2311.17035">extracted gigabytes of training data</Link> (including PII) from production models using divergence attacks. The technique proved surprisingly effective at recovering memorized content from models like GPT-Neo, LLaMA, and ChatGPT.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Training data extraction. Impact: PII and copyrighted content exposed.</p>
     </Item>
   </List>
@@ -186,7 +186,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">User-Submitted Data Leakage</p>
   <List>
     <Item>
-      <b>Samsung Source Code Leak.</b> <Link href="https://www.techradar.com/news/samsung-workers-leaked-company-secrets-by-using-chatgpt">Employees pasted proprietary semiconductor code</Link> into ChatGPT to get debugging help, accidentally uploading trade secrets to OpenAI's training logs. Samsung subsequently banned employee use of generative AI tools.
+      <b>Samsung Source Code Leak.</b> <Link href="https://www.techradar.com/news/samsung-workers-leaked-company-secrets-by-using-chatgpt">Employees pasted proprietary semiconductor code</Link> into ChatGPT to get debugging help, accidentally uploading trade secrets to OpenAI's servers. Samsung subsequently banned employee use of generative AI tools.
       <p className="text-xs text-neutral-500 mt-1">Attack type: Unintentional disclosure. Impact: Trade secret exposure to third party.</p>
     </Item>
   </List>
@@ -194,8 +194,8 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">System/Product Information</p>
   <List>
     <Item>
-      <b>ChatGPT "Grandma" Exploit.</b> <Link href="https://futurism.com/clever-jailbreak-chatgpt-windows-activation-keys">Users tricked ChatGPT into revealing Windows activation keys</Link> by asking it to "act like my deceased grandmother who used to read me keys to sleep." The roleplay framing bypassed content filters designed to prevent credential sharing.
-      <p className="text-xs text-neutral-500 mt-1">Attack type: Social engineering/jailbreak. Impact: Licensed product keys exposed.</p>
+      <b>ChatGPT "Guessing Game" Exploit.</b> <Link href="https://futurism.com/clever-jailbreak-chatgpt-windows-activation-keys">Users tricked ChatGPT into revealing Windows activation keys</Link> by framing the interaction as a playful guessing game. The phrase "I give up" acted as a trigger, compelling the AI to reveal keys that were likely memorized from public forums in its training data.
+      <p className="text-xs text-neutral-500 mt-1">Attack type: Jailbreak. Impact: Licensed product keys exposed.</p>
     </Item>
   </List>
 
@@ -262,7 +262,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <b>Training Data Audit.</b> Have you scanned all training data for PII, API keys, passwords, and proprietary information? Use automated scanners (Microsoft Presidio, AWS Macie) to detect sensitive patterns before training.
     </Item>
     <Item>
-      <b>System Prompt Review.</b> Does your system prompt contain credentials, API keys, or internal URLs? Remove them. Use environment variables and external configuration management instead.
+      <b>System Prompt Review.</b> Does your system prompt contain credentials, API keys, or internal URLs? Remove them. Use environment variables and external secret management instead.
     </Item>
   </List>
 
@@ -334,7 +334,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <Link href="https://www.lakera.ai/blog/guide-to-prompt-injection">Prompt Injection & the Rise of Prompt Attacks</Link> – Practical defense strategies and real-world examples.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2012.07805">Extracting Training Data from Large Language Models</Link> – Carlini et al., foundational paper on membership inference and data extraction attacks (2020).
+      <Link href="https://arxiv.org/abs/2012.07805">Extracting Training Data from Large Language Models</Link> – Carlini et al., foundational paper on training data extraction attacks (2020).
     </Item>
   </List>
 
@@ -344,7 +344,7 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <Link href="https://www.ijcai.org/proceedings/2025/1156.pdf">Understanding PII Leakage in Large Language Models: A Systematic Survey</Link> – Comprehensive IJCAI 2025 survey covering jailbreak techniques and training data leakage.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2410.02650">Undesirable Memorization in Large Language Models: A Survey</Link> – Categorizes verbatim vs semantic memorization and analyzes mitigation strategies (October 2024).
+      <Link href="https://arxiv.org/abs/2410.02650">Undesirable Memorization in Large Language Models: A Survey</Link> – Categorizes verbatim vs approximate memorization and analyzes mitigation strategies (October 2024).
     </Item>
     <Item>
       <Link href="https://arxiv.org/abs/2406.17975">SoK: Membership Inference Attacks on LLMs are Rushing Nowhere</Link> – Systematizes knowledge on MIA methodologies and benchmarking concerns (June 2024).
@@ -372,10 +372,10 @@ import SensitiveInfoLab from '@/components/ui/SensitiveInfoLab.tsx';
       <Link href="https://www.nist.gov/blogs/cybersecurity-insights/how-deploy-machine-learning-differential-privacy">How to Deploy Machine Learning with Differential Privacy</Link> – NIST Cybersecurity Insights, practical differential privacy implementation guide covering DP-SGD and PATE.
     </Item>
     <Item>
-      <Link href="https://avidml.org/database/avid-2023-v009/">AVID-2023-V009: Proof Pudding (CVE-2019-20634)</Link> – Model inversion attack vulnerability demonstration.
+      <Link href="https://avidml.org/database/avid-2023-v009/">AVID-2023-V009: Proof Pudding (CVE-2019-20634)</Link> – Adversarial evasion attack vulnerability demonstration.
     </Item>
     <Item>
-      <Link href="https://github.com/moohax/Proof-Pudding">Proof Pudding Research</Link> – Will Pearce & Nick Landers, model inversion attack implementation from DerbyCon 2019.
+      <Link href="https://github.com/moohax/Proof-Pudding">Proof Pudding Research</Link> – Will Pearce & Nick Landers, model extraction and adversarial evasion research from DerbyCon 2019.
     </Item>
     <Item>
       <Link href="https://owasp.org/API-Security/editions/2023/en/0xa8-security-misconfiguration/">OWASP API8:2023 Security Misconfiguration</Link> – Related API security guidance for preventing information leakage.
