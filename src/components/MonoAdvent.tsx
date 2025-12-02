@@ -28,6 +28,21 @@ type Door = {
   state: DoorState;
 };
 
+function formatCountdown(now: Date, target: Date): string | null {
+  const diff = target.getTime() - now.getTime();
+  if (diff <= 0) return null;
+
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  return `${minutes}m ${seconds}s`;
+}
+
 
 type Props = {
   doors: DoorDocument[];
@@ -154,9 +169,14 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                         {d.title.replace(/^Door \d+ - /, '')}
                       </p>
                     ) : (
-                      <time className="text-[0.7rem] uppercase tracking-[0.2em] text-black/70 group-hover:text-white/80" dateTime={d.iso}>
-                        {d.label}
-                      </time>
+                      <p className="m-0 text-[0.7rem] uppercase tracking-[0.2em] text-black group-hover:text-white">
+                        <time dateTime={d.iso}>{d.label}</time>
+                        {formatCountdown(now, d.date) && (
+                          <span className="ml-2 text-black/70 group-hover:text-white/70 tabular-nums">
+                            in {formatCountdown(now, d.date)}
+                          </span>
+                        )}
+                      </p>
                     )}
                   </div>
                   <div className="text-right grid justify-items-end gap-[var(--shell-gap)]">
