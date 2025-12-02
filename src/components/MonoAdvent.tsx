@@ -211,13 +211,16 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
           <div className="shell-section__body">
             <List>
               <Item>
-                <a href="https://adventofcode.com" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Code</a> - The original programming puzzle advent calendar (honorable mention)
+                <a href="https://adventofcode.com" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Code 2025</a> - The original programming puzzle advent calendar (honorable mention)
               </Item>
               <Item>
-                <a href="https://advent.cloudsecuritypodcast.tv" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Cloud Security</a> - 24 days of cloud security videos from the Cloud Security Podcast
+                <a href="https://advent.cloudsecuritypodcast.tv" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Cloud Security 2024</a> - 24 days of cloud security videos from the Cloud Security Podcast
               </Item>
               <Item>
-                <a href="https://blog.securitybreak.io/genai-x-sec-advent-2025-edition-32c52ff753b4" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">GenAI x Sec Advent</a> - Daily GenAI security use cases by Thomas Roccia (threat intel, PCAP analysis, RAG)
+                <a href="https://blog.securitybreak.io/genai-x-sec-advent-2025-edition-32c52ff753b4" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">GenAI x Sec Advent 2025</a> - Daily GenAI security use cases by Thomas Roccia (threat intel, PCAP analysis, RAG)
+              </Item>
+              <Item>
+                <a href="https://xania.org/202511/advent-of-compiler-optimisation" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Compiler Optimisation 2025</a> - Daily deep dives into compiler optimisation techniques
               </Item>
             </List>
           </div>
