@@ -43,7 +43,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
 <Section title="TL;DR" meta="AT A GLANCE">
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM03:2025 Supply Chain Vulnerabilities" href="https://genai.owasp.org/llmrisk/llm032025-supply-chain/">
-      Supply Chain Vulnerabilities arise when an application relies on compromised third-party models, libraries, or datasets. A secure app built on rotten foundations is still insecure.
+      Supply Chain Vulnerabilities arise when an application relies on compromised third-party models, libraries, or datasets.
     </Quote>
     <p>
       Every external dependency – models, libraries, datasets – is a potential attack vector. Prevention requires cryptographic verification, safe serialization formats, and treating all third-party artifacts as untrusted until proven otherwise.
@@ -72,7 +72,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   </p>
   <List>
     <Item><b>Arbitrary Code Execution.</b> The most common format for PyTorch models (<code>pickle</code>) is <Link href="https://huggingface.co/docs/hub/en/security-pickle">notoriously insecure</Link>. Loading a malicious model file can instantly give an attacker shell access to your server – no exploitation required, just <code>torch.load()</code>.</Item>
-    <Item><b>Hidden Backdoors.</b> A compromised foundation model might behave normally 99% of the time but <Link href="https://arxiv.org/abs/2204.06974">fail catastrophically on specific trigger inputs</Link>. Imagine a sentiment analysis model that works perfectly except when analyzing your competitor's products.</Item>
+    <Item><b>Hidden Backdoors.</b> A compromised foundation model might behave normally 99% of the time but <Link href="https://arxiv.org/abs/2204.06974">contain undetectable backdoors that alter outputs for attacker-chosen inputs</Link>. Imagine a sentiment analysis model that works perfectly except when analyzing your competitor's products.</Item>
     <Item><b>Data Exfiltration.</b> A malicious Python library could silently upload your API keys, model weights, or user data to an external server while pretending to do "analytics" or "telemetry."</Item>
     <Item><b>Lateral Movement.</b> Once inside your ML pipeline, attackers can pivot to compromise CI/CD systems, access production databases, or inject malicious code into model artifacts you distribute to customers.</Item>
   </List>
@@ -155,10 +155,10 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <List>
     <Item>
       <b>Pickle Deserialization Exploits.</b> PyTorch's default <code>.bin</code> and <code>.pkl</code> formats use Python's pickle module, which can execute arbitrary code during deserialization. A malicious model file runs attacker code the moment you call <code>torch.load()</code> – no vulnerability exploitation required.
-      <p className="text-xs text-neutral-500 mt-1">Detection: Medium – tools like Picklescan can detect known patterns, but obfuscation is possible.</p>
+      <p className="text-xs text-neutral-500 mt-1">Detection: Medium to High – tools like Picklescan exist but have known bypass vulnerabilities; sophisticated payloads can evade detection.</p>
     </Item>
     <Item>
-      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research shows these adapters' small size</Link> makes them easy to distribute and harder to audit – a malicious adapter can subtly alter outputs without triggering obvious red flags.
+      <b>LoRA/Adapter Poisoning.</b> Lightweight fine-tuning adapters (LoRA, QLoRA, PEFT) are small files that modify model behavior. <Link href="https://arxiv.org/abs/2403.00108">Research shows backdoor LoRAs can be merged with legitimate task-enhancing adapters</Link>, concealing malicious intent behind improved capabilities – a malicious adapter can subtly alter outputs without triggering obvious red flags.
       <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – behavioral changes may only manifest on specific inputs.</p>
     </Item>
     <Item>
@@ -201,7 +201,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Model Hub Incidents</p>
   <List>
     <Item>
-      <b>PoisonGPT Demonstration.</b> Mithril Security researchers demonstrated how easy it is to upload a "lobotomized" LLM to Hugging Face – a model that appears normal but spreads targeted misinformation. They modified Llama to give false answers about specific topics while performing correctly on benchmarks. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link>
+      <b>PoisonGPT Demonstration.</b> Mithril Security researchers demonstrated how easy it is to upload a "lobotomized" LLM to Hugging Face – a model that appears normal but spreads targeted misinformation. They modified GPT-J-6B to give false answers about specific topics while performing correctly on benchmarks. <Link href="https://blog.mithrilsecurity.io/poisongpt-how-we-hid-a-lobotomized-llm-on-hugging-face-to-spread-fake-news/">Mithril Security</Link>
       <p className="text-xs text-neutral-500 mt-1">Attack surface: Model artifacts. Impact: Demonstrated feasibility of backdoored model distribution.</p>
     </Item>
     <Item>
@@ -375,7 +375,7 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
   <List>
     <Item>
-      <Link href="https://hiddenlayer.com/research/hijacking-safetensors-conversion-on-hugging-face/">Hijacking Safetensors Conversion on Hugging Face</Link> – HiddenLayer research on safetensors conversion attacks.
+      <Link href="https://hiddenlayer.com/innovation-hub/silent-sabotage/">Hijacking Safetensors Conversion on Hugging Face</Link> – HiddenLayer research on safetensors conversion attacks.
     </Item>
     <Item>
       <Link href="https://developers.googleblog.com/en/large-language-models-on-device-with-mediapipe-and-tensorflow-lite/">Large Language Models On-Device with MediaPipe and TensorFlow Lite</Link> – Google, edge deployment security considerations.
@@ -384,13 +384,13 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
       <Link href="https://docs.vllm.ai/en/latest/features/lora.html">Using LoRA Adapters with vLLM</Link> – vLLM documentation on LoRA adapter usage and security.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2310.20624">Removing RLHF Protections in GPT-4 via Fine-Tuning</Link> – Research demonstrating safety removal through fine-tuning.
+      <Link href="https://arxiv.org/abs/2311.05553">Removing RLHF Protections in GPT-4 via Fine-Tuning</Link> – Research demonstrating safety removal through fine-tuning.
     </Item>
     <Item>
       <Link href="https://huggingface.co/docs/peft/main/en/developer_guides/model_merging">Model Merging with PEFT</Link> – Hugging Face documentation on model merge security considerations.
     </Item>
     <Item>
-      <Link href="https://huggingface.co/spaces/mcpotato/sf-convertbot-scanner">HuggingFace SF_Convertbot Scanner</Link> – Automated safetensors security scanner tool.
+      <Link href="https://huggingface.co/spaces/safetensors/safetensors-checker">Safetensors Checker</Link> – Official Hugging Face tool to check safetensors metadata.
     </Item>
     <Item>
       <Link href="https://www.oligo.security/blog/shadowray-attack-ai-workloads-actively-exploited-in-the-wild">Shadow Ray: AI Workloads Actively Exploited</Link> – Oligo Security, Ray AI framework exploit affecting thousands of servers.
@@ -414,6 +414,12 @@ import SupplyChainLab from '@/components/ui/SupplyChainLab.tsx';
     </Item>
     <Item>
       <Link href="https://github.com/mmaitre314/picklescan">picklescan</Link> – Security scanner that detects malicious pickle files in ML models.
+    </Item>
+    <Item>
+      <Link href="https://github.com/pyupio/safety">safety</Link> – Python dependency scanner for known security vulnerabilities.
+    </Item>
+    <Item>
+      <Link href="https://github.com/dependabot">GitHub Dependabot</Link> – Automated dependency updates and security alerts.
     </Item>
   </List>
 </Section>
