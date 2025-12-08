@@ -68,9 +68,9 @@ const SCENARIOS: Scenario[] = [
 function usePoisoningSimulation() {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('pretrain');
   const [defenses, setDefenses] = useState({
-    contentFilter: true,
-    anomalyDetection: true,
-    humanAudit: true,
+    contentFilter: false,
+    anomalyDetection: false,
+    humanAudit: false,
   });
 
   const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;

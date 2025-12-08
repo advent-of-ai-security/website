@@ -163,3 +163,8 @@ Collator for sorting numeric slugs (01, 02, ..., 10) in correct order.
 - Secrets: set via Cloudflare Wrangler. Example: `wrangler secret put UNLOCK_ALL_DOORS` (defined as a server‑only secret in `astro.config.ts`).
 - Never commit secrets or tokens; review `wrangler.toml` routes (e.g., `advent-of-ai-security.com`) before deploys.
 - Avoid embedding credentials in MDX/content.
+
+## Web Scraping
+- When scraping external sites for content or analysis, use a headless Chrome dump piped into `markitdown`:
+  - `chrome --headless --dump-dom "https://example.com" | uvx markitdown`
+  - Replace `https://example.com` with the target URL to scrape.
