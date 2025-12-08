@@ -214,6 +214,9 @@ export default function MonoAdvent({ doors: rawDoors, unlockAll }: Props) {
                 <a href="https://adventofcode.com" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Code 2025</a> - The original programming puzzle advent calendar (honorable mention)
               </Item>
               <Item>
+                <a href="https://12days.cmdchallenge.com" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">12 Days of cmdchallenge</a> - Daily command-line challenges to sharpen your shell skills
+              </Item>
+              <Item>
                 <a href="https://advent.cloudsecuritypodcast.tv" target="_blank" rel="noopener noreferrer" className="hover:text-black/60 transition-colors underline">Advent of Cloud Security 2024</a> - 24 days of cloud security videos from the Cloud Security Podcast
               </Item>
               <Item>
