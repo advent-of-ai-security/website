@@ -66,9 +66,9 @@ const SCENARIOS: Scenario[] = [
 function useOutputSimulation() {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>('xss');
   const [defenses, setDefenses] = useState({
-    encoding: true,
-    sandboxing: true,
-    validation: true,
+    encoding: false,
+    sandboxing: false,
+    validation: false,
   });
 
   const activeScenario = SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0]!;
