@@ -17,19 +17,19 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.6.0",
     "@tabler/icons-react": "^3.35.0",
-    "@tailwindcss/vite": "^4.1.17",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.16.5",
     "astro-d2": "^0.8.1",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "tailwindcss": "^4.1.17",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251210.0",
+    "@cloudflare/workers-types": "^4.20251212.0",
     "@tailwindcss/typography": "^0.5.19",
-    "wrangler": "^4.53.0"
+    "wrangler": "^4.54.0"
   }
 }

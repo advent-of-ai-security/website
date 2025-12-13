@@ -43,7 +43,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 <Section title="TL;DR" meta="AT A GLANCE">
   <div className="space-y-4">
     <Quote minimal source="OWASP LLM06:2025 Excessive Agency" href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">
-      Excessive Agency happens when an LLM-based agent is given too much autonomy, permission, or ability to effect change in outside systems.
+      Excessive Agency is the vulnerability that enables damaging actions to be performed in response to unexpected, ambiguous or manipulated outputs from an LLM, regardless of what is causing the LLM to malfunction.
     </Quote>
     <p>
       Agency amplifies every other vulnerability – prompt injection becomes data exfiltration, output bugs become code execution. Defense requires architectural controls: human approval for high-stakes actions, least privilege permissions, rate limits, and kill switches. You cannot prompt your way to safe agency.
@@ -62,7 +62,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
     The consequences of excessive agency scale with the permissions you grant – the more tools an agent can use, the larger the blast radius when something goes wrong.
   </p>
   <Quote source="The Dark Side of LLMs (2025)" href="https://arxiv.org/html/2507.06850">
-    Our findings reveal significant vulnerabilities across all tested LLMs, with 94.4% susceptible to Direct Prompt Injection, 83.3% vulnerable to RAG Backdoor Attacks, and a 100% success rate in Inter-Agent Trust Exploitation.
+    94.4% of models succumb to Direct Prompt Injection, and 83.3% are vulnerable to the more stealthy and evasive RAG Backdoor Attack. [...] 100.0% of tested LLMs can be compromised through Inter-Agent Trust Exploitation attacks.
   </Quote>
 </Section>
 
@@ -94,7 +94,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
         Standard chatbot. It processes input and generates text output – nothing else. No tool access, no external actions, no persistence.
       </p>
       <p className="text-sm">
-        <i>Risk level:</i> Minimal. Attacks are limited to generating harmful text.
+        <i>Risk level:</i> Minimal. <Link href="https://cloudsecurityalliance.org/blog/2025/06/16/ai-agents-vs-ai-chatbots-understanding-the-difference">Chatbots pose less risk</Link> because they have lower potential to cause damage.
       </p>
       <p className="text-sm">
         <b>Example:</b> A simple Q&A bot that answers questions from a knowledge base.
@@ -106,7 +106,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
         Can search the web, query databases, or retrieve documents – but cannot modify anything. Information flows in only one direction.
       </p>
       <p className="text-sm">
-        <i>Risk level:</i> Low. Attacks may expose sensitive information but cannot alter systems.
+        <i>Risk level:</i> Low. <Link href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP recommends read-only access</Link> where possible – attacks may expose information but cannot alter systems.
       </p>
       <p className="text-sm">
         <b>Example:</b> A research assistant that can search internal wikis and summarize findings.
@@ -118,7 +118,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
         Can draft emails, propose code changes, or prepare transactions – but requires human approval before execution. The agent plans, the human decides.
       </p>
       <p className="text-sm">
-        <i>Risk level:</i> Moderate. Attacks require social engineering the human approver.
+        <i>Risk level:</i> Moderate. <Link href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP recommends human-in-the-loop</Link> for high-impact actions – attacks require social engineering the approver.
       </p>
       <p className="text-sm">
         <b>Example:</b> A coding assistant that suggests PRs but waits for developer approval to merge.
@@ -130,7 +130,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
         Can send emails, execute code, make purchases, and modify systems autonomously. No human approval required for individual actions.
       </p>
       <p className="text-sm">
-        <i>Risk level:</i> Critical. Attacks gain direct action capability – data exfiltration, system modification, financial loss.
+        <i>Risk level:</i> Critical. <Link href="https://cloudsecurityalliance.org/blog/2025/06/16/ai-agents-vs-ai-chatbots-understanding-the-difference">Security risks scale with autonomy</Link> – attacks gain direct action capability including data exfiltration and financial loss.
       </p>
       <p className="text-sm">
         <b>Example:</b> AutoGPT-style agents that autonomously browse the web, write files, and execute shell commands.
@@ -152,11 +152,11 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <List>
     <Item>
       <b>Direct Prompt Injection.</b> Attackers embed malicious instructions in user input, causing the agent to execute unauthorized actions. With tool access, this becomes data exfiltration, unauthorized API calls, or system modification. <Link href="https://arxiv.org/html/2507.06850">Research demonstrates 94.4% of tested agents</Link> are vulnerable.
-      <p className="text-xs text-neutral-500 mt-1">Success rate: 94.4% of tested agents vulnerable. Detection: Medium – input filtering helps but is bypassable.</p>
+      <p className="text-xs text-neutral-500 mt-1">Detection: Medium – input filtering helps but is bypassable.</p>
     </Item>
     <Item>
-      <b>RAG Backdoor Attacks.</b> Poisoning the knowledge base with documents containing hidden instructions that trigger when retrieved. The agent follows instructions embedded in "trusted" internal documents.
-      <p className="text-xs text-neutral-500 mt-1">Success rate: 83.3% in research. Detection: High difficulty – attacks come from "trusted" sources.</p>
+      <b>RAG Backdoor Attacks.</b> Poisoning the knowledge base with documents containing hidden instructions that trigger when retrieved. The agent follows instructions embedded in "trusted" internal documents. <Link href="https://arxiv.org/html/2507.06850">Research demonstrates 83.3% vulnerability</Link>.
+      <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – attacks come from "trusted" sources.</p>
     </Item>
   </List>
 
@@ -164,8 +164,8 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Exploiting trust relationships between agents.</p>
   <List>
     <Item>
-      <b>Inter-Agent Trust Exploitation.</b> In multi-agent systems, compromising one agent to influence others through their communications. Agents trust outputs from other agents, creating cascading security failures across the system.
-      <p className="text-xs text-neutral-500 mt-1">Success rate: 100% demonstrated. Detection: Very high difficulty – appears as legitimate agent communication.</p>
+      <b>Inter-Agent Trust Exploitation.</b> In multi-agent systems, compromising one agent to influence others through their communications. <Link href="https://arxiv.org/html/2507.06850">Agents trust outputs from other agents</Link>, creating cascading security failures across the system.
+      <p className="text-xs text-neutral-500 mt-1">Detection: Very high difficulty – appears as legitimate agent communication.</p>
     </Item>
   </List>
 
@@ -173,11 +173,11 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Subverting the agent's objectives or tool usage.</p>
   <List>
     <Item>
-      <b>Goal Hijacking.</b> Manipulating the agent's objective function to pursue attacker-defined goals while appearing to work normally. The agent optimizes for the wrong target. <Link href="https://arxiv.org/pdf/2504.19956">Research details this attack pattern</Link> in comprehensive threat models.
+      <b>Goal Hijacking.</b> Manipulating the agent's objective function to pursue attacker-defined goals while appearing to work normally. The agent optimizes for the wrong target. <Link href="https://arxiv.org/abs/2504.19956">Research details this attack pattern</Link> in comprehensive threat models.
       <p className="text-xs text-neutral-500 mt-1">Detection: High difficulty – agent behavior appears purposeful and coherent.</p>
     </Item>
     <Item>
-      <b>Tool Misuse Amplification.</b> Tricking agents into using their legitimate tool access for unintended purposes – data exfiltration via file APIs, unauthorized purchases, or system reconfiguration.
+      <b>Tool Misuse Amplification.</b> Tricking agents into using their legitimate tool access for unintended purposes – data exfiltration via file APIs, unauthorized purchases, or system reconfiguration. <Link href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications/">OWASP identifies this as ASI02</Link>.
       <p className="text-xs text-neutral-500 mt-1">Detection: Medium – action logging and anomaly detection help.</p>
     </Item>
   </List>
@@ -217,79 +217,129 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 </Section>
 
 <Section title="Defense Strategy Tiers" meta="SECURITY CONTROLS">
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Tier 1: Essential</p>
+  <p>
+    Defense against excessive agency requires architectural controls – you cannot prompt your way to safe autonomy. Prioritize based on your agent's capability level and blast radius.
+  </p>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 1: Essential (Before Any Deployment)</p>
   <p className="text-sm text-neutral-400 mb-4">Non-negotiable controls for any agent with tool access.</p>
-  <List>
-    <Item>
-      <b>Human-in-the-Loop (HITL).</b> The golden rule: AI can <i>plan</i>, but humans must <i>approve</i> before execution. <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">OWASP guidance recommends</Link> explicit confirmation for irreversible actions (delete, send, purchase, deploy).
-    </Item>
-    <Item>
-      <b>Least Privilege Permissions.</b> Grant only the minimum tool access required. If an agent needs to read data, don't give it write access. Use scoped API tokens, read-only database connections, and role-based access controls.
-    </Item>
-  </List>
+  <Steps>
+    <Step n={1}>
+      <b>Human-in-the-Loop for Irreversible Actions.</b>
+      <p className="text-sm mt-2">
+        The golden rule: AI can <i>plan</i>, but humans must <i>approve</i> before execution. <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">OWASP guidance recommends</Link> explicit confirmation for high-impact operations. Implement approval UI that shows exactly what the agent intends: "About to send email to 500 recipients with subject 'Password Reset'. Approve?"
+      </p>
+      <p className="text-sm">
+        Categorize actions by risk: <b>Low</b> (read-only, reversible) → auto-approve. <b>Medium</b> (write, recoverable) → batch approval. <b>High</b> (delete, send, purchase, deploy) → individual confirmation with details.
+      </p>
+    </Step>
+    <Step n={2}>
+      <b>Least Privilege Tool Access.</b>
+      <p className="text-sm mt-2">
+        Grant only the minimum permissions required for each task. If an agent summarizes emails, give it <code>mail.read</code> scope – not <code>mail.send</code>. Use short-lived tokens (60 minutes max), scope credentials to specific resources, and prefer read-only database connections.
+      </p>
+      <p className="text-sm">
+        For APIs: create agent-specific service accounts with restricted IAM roles. Never reuse admin credentials or personal API keys for agent access.
+      </p>
+    </Step>
+  </Steps>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard (Production Systems)</p>
   <p className="text-sm text-neutral-400 mb-4">Production-grade controls for agents performing repeated tasks.</p>
-  <List>
-    <Item>
-      <b>Rate Limits & Step Caps.</b> Limit actions per time period (max API calls per minute, max emails per hour). Cap total steps per task (e.g., "Max 10 tool calls") to prevent runaway loops.
-    </Item>
-    <Item>
-      <b>Budget Constraints.</b> Set hard spending limits: max $10 per task, max 1000 tokens per request. Kill processes that exceed thresholds to prevent AutoGPT-style credit burns.
-    </Item>
-    <Item>
-      <b>Audit Logging.</b> Log every tool call with timestamp, user context, input parameters, and outcome. Create immutable trails for incident investigation and anomaly detection.
-    </Item>
-  </List>
+  <Steps>
+    <Step n={3}>
+      <b>Rate Limits & Step Caps.</b>
+      <p className="text-sm mt-2">
+        Prevent runaway loops by limiting actions per time period: max 100 API calls per minute, max 10 emails per hour, max 50 tool invocations per task. Implement circuit breakers that pause execution after N consecutive failures.
+      </p>
+      <p className="text-sm">
+        For multi-step agents, set hard caps: "Max 20 reasoning steps per request." Log when limits are hit – frequent limit triggers indicate either attack attempts or poorly designed agent goals.
+      </p>
+    </Step>
+    <Step n={4}>
+      <b>Budget Constraints & Cost Controls.</b>
+      <p className="text-sm mt-2">
+        Set hard spending limits at multiple levels: per-request ($1), per-task ($10), per-user-per-day ($50). Monitor token consumption in real-time and kill processes that exceed thresholds. This prevents AutoGPT-style incidents where agents burn hundreds of dollars in minutes.
+      </p>
+    </Step>
+    <Step n={5}>
+      <b>Comprehensive Audit Logging.</b>
+      <p className="text-sm mt-2">
+        Log every tool call with: timestamp, user context, agent ID, input parameters, output summary, and success/failure status. Store logs immutably (append-only) for forensic analysis. Include the full reasoning chain that led to each action.
+      </p>
+    </Step>
+  </Steps>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced</p>
-  <p className="text-sm text-neutral-400 mb-4">Enterprise controls for high-autonomy or multi-agent deployments.</p>
-  <List>
-    <Item>
-      <b>Anomaly Detection.</b> Monitor for unusual patterns: repeated failed actions, unexpected resource access, unusual timing, or behavior that deviates from training distribution. Alert operators on threshold violations.
-    </Item>
-    <Item>
-      <b>Kill Switches.</b> Implement emergency stop buttons accessible to operators. Enable immediate agent termination without requiring graceful shutdown. Test kill switch functionality regularly.
-    </Item>
-    <Item>
-      <b>Confined Goal Specification.</b> Replace open-ended goals ("Fix the server") with bounded objectives ("Analyze error logs and propose a fix for 500 errors"). Narrow missions reduce blast radius when things go wrong.
-    </Item>
-  </List>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced (High-Autonomy Deployments)</p>
+  <p className="text-sm text-neutral-400 mb-4">Enterprise controls for multi-agent systems or high-stakes environments.</p>
+  <Steps>
+    <Step n={6}>
+      <b>Behavioral Anomaly Detection.</b>
+      <p className="text-sm mt-2">
+        Monitor for deviations from expected behavior: repeated failed actions (possible attack probing), access to unexpected resources (lateral movement), unusual timing patterns (automated attacks), or sudden changes in tool usage frequency.
+      </p>
+      <p className="text-sm">
+        Set up automated alerts when anomaly scores exceed thresholds. Feed alerts to security teams for investigation before allowing the agent to continue.
+      </p>
+    </Step>
+    <Step n={7}>
+      <b>Kill Switches & Emergency Stops.</b>
+      <p className="text-sm mt-2">
+        Implement emergency stop buttons accessible to operators via dashboard and API. Kill switches must work immediately without requiring graceful shutdown – force-terminate all agent processes and revoke active tokens. Test kill switch functionality monthly.
+      </p>
+    </Step>
+    <Step n={8}>
+      <b>Confined Goal Specification.</b>
+      <p className="text-sm mt-2">
+        Replace open-ended goals with bounded objectives. Instead of "Fix the server," specify "Analyze nginx error logs from the last hour and propose a configuration change for 502 errors – do not apply changes." Narrow missions reduce blast radius when things go wrong.
+      </p>
+    </Step>
+  </Steps>
+
+  <p className="mt-4">
+    The following checklist helps you systematically verify these controls based on your role.
+  </p>
 </Section>
 
 <Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
-  <p>Before deploying an autonomous AI agent with tool access, verify these controls:</p>
+  <p>Before deploying an autonomous AI agent with tool access, verify these controls based on your role:</p>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">For Everyone</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Everyone (Product, Security, Engineering)</p>
   <List>
     <Item>
-      <b>Human-in-the-Loop for High-Risk Actions.</b> Have you identified all irreversible operations (delete, send, purchase, deploy)? Require explicit human approval before execution. Display exactly what the agent intends to do: "About to delete 42 files in /data. Confirm?"
+      <b>Action Risk Classification.</b> Have you categorized every tool the agent can invoke by risk level (low/medium/high)? Do high-risk actions (delete, send, purchase) require human approval?
     </Item>
     <Item>
-      <b>Confined Goal Specification.</b> Are your agent's goals specific and bounded? Replace "Fix the website" with "Analyze error logs and propose a fix for 500 errors." Narrow missions reduce blast radius.
+      <b>Goal Boundaries Defined.</b> Are agent objectives specific and bounded? Can you explain exactly what the agent should and should not do in one sentence?
+    </Item>
+    <Item>
+      <b>Blast Radius Assessment.</b> If this agent is compromised, what's the worst-case impact? Have you documented the maximum damage it could cause?
     </Item>
   </List>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Developers</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Agent Developers</p>
   <List>
     <Item>
-      <b>Least Privilege Tool Access.</b> Does your agent have more permissions than necessary? If it only needs to read data, don't give it write access. Use API tokens with minimal scopes (e.g., read-only database connections, send-only email credentials).
+      <b>Token Scoping.</b> Are API tokens scoped to minimum required permissions? Are they short-lived (≤60 minutes)? Do they use agent-specific service accounts, not personal credentials?
     </Item>
     <Item>
-      <b>Rate Limits & Step Caps.</b> Have you limited the number of actions per time period? Implement: max API calls per minute, max emails per hour, max steps per task. Prevent runaway loops from draining budgets or spamming users.
+      <b>Runaway Prevention.</b> Is there a hard cap on reasoning steps per request? Do rate limits exist for each tool type? Will the agent halt after N consecutive failures?
     </Item>
     <Item>
-      <b>Budget Constraints.</b> Is there a spending limit? Set hard caps: max $10 per task, max 1000 API tokens per request. Monitor actual usage against budgets and kill processes that exceed thresholds.
+      <b>Cost Guardrails.</b> Are spending limits enforced at per-request, per-task, and per-user levels? Does exceeding limits trigger automatic termination?
     </Item>
   </List>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Security Teams</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Platform & Security Teams</p>
   <List>
     <Item>
-      <b>Audit Logging for All Actions.</b> Are you logging every tool call with timestamp, user context, and outcome? Implement immutable audit trails. Log both successful actions and failed attempts to detect attack patterns.
+      <b>Audit Trail Completeness.</b> Does every tool call log: timestamp, user context, agent ID, parameters, outcome, and reasoning chain? Are logs immutable and retained for forensic analysis?
     </Item>
     <Item>
-      <b>Anomaly Detection & Kill Switches.</b> Do you monitor for unusual behavior? Set up alerts for: repeated failed actions, accessing unexpected resources, unusual timing patterns. Implement emergency stop buttons accessible to operators.
+      <b>Anomaly Alerting.</b> Are alerts configured for: repeated failures, unexpected resource access, unusual timing, tool usage spikes? Do alerts route to on-call responders?
+    </Item>
+    <Item>
+      <b>Emergency Stop Tested.</b> Does the kill switch work? Have you tested force-termination within the last month? Can operators revoke all agent tokens instantly?
     </Item>
   </List>
   <p>
@@ -315,7 +365,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <b>Autonomy ≠ Intelligence.</b> An agent can be sophisticated at reasoning but still make catastrophic decisions if given unconstrained tool access. The "paperclip maximizer" thought experiment is no longer theoretical – real agents optimize for goals without considering unintended consequences.
     </Item>
     <Item>
-      <b>Human Oversight is Non-Negotiable for High-Stakes Actions.</b> AI agents should draft emails, propose code changes, and suggest purchases – but humans must approve before execution. The agent-in-the-loop pattern (agent proposes, human decides) is the safest architecture.
+      <b>Human Oversight is Non-Negotiable for High-Stakes Actions.</b> AI agents should draft emails, propose code changes, and suggest purchases – but humans must approve before execution. The human-in-the-loop pattern (agent proposes, human approves) is the safest architecture.
     </Item>
     <Item>
       <b>Defense is Architectural, Not Prompt-Based.</b> You cannot prompt your way to safe agency. "Be careful" instructions in system prompts are insufficient. Effective defense requires privilege separation, rate limits, budget caps, and kill switches.
@@ -325,16 +375,22 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
 
 <Section title="Further Reading" meta="RESOURCES">
   <p className="text-sm text-neutral-300 mb-4">
-    Research and frameworks for building safe autonomous AI agents.
+    Research, frameworks, and tools for building safe autonomous AI agents.
   </p>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Start Here</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Start Here</p>
   <List>
     <Item>
       <Link href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP LLM06:2025 - Excessive Agency</Link> – Official documentation and mitigation strategies.
     </Item>
     <Item>
-      <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">Agentic AI - OWASP Lists Threats and Mitigations</Link> – OWASP Agentic Security Initiative comprehensive threat model and defense guide.
+      <Link href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP Top 10 for Agentic Applications</Link> – The benchmark for agentic security covering ASI01-ASI10 threats (December 2025).
+    </Item>
+    <Item>
+      <Link href="https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/">Agentic AI - Threats and Mitigations</Link> – OWASP Agentic Security Initiative comprehensive threat model and defense guide.
+    </Item>
+    <Item>
+      <Link href="https://cloudsecurityalliance.org/blog/2025/06/16/ai-agents-vs-ai-chatbots-understanding-the-difference">AI Agents vs AI Chatbots: Understanding the Difference</Link> – Cloud Security Alliance guide on agent risk profiles.
     </Item>
   </List>
 
@@ -344,21 +400,30 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <Link href="https://arxiv.org/html/2507.06850">The Dark Side of LLMs: Agent-based Attacks for Complete Computer Takeover</Link> – Critical research demonstrating 94.4% vulnerability rate and 100% Inter-Agent Trust Exploitation success (2025).
     </Item>
     <Item>
-      <Link href="https://arxiv.org/pdf/2504.19956">Securing Agentic AI: A Comprehensive Threat Model and Mitigation Framework for Generative AI Agents</Link> – Detailed framework for protecting generative AI agents (2025).
+      <Link href="https://arxiv.org/abs/2504.19956">Securing Agentic AI: A Comprehensive Threat Model and Mitigation Framework</Link> – ATFAA and SHIELD frameworks for protecting generative AI agents (2025).
+    </Item>
+    <Item>
+      <Link href="https://aws.amazon.com/blogs/security/the-agentic-ai-security-scoping-matrix-a-framework-for-securing-autonomous-ai-systems/">The Agentic AI Security Scoping Matrix</Link> – AWS framework categorizing agent architectures by connectivity and autonomy levels.
+    </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2505.03574">LlamaFirewall: An Open Source Guardrail System for Building Secure AI Agents</Link> – Meta research on real-time guardrail monitors for autonomous agents (2025).
     </Item>
     <Item>
       <Link href="https://www.anthropic.com/research/measuring-model-persuasiveness">Measuring the Persuasiveness of Language Models</Link> – Anthropic research on AI persuasion capabilities and risks (2024).
-    </Item>
-    <Item>
-      <Link href="https://arxiv.org/abs/2204.01691">Do As I Can, Not As I Say: Grounding Language in Robotic Affordances</Link> – Google Research on grounding language models in robotic capabilities (2022).
-    </Item>
-    <Item>
-      <Link href="https://www.lesswrong.com/posts/pRkFkzwKZ2zfa3R6H/without-specific-countermeasures-the-easiest-path-to">Without Specific Countermeasures, the Easiest Path to Transformative AI Likely Leads to AI Takeover</Link> – Analysis of AI takeover risks from autonomous capability scaling.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools</p>
   <List>
+    <Item>
+      <Link href="https://github.com/meta-llama/PurpleLlama/tree/main/LlamaFirewall">LlamaFirewall</Link> – Meta's open-source guardrail system for secure AI agents (part of PurpleLlama).
+    </Item>
+    <Item>
+      <Link href="https://github.com/NVIDIA/NeMo-Guardrails">NeMo Guardrails</Link> – NVIDIA's toolkit for adding programmable guardrails to LLM applications.
+    </Item>
+    <Item>
+      <Link href="https://www.guardrailsai.com/">Guardrails AI</Link> – Open-source framework for validating and structuring LLM outputs.
+    </Item>
     <Item>
       <Link href="https://github.com/Significant-Gravitas/AutoGPT">AutoGPT</Link> – Open-source autonomous agent framework (study its architecture for agency patterns).
     </Item>
@@ -367,7 +432,7 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
   <List>
     <Item>
-      <Link href="https://promptarmor.substack.com/p/slack-ai-data-exfiltration-from-private">Slack AI data exfiltration from private channels</Link> – PromptArmor, real-world Slack AI vulnerability demonstration.
+      <Link href="https://promptarmor.substack.com/p/slack-ai-data-exfiltration-from-private">Slack AI Data Exfiltration from Private Channels</Link> – PromptArmor, real-world Slack AI vulnerability demonstration.
     </Item>
     <Item>
       <Link href="https://www.twilio.com/en-us/blog/rogue-ai-agents-secure-your-apis">Rogue Agents: Stop AI From Misusing Your APIs</Link> – Twilio, API security strategies for AI agents.
@@ -376,13 +441,10 @@ import ExcessiveAgencyLab from '@/components/ui/ExcessiveAgencyLab.tsx';
       <Link href="https://embracethered.com/blog/posts/2023/chatgpt-cross-plugin-request-forgery-and-prompt-injection./">Confused Deputy Problem in LLMs</Link> – Embrace The Red, cross-plugin request forgery.
     </Item>
     <Item>
-      <Link href="https://github.com/NVIDIA/NeMo-Guardrails/blob/main/docs/security/guidelines.md">NeMo-Guardrails Interface Guidelines</Link> – NVIDIA, implementation guidelines for guardrails.
-    </Item>
-    <Item>
       <Link href="https://simonwillison.net/2023/Apr/25/dual-llm-pattern/">Dual LLM Pattern</Link> – Simon Willison, architectural pattern for safe agents.
     </Item>
     <Item>
-      <Link href="https://developer.nvidia.com/blog/sandboxing-agentic-ai-workflows-with-webassembly/">Sandboxing Agentic AI Workflows with WebAssembly</Link> – NVIDIA/Joe Lucas, WebAssembly sandboxing technique.
+      <Link href="https://developer.nvidia.com/blog/sandboxing-agentic-ai-workflows-with-webassembly/">Sandboxing Agentic AI Workflows with WebAssembly</Link> – NVIDIA, WebAssembly sandboxing technique for agent isolation.
     </Item>
   </List>
 </Section>
