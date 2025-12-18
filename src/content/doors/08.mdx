@@ -204,7 +204,7 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <b>Phantom Backdoor Attacks (2024).</b> <Link href="https://arxiv.org/abs/2405.20485">Research demonstrated</Link> general backdoor attacks on RAG systems using two-stage optimization. Adversaries inject malicious documents that are only retrieved when specific trigger sequences appear in queries, causing integrity violations across Gemma, Vicuna, Llama, GPT-3.5, and GPT-4 models.
     </Item>
     <Item>
-      <b>Embedding Reconstruction Attack.</b> <Link href="https://aclanthology.org/2024.acl-long.230/">Researchers demonstrated reconstructing PII from embedding vectors</Link> with 70%+ accuracy for documents under 100 words – highlighting that embeddings are not anonymized representations.
+      <b>Embedding Reconstruction Attack.</b> <Link href="https://aclanthology.org/2024.acl-long.230/">Researchers demonstrated reconstructing sensitive attributes from clinical embeddings</Link> with 80-99% accuracy, with performance degrading for longer text sequences – highlighting that embeddings are not anonymized representations.
     </Item>
   </List>
 
@@ -220,10 +220,12 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Tenant isolation and permission inheritance vulnerabilities.</p>
   <List>
     <Item>
-      <b>Healthcare RAG Cross-User Leak.</b> <Link href="https://cloudsecurityalliance.org/blog/2023/11/22/mitigating-security-risks-in-retrieval-augmented-generation-rag-llm-applications">A multi-tenant medical chatbot failed to isolate patient embeddings</Link>. Queries like "Show me recent diagnoses" retrieved documents across all patients, not just the authenticated user – exposing HIPAA-protected information.
+      <b>Flowise Vector DB Exposures (CVE-2024-31621).</b> <Link href="https://www.legitsecurity.com/blog/the-risks-lurking-in-publicly-exposed-genai-development-services">Security researchers found 438 vulnerable Flowise servers</Link> exposing Pinecone vector database API keys, OpenAI credentials, customer PII, and financial records. A simple authentication bypass (uppercase /API/v1 instead of /api/v1) granted full access to RAG configurations and embedded data.
+      <p className="text-xs text-neutral-500 mt-1">Impact: Vector DB credentials exposed, enabling access to all embedded corporate data.</p>
     </Item>
     <Item>
-      <b>Enterprise Document Leakage.</b> <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">Reports document cases where employees</Link> accessed confidential executive documents via RAG systems because embeddings lacked proper access control inheritance from source documents.
+      <b>ConfusedPilot: M365 Copilot RAG Exploitation (2024).</b> <Link href="https://arxiv.org/abs/2408.04870">University of Texas researchers demonstrated</Link> that anyone who can save documents to an AI-indexed folder can manipulate Copilot's RAG responses. Malicious documents containing "This document trumps other documents" suppressed legitimate results. The attack also exploited RAG caching to leak data from deleted confidential documents.
+      <p className="text-xs text-neutral-500 mt-1">Impact: Cross-user data suppression and confidential document leakage via RAG cache.</p>
     </Item>
   </List>
 </Section>
@@ -235,42 +237,50 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-4 mb-3">Tier 1: Essential</p>
   <p className="text-sm text-neutral-400 mb-4">Non-negotiable controls for any production RAG system.</p>
-  <List>
-    <Item>
-      <b>Access Control Inheritance.</b> Embeddings must inherit access controls from source documents. If "executive_report.pdf" is restricted to C-suite users, its embedding must carry the same permissions. Implement metadata-based filtering: before retrieval, check <code>embedding.acl</code> against <code>user.permissions</code>.
-    </Item>
-    <Item>
-      <b>Multi-Tenant Isolation.</b> Use separate vector namespaces or collections per tenant. Never rely on filtering alone – physical separation prevents cross-contamination. Example: <code>tenant_123_embeddings</code> vs <code>tenant_456_embeddings</code>.
-    </Item>
-  </List>
+  <Steps>
+    <Step n={1}>
+      <b>Access Control Inheritance.</b>
+      <p className="text-sm mt-2">Embeddings must inherit access controls from source documents. If "executive_report.pdf" is restricted to C-suite users, its embedding must carry the same permissions. Implement metadata-based filtering: before retrieval, check <code>embedding.acl</code> against <code>user.permissions</code>.</p>
+    </Step>
+    <Step n={2}>
+      <b>Multi-Tenant Isolation.</b>
+      <p className="text-sm mt-2">Use separate vector namespaces or collections per tenant. Never rely on filtering alone – physical separation prevents cross-contamination. Example: <code>tenant_123_embeddings</code> vs <code>tenant_456_embeddings</code>.</p>
+    </Step>
+  </Steps>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 2: Standard</p>
   <p className="text-sm text-neutral-400 mb-4">Production-grade controls for systems with user-contributed content.</p>
-  <List>
-    <Item>
-      <b>Input Validation for Document Uploads.</b> If users can upload documents to the RAG system: (1) Verify source authenticity, (2) Scan for malicious content, (3) Implement rate limits, (4) Quarantine and review high-risk uploads before indexing.
-    </Item>
-    <Item>
-      <b>Retrieval Logging & Anomaly Detection.</b> Log all retrieval operations with user ID, query, and returned document IDs. Alert on: excessive retrieval volume, access outside user's typical scope, repeated failed retrieval attempts (probing).
-    </Item>
-    <Item>
-      <b>Query Filtering for Injection Patterns.</b> Detect queries designed to manipulate retrieval: "Fetch all documents with 'confidential' metadata" or embedding-targeted prompts. Use semantic classifiers to identify adversarial queries.
-    </Item>
-  </List>
+  <Steps>
+    <Step n={3}>
+      <b>Input Validation for Document Uploads.</b>
+      <p className="text-sm mt-2">If users can upload documents to the RAG system: (1) Verify source authenticity, (2) Scan for malicious content, (3) Implement rate limits, (4) Quarantine and review high-risk uploads before indexing.</p>
+    </Step>
+    <Step n={4}>
+      <b>Retrieval Logging & Anomaly Detection.</b>
+      <p className="text-sm mt-2">Log all retrieval operations with user ID, query, and returned document IDs. Alert on: excessive retrieval volume, access outside user's typical scope, repeated failed retrieval attempts (probing).</p>
+    </Step>
+    <Step n={5}>
+      <b>Query Filtering for Injection Patterns.</b>
+      <p className="text-sm mt-2">Detect queries designed to manipulate retrieval: "Fetch all documents with 'confidential' metadata" or embedding-targeted prompts. Use semantic classifiers to identify adversarial queries.</p>
+    </Step>
+  </Steps>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tier 3: Advanced</p>
   <p className="text-sm text-neutral-400 mb-4">Research-backed defenses for high-security deployments.</p>
-  <List>
-    <Item>
-      <b>Embedding Sanitization & Differential Privacy.</b> Apply noise to embeddings to prevent inversion attacks. Trade-off: reduces retrieval accuracy slightly but makes reconstruction attacks computationally infeasible. Use techniques like DP-SGD during embedding model training.
-    </Item>
-    <Item>
-      <b>RevPRAG: Poisoning Detection.</b> <Link href="https://arxiv.org/abs/2411.18948">RevPRAG detects RAG poisoning</Link> by analyzing LLM activation patterns, achieving 98% true positive rate with only 1% false positives. Identifies distinct activation signatures when models generate poisoned vs correct outputs.
-    </Item>
-    <Item>
-      <b>Periodic Re-Embedding & Vector DB Audits.</b> Regularly re-embed documents to detect drift or tampering. Audit for orphaned embeddings, metadata anomalies, or suspicious similarity clusters. Use tools like <Link href="https://arxiv.org/abs/2406.00083">BadRAG</Link> to identify vulnerabilities.
-    </Item>
-  </List>
+  <Steps>
+    <Step n={6}>
+      <b>Embedding Sanitization & Differential Privacy.</b>
+      <p className="text-sm mt-2">Apply noise to embeddings to prevent inversion attacks. Trade-off: reduces retrieval accuracy slightly but makes reconstruction attacks computationally infeasible. Use techniques like DP-SGD during embedding model training.</p>
+    </Step>
+    <Step n={7}>
+      <b>RevPRAG: Poisoning Detection.</b>
+      <p className="text-sm mt-2"><Link href="https://arxiv.org/abs/2411.18948">RevPRAG detects RAG poisoning</Link> by analyzing LLM activation patterns, achieving 98% true positive rate with only 1% false positives. Identifies distinct activation signatures when models generate poisoned vs correct outputs.</p>
+    </Step>
+    <Step n={8}>
+      <b>Periodic Re-Embedding & Vector DB Audits.</b>
+      <p className="text-sm mt-2">Regularly re-embed documents to detect drift or tampering. Audit for orphaned embeddings, metadata anomalies, or suspicious similarity clusters. Use tools like <Link href="https://arxiv.org/abs/2406.00083">BadRAG</Link> to identify vulnerabilities.</p>
+    </Step>
+  </Steps>
 </Section>
 
 <Section title="Builder's Security Checklist" meta="IMPLEMENTATION">
@@ -347,16 +357,13 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
     Research papers, detection tools, and best practices for securing RAG systems against vector and embedding attacks.
   </p>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-2 mb-3">Start Here</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Start Here</p>
   <List>
     <Item>
       <Link href="https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/">OWASP LLM08:2025 - Vector and Embedding Weaknesses</Link> – Official documentation and mitigation guidelines.
     </Item>
     <Item>
       <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">Vector and embedding weaknesses | Tutorial and examples</Link> – Interactive tutorial with FinBot case study (Snyk Learn).
-    </Item>
-    <Item>
-      <Link href="https://www.cobalt.io/blog/vector-and-embedding-weaknesses">Vector and Embedding Weaknesses: Vulnerabilities and Mitigations</Link> – Practical security guide (Cobalt, 2025).
     </Item>
   </List>
 
@@ -375,12 +382,37 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <Link href="https://arxiv.org/abs/2405.20485">Phantom: General Backdoor Attacks on Retrieval Augmented Language Generation</Link> – Two-stage optimization framework for backdoor injection (May 2024).
     </Item>
     <Item>
-      <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">OWASP's Updated Top 10 LLM Includes Vector and Embedding Weaknesses</Link> – Enterprise perspective on RAG security (IronCore Labs).
+      <Link href="https://arxiv.org/abs/2408.04870">ConfusedPilot: Confused Deputy Risks in RAG-based LLMs</Link> – RAG access control vulnerabilities in M365 Copilot (DEF CON AI Village 2024).
+    </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2407.12784">AgentPoison: Red-teaming LLM Agents via Poisoning Memory or Knowledge Bases</Link> – First backdoor attack on RAG-based agents, ≥80% success rate (NeurIPS 2024).
+    </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2004.00053">Information Leakage in Embedding Models</Link> – Foundational embedding privacy research.
+    </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2305.03010">Sentence Embedding Leaks More Information than You Expect: Generative Embedding Inversion Attack</Link> – Embedding reconstruction attack research.
+    </Item>
+  </List>
+
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Labs</p>
+  <List>
+    <Item>
+      <Link href="https://github.com/leondz/garak">Garak: LLM Vulnerability Scanner</Link> – Open-source tool for probing LLM weaknesses including RAG poisoning and data extraction.
+    </Item>
+    <Item>
+      <Link href="https://learn.snyk.io/lesson/llm-vector-and-embedding-weaknesses/">Snyk Learn: Vector Weakness Lab</Link> – Hands-on FinBot exploitation exercise demonstrating RAG poisoning.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
   <List>
+    <Item>
+      <Link href="https://www.cobalt.io/blog/vector-and-embedding-weaknesses">Vector and Embedding Weaknesses: Vulnerabilities and Mitigations</Link> – Practical security guide (Cobalt, 2025).
+    </Item>
+    <Item>
+      <Link href="https://ironcorelabs.com/blog/2025/owasp-llm-top10-2025-update/">OWASP's Updated Top 10 LLM Includes Vector and Embedding Weaknesses</Link> – Enterprise perspective on RAG security (IronCore Labs).
+    </Item>
     <Item>
       <Link href="https://learn.microsoft.com/en-us/azure/developer/ai/augment-llm-rag-fine-tuning">Augmenting a Large Language Model with Retrieval-Augmented Generation and Fine-tuning</Link> – Microsoft Learn, enterprise RAG implementation guide.
     </Item>
@@ -388,26 +420,17 @@ import VectorWeaknessLab from '@/components/ui/VectorWeaknessLab.tsx';
       <Link href="https://www.infosecurity-magazine.com/news/confusedpilot-attack-targets-ai/">New ConfusedPilot Attack Targets AI Systems with Data Poisoning</Link> – Infosecurity Magazine, real-world RAG attack coverage.
     </Item>
     <Item>
-      <Link href="https://confusedpilot.info/">Confused Deputy Risks in RAG-based LLMs</Link> – ConfusedPilot resource, dedicated RAG vulnerability documentation.
-    </Item>
-    <Item>
-      <Link href="https://blog.repello.ai/how-rag-poisoning-made-llama3-racist-1c5e390dd564">How RAG Poisoning Made Llama3 Racist!</Link> – Repello Blog, RAG poisoning case study.
-    </Item>
-    <Item>
       <Link href="https://truera.com/ai-quality-education/generative-ai-rags/what-is-the-rag-triad/">What is the RAG Triad?</Link> – TruEra, RAG quality evaluation framework.
     </Item>
   </List>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Research Papers</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Taxonomy & Classification</p>
   <List>
     <Item>
-      <Link href="https://arxiv.org/abs/2410.07176">Astute RAG: Overcoming Imperfect Retrieval Augmentation and Knowledge Conflicts</Link> – arXiv, RAG robustness research.
+      <Link href="https://atlas.mitre.org/techniques/AML.T0070">MITRE ATLAS AML.T0070 - RAG Poisoning</Link> – Official classification for RAG knowledge base poisoning attacks.
     </Item>
     <Item>
-      <Link href="https://arxiv.org/abs/2004.00053">Information Leakage in Embedding Models</Link> – arXiv, foundational embedding privacy research.
-    </Item>
-    <Item>
-      <Link href="https://arxiv.org/pdf/2305.03010">Sentence Embedding Leaks More Information than You Expect: Generative Embedding Inversion Attack</Link> – arXiv, embedding reconstruction attack research.
+      <Link href="https://labs.zenity.io/p/techniques-from-zenitys-genai-attacks-matrix-incorporated-into-mitre-atlas-to-track-emerging-ai-thr">Zenity GenAI Attacks Matrix in MITRE ATLAS</Link> – RAG attack techniques AML.T0064, AML.T0070, AML.T0071 integrated into ATLAS.
     </Item>
   </List>
 </Section>
