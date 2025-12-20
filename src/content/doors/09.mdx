@@ -72,7 +72,7 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
   </p>
   <List>
     <Item>
-      <b>Deceptive Explanations Outperform Truth.</b> <Link href="https://dl.acm.org/doi/10.1145/3706598.3713408">Research with 11,780 observations</Link> from 589 participants demonstrates that deceptive AI-generated explanations are <b>more convincing than honest explanations</b>, increasing belief in false news while undermining true information. Even logically invalid deceptive arguments retain persuasive power, revealing a fundamental vulnerability in human-AI interaction.
+      <b>Deceptive Explanations Outperform Truth.</b> <Link href="https://dl.acm.org/doi/10.1145/3706598.3713408">Research with 23,840 observations</Link> from 1,192 participants demonstrates that deceptive AI-generated explanations are <b>more convincing than honest explanations</b>, increasing belief in false news while undermining true information. Even logically invalid deceptive arguments retain persuasive power, revealing a fundamental vulnerability in human-AI interaction.
     </Item>
     <Item>
       <b>AI-Generated Fake News Epidemic.</b> <Link href="https://arxiv.org/abs/2410.19250">Research shows LLMs systematically generate</Link> convincing fake news at scale. While LLMs detect real news 68% better than humans, both achieve only ~60% accuracy detecting AI-generated fake content – demonstrating the asymmetric advantage attackers have in creating vs. detecting misinformation.
@@ -81,7 +81,7 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
       <b>Security Breaches via False Guidance.</b> LLMs used in security operations might hallucinate: "CVE-2024-FAKE is patched in version 2.1" when it doesn't exist, causing teams to ignore real vulnerabilities or deploy unpatched systems.
     </Item>
     <Item>
-      <b>Legal Liability (Fake Citations).</b> Lawyers using LLMs have submitted briefs citing <b>non-existent court cases</b> that the model hallucinated. Courts sanctioned attorneys for relying on AI-generated false precedents. <Link href="https://www.indusface.com/blog/owasp-top-10-llm/">Multiple documented cases</Link> in 2023-2024.
+      <b>Legal Liability (Fake Citations).</b> Lawyers using LLMs have submitted briefs citing <b>non-existent court cases</b> that the model hallucinated. <Link href="https://www.legaldive.com/news/chatgpt-lawyer-fake-cases-lawyer-uses-chatgpt-sanctions-generative-ai/653925/">Courts have sanctioned attorneys</Link> for relying on AI-generated false precedents.
     </Item>
     <Item>
       <b>Medical Misinformation.</b> Healthcare chatbots hallucinating drug interactions, dosages, or treatment protocols create life-threatening risks. Users trust medical advice delivered in authoritative language without verifying against clinical sources.
@@ -162,7 +162,7 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
       <p className="text-xs text-neutral-500 mt-1">Detection: Easy – automated URL/citation verification catches most.</p>
     </Item>
     <Item>
-      <b>Factual vs. Fidelity Hallucinations.</b> The <Link href="https://arxiv.org/abs/2504.17550">HalluLens benchmark distinguishes</Link> between <i>factual</i> hallucinations (incorrect information) and <i>fidelity</i> hallucinations (content deviating from input context). Research shows even top models exhibit hallucinations in up to <b>86% of generated atomic facts</b> depending on domain.
+      <b>Factual vs. Fidelity Hallucinations.</b> The <Link href="https://arxiv.org/abs/2501.08292">HALoGEN benchmark</Link> decomposes LLM outputs into atomic facts and verifies each against knowledge sources. Research shows even top models exhibit hallucinations in up to <b>86% of generated atomic facts</b> depending on domain.
       <p className="text-xs text-neutral-500 mt-1">Detection: Hard – requires semantic comparison against source material.</p>
     </Item>
   </List>
@@ -203,10 +203,10 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Court-documented cases of LLM misinformation.</p>
   <List>
     <Item>
-      <b>Lawyer Sanctioned for AI-Generated Fake Cases (2023).</b> <Link href="https://arstechnica.com/tech-policy/2023/06/lawyer-who-used-chatgpt-to-cite-fake-cases-gets-sanctioned-by-court/">An attorney used ChatGPT for legal research</Link>, submitting a brief citing six cases – all hallucinated. The court sanctioned Schwartz for failure to verify, setting precedent for LLM misinformation liability.
+      <b>Lawyer Sanctioned for AI-Generated Fake Cases (2023).</b> <Link href="https://www.legaldive.com/news/chatgpt-lawyer-fake-cases-lawyer-uses-chatgpt-sanctions-generative-ai/653925/">An attorney used ChatGPT for legal research</Link>, submitting a brief citing six cases – all hallucinated. The court fined Schwartz $5,000 for failure to verify, setting precedent for LLM misinformation liability.
     </Item>
     <Item>
-      <b>Air Canada Chatbot Refund Fiasco (2024).</b> <Link href="https://arstechnica.com/tech-policy/2024/02/air-canada-must-honor-refund-policy-invented-by-airlines-chatbot/">Air Canada's chatbot</Link> hallucinated a bereavement fare policy that didn't exist. When a customer relied on this misinformation, the airline was held legally liable and ordered to honor the false policy.
+      <b>Air Canada Chatbot Refund Fiasco (2024).</b> <Link href="https://www.cbc.ca/news/canada/british-columbia/air-canada-chatbot-lawsuit-1.7116416">Air Canada's chatbot</Link> provided incorrect information about bereavement fare eligibility, claiming customers could apply for refunds within 90 days after travel – which wasn't true. When a customer relied on this misinformation, the airline was held legally liable.
     </Item>
   </List>
 
@@ -214,7 +214,7 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Life-critical misinformation in medical contexts.</p>
   <List>
     <Item>
-      <b>Medical Chatbot Dosage Errors.</b> <Link href="https://www.nature.com/articles/s41746-025-01670-7">Multiple reports of health chatbots providing incorrect medication dosages</Link>, drug interactions, or contraindications – creating patient safety risks when users follow AI advice without consulting professionals.
+      <b>Medical Chatbot Prescription Errors.</b> <Link href="https://www.nature.com/articles/s41746-025-01956-w">Research on AI chatbots managing chronic diseases</Link> found they prescribe unnecessary medications in 57.8% of cases and order unnecessary medical tests in 91.9% of cases – creating patient safety risks and increased healthcare costs when users follow AI advice without consulting professionals.
     </Item>
   </List>
 
@@ -222,10 +222,10 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
   <p className="text-sm text-neutral-400 mb-4">Developer tools and financial systems generating false information.</p>
   <List>
     <Item>
-      <b>GitHub Copilot Insecure Code Generation.</b> <Link href="https://www.firetail.ai/blog/llm09-misinformation">Research shows</Link> Copilot frequently generates code with hallucinated security functions or deprecated patterns labeled as "secure," leading developers to ship vulnerable applications.
+      <b>Insecure Code Generation.</b> <Link href="https://arxiv.org/abs/2310.02059">Empirical analysis of GitHub Copilot-generated code</Link> found security weaknesses in 29.5% of Python and 24.2% of JavaScript snippets. Separate research found ChatGPT produced secure code in only 5 of 21 vulnerability-prone scenarios.
     </Item>
     <Item>
-      <b>Financial Advisor Hallucinated Investments.</b> <Link href="https://biztechmagazine.com/article/2025/08/llm-hallucinations-what-are-implications-financial-institutions">LLM-powered investment tools have recommended non-existent financial products</Link> – research shows LLMs hallucinate in up to 41% of finance-related queries, creating serious risks when users act on fabricated investment advice.
+      <b>Financial Analysis Hallucinations.</b> <Link href="https://www.baytechconsulting.com/blog/hidden-dangers-of-ai-hallucinations-in-financial-services">Documented cases include LLMs inventing stock split ratios</Link> when summarizing financial documents (citing 10-to-1 when documents say 6-to-1), and fabricating regulatory references like "IFRS 99 standard" that don't exist.
     </Item>
   </List>
 </Section>
@@ -270,7 +270,10 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
       <b>Domain Fine-Tuning.</b> Fine-tune models on curated, verified datasets specific to your domain. Reduces generic hallucinations but requires ongoing updates as domain knowledge evolves.
     </Item>
     <Item>
-      <b>Hallucination Detection Classifiers.</b> Train secondary models to detect hallucinations in outputs. <Link href="https://arxiv.org/abs/2504.17550">HalluLens benchmarks</Link> check for: unsupported claims, temporal inconsistencies, fabricated entity names, or contradictions with retrieved context.
+      <b>Hallucination Detection Classifiers.</b> Train secondary models to detect hallucinations in outputs. Detection methods check for: unsupported claims, temporal inconsistencies, fabricated entity names, or contradictions with retrieved context. <Link href="https://arxiv.org/abs/2504.17550">Benchmarks like HalluLens</Link> help evaluate detector effectiveness.
+    </Item>
+    <Item>
+      <b>Output Monitoring.</b> Log and review LLM outputs for patterns of misinformation or user complaints about accuracy. Track hallucination rates over time to identify model degradation or problematic query patterns.
     </Item>
   </List>
 </Section>
@@ -302,13 +305,13 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
     <Item>
       <b>Citations Verified.</b> Do you validate that all cited sources exist and are relevant (no zombie citations)?
     </Item>
-    <Item>
-      <b>Domain Fine-Tuning Applied.</b> For specialized applications, have you fine-tuned on curated, expert-verified datasets?
-    </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">For Security Teams</p>
   <List>
+    <Item>
+      <b>Domain Fine-Tuning Applied.</b> For specialized applications, have you fine-tuned on curated, expert-verified datasets?
+    </Item>
     <Item>
       <b>Hallucination Detection Active.</b> Do you scan outputs for common hallucination patterns (fabricated entities, temporal errors, unsupported claims)?
     </Item>
@@ -382,6 +385,9 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
     <Item>
       <Link href="https://www.pointguardai.com/blog/understanding-the-owasp-top-10-for-llms">Understanding the 2025 OWASP Top 10 for LLM Applications</Link> – Enterprise perspective on LLM security (PointGuard AI).
     </Item>
+    <Item>
+      <Link href="https://arxiv.org/abs/2304.09655">How Secure is Code Generated by ChatGPT?</Link> – arXiv, code generation security analysis.
+    </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
@@ -396,7 +402,7 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
       <Link href="https://www.legaldive.com/news/chatgpt-fake-legal-cases-generative-ai-hallucinations/651557/">ChatGPT Fake Legal Cases: Generative AI Hallucinations</Link> – LegalDive, legal industry hallucination cases.
     </Item>
     <Item>
-      <Link href="https://towardsdatascience.com/llm-hallucinations-ec831dcd7786">Understanding LLM Hallucinations</Link> – Towards Data Science, technical hallucination explainer.
+      <Link href="https://towardsdatascience.com/unraveling-large-language-model-hallucinations/">Unraveling Large Language Model Hallucinations</Link> – Towards Data Science, technical hallucination explainer.
     </Item>
     <Item>
       <Link href="https://techpolicy.press/how-should-companies-communicate-the-risks-of-large-language-models-to-users/">How Should Companies Communicate the Risks of Large Language Models to Users?</Link> – Techpolicy, risk communication best practices.
@@ -418,17 +424,23 @@ import MisinformationLab from '@/components/ui/MisinformationLab.tsx';
     </Item>
   </List>
 
-  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Research Papers</p>
+  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Tools & Frameworks</p>
   <List>
     <Item>
-      <Link href="https://arxiv.org/abs/2304.09655">How Secure is Code Generated by ChatGPT?</Link> – arXiv, code generation security analysis.
+      <Link href="https://github.com/vectara/hallucination-leaderboard">Vectara Hallucination Leaderboard</Link> – Benchmark comparing hallucination rates across LLM models.
+    </Item>
+    <Item>
+      <Link href="https://www.lakera.ai/blog/guide-to-hallucinations-in-large-language-models">Lakera Hallucination Guide</Link> – Detection strategies and guardrail implementation patterns.
+    </Item>
+    <Item>
+      <Link href="https://aws.amazon.com/blogs/machine-learning/reducing-hallucinations-in-large-language-models-with-custom-intervention-using-amazon-bedrock-agents/">Amazon Bedrock Guardrails</Link> – Contextual grounding checks for hallucination detection in production.
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Taxonomy & Classification</p>
   <List>
     <Item>
-      <Link href="https://atlas.mitre.org/techniques/AML.T0048">MITRE ATLAS AML.T0048.002 - Societal Harm</Link> – MITRE ATLAS, misinformation attack classification.
+      <Link href="https://atlas.mitre.org/techniques/AML.T0060">MITRE ATLAS AML.T0060 - Publish Hallucinated Entities</Link> – Adversaries exploiting LLM hallucinations to control fake packages, URLs, or entities.
     </Item>
   </List>
 </Section>
