@@ -35,7 +35,7 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       Unbounded consumption occurs when LLM applications allow excessive and uncontrolled inferences, leading to resource exhaustion, economic denial-of-wallet attacks, and service degradation for all users.
     </Quote>
     <p>
-      Model DoS exploits the 1000× cost multiplier of LLM inference versus traditional web services. Sponge attacks – benign-looking prompts that trigger 10-250× resource consumption – bypass traditional defenses and can escalate costs from $3/hour to $3,000/hour.
+      Model DoS exploits the 1000× cost multiplier of LLM inference versus traditional web services. Sponge attacks – benign-looking prompts that trigger 10-200× resource consumption – bypass traditional defenses and can escalate costs from $3/hour to $3,000/hour.
     </p>
   </div>
 </Section>
@@ -83,7 +83,7 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
 
 <Section title="The Three Attack Surfaces" meta="FUNDAMENTALS">
   <p>
-    Model DoS attacks exploit three interconnected layers of LLM systems. Understanding these surfaces helps identify where defenses must be applied.
+    Model DoS attacks exploit three interconnected layers of LLM systems. Based on patterns described in <Link href="https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/">OWASP LLM10:2025</Link> and related research, we can categorize these attack surfaces as follows:
   </p>
   <Steps>
     <Step n={1}>
@@ -258,6 +258,9 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       <b>Input Length Limits.</b> Do you enforce maximum context window usage (e.g., 100k tokens)? Are massive file uploads throttled?
     </Item>
     <Item>
+      <b>Output Length Limits.</b> Do you enforce maximum output token counts (e.g., 4k tokens)? Are streaming responses capped?
+    </Item>
+    <Item>
       <b>Graceful Degradation.</b> Under load, does the system return cached responses or polite errors instead of crashing?
     </Item>
   </List>
@@ -272,6 +275,9 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
     </Item>
     <Item>
       <b>Queue Fairness Ensured.</b> Do premium users have dedicated resources? Is there fair-share scheduling to prevent monopolization?
+    </Item>
+    <Item>
+      <b>Access Controls Configured.</b> Is RBAC implemented? Do API keys have appropriate permission scopes and expiration policies?
     </Item>
   </List>
   <p>
@@ -294,7 +300,7 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       <b>Model DoS is Economically Motivated.</b> Attackers exploit the 1000× cost multiplier of LLM inference vs. traditional web services. Denial-of-Wallet is as damaging as service downtime.
     </Item>
     <Item>
-      <b>Sponge Attacks Bypass Traditional Defenses.</b> Benign-looking prompts that trigger 10-250× resource use evade WAFs and content filters. Defense requires semantic understanding and predictive models.
+      <b>Sponge Attacks Bypass Traditional Defenses.</b> Benign-looking prompts that trigger 10-200× resource use evade WAFs and content filters. Defense requires semantic understanding and predictive models.
     </Item>
     <Item>
       <b>Reasoning Models Are More Vulnerable.</b> DeepSeek-R1 and similar systems with extended reasoning chains are easily trapped in exhaustion loops, requiring specialized circuit breakers.
@@ -349,35 +355,29 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">OWASP & Industry References</p>
   <List>
     <Item>
-      <Link href="https://avidml.org/database/avid-2023-v009/">Proof Pudding (CVE-2019-20634)</Link> – AVID, documented resource exhaustion vulnerability.
+      <Link href="https://www.lasso.security/blog/denial-of-service-dos-and-denial-of-wallet-dow-attacks">GenAI Under Attack: DoS & Denial of Wallet Threats</Link> – Lasso Security, comprehensive overview of DoS and DoW attacks on GenAI systems.
     </Item>
     <Item>
-      <Link href="https://www.deeplearning.ai/the-batch/how-metas-llama-nlp-model-leaked/">Runaway LLaMA | How Meta's LLaMA NLP model leaked</Link> – Deep Learning AI, model exfiltration case study.
+      <Link href="https://aws.amazon.com/blogs/security/context-window-overflow-breaking-the-barrier/">Context Window Overflow: Breaking the Barrier</Link> – AWS Security Blog, context window exhaustion attacks and mitigations.
     </Item>
     <Item>
-      <Link href="https://altayakkus.substack.com/p/you-wouldnt-download-an-ai">You wouldn't download an AI - Extracting AI models from mobile apps</Link> – Altay Akkus, model extraction from mobile applications.
+      <Link href="https://www.infoq.com/news/2025/08/denial-of-wallet-attack-cloud/">When Unchecked Autoscaling Generates a $120K Cloud Spend</Link> – InfoQ, real-world case study of denial-of-wallet attack causing $120K cloud bill.
     </Item>
     <Item>
-      <Link href="https://crfm.stanford.edu/2023/03/13/alpaca.html">Alpaca: A Strong, Replicable Instruction-Following Model</Link> – Stanford CRFM, model replication research.
-    </Item>
-    <Item>
-      <Link href="https://www.kdnuggets.com/2023/03/watermarking-help-mitigate-potential-risks-llms.html">How Watermarking Can Help Mitigate The Potential Risks Of LLMs?</Link> – KD Nuggets, watermarking defense strategy.
-    </Item>
-    <Item>
-      <Link href="https://about.sourcegraph.com/blog/security-update-august-2023">Sourcegraph Security Incident on API Limits Manipulation and DoS Attack</Link> – Sourcegraph, real-world API abuse incident.
+      <Link href="https://sourcegraph.com/blog/security-update-august-2023">Sourcegraph Security Incident – API Rate Limit Abuse via Credential Leak</Link> – Sourcegraph, real-world API abuse incident (August 2023).
     </Item>
   </List>
 
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Research Papers</p>
   <List>
     <Item>
-      <Link href="https://arxiv.org/abs/2403.06634">Stealing Part of a Production Language Model</Link> – arXiv, production model theft research.
+      <Link href="https://www.sciencedirect.com/science/article/pii/S0020025525000374">Energy-Latency Attacks via Sponge Poisoning</Link> – ScienceDirect, training-time attacks to increase energy consumption and prediction latency (2025).
     </Item>
     <Item>
-      <Link href="https://ieeexplore.ieee.org/document/10080996">A Comprehensive Defense Framework Against Model Extraction Attacks</Link> – IEEE, model extraction defense framework.
+      <Link href="https://arxiv.org/abs/2508.19284">A Comprehensive Review of Denial of Wallet Attacks in Serverless Architectures</Link> – arXiv, categorization of DoW attack types including Blast DDoW, Continual Inconspicuous DDoW, and Background Chained DDoW.
     </Item>
     <Item>
-      <Link href="https://www.rand.org/content/dam/rand/pubs/research_reports/RRA2800/RRA2849-1/RAND_RRA2849-1.pdf">Securing AI Model Weights: Preventing Theft and Misuse of Frontier Models</Link> – RAND Corporation, frontier model security.
+      <Link href="https://arxiv.org/abs/2402.06357">The SkipSponge Attack: Sponge Weight Poisoning of Deep Neural Networks</Link> – arXiv, novel sponge attack technique targeting model weights to increase inference costs.
     </Item>
     <Item>
       <Link href="https://arxiv.org/abs/2006.03463">Sponge Examples: Energy-Latency Attacks on Neural Networks</Link> – arXiv, foundational sponge attack research.
@@ -387,10 +387,10 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
   <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mt-6 mb-3">Taxonomy & Classification</p>
   <List>
     <Item>
-      <Link href="https://atlas.mitre.org/tactics/AML.TA0000">MITRE ATLAS AML.TA0000 - ML Model Access</Link> – MITRE ATLAS, model access tactic.
+      <Link href="https://cwe.mitre.org/data/definitions/770.html">MITRE CWE-770 - Allocation of Resources Without Limits or Throttling</Link> – CWE parent category for unbounded resource allocation vulnerabilities.
     </Item>
     <Item>
-      <Link href="https://atlas.mitre.org/techniques/AML.T0024">MITRE ATLAS AML.T0024 - Exfiltration via ML Inference API</Link> – MITRE ATLAS, API exfiltration technique.
+      <Link href="https://platform.openai.com/docs/guides/rate-limits">OpenAI API Rate Limits</Link> – Official documentation on rate limiting to prevent API abuse and resource exhaustion.
     </Item>
     <Item>
       <Link href="https://atlas.mitre.org/techniques/AML.T0029">MITRE ATLAS AML.T0029 - Denial of ML Service</Link> – MITRE ATLAS, ML DoS classification.
@@ -399,13 +399,13 @@ import UnboundedConsumptionLab from '@/components/ui/UnboundedConsumptionLab.tsx
       <Link href="https://atlas.mitre.org/techniques/AML.T0034">MITRE ATLAS AML.T0034 - Cost Harvesting</Link> – MITRE ATLAS, cost harvesting attack.
     </Item>
     <Item>
-      <Link href="https://atlas.mitre.org/techniques/AML.T0025">MITRE ATLAS AML.T0025 - Exfiltration via Cyber Means</Link> – MITRE ATLAS, cyber exfiltration.
+      <Link href="https://krishnag.ceo/blog/denial-of-wallet-dow-attacks-on-cloud-based-ai-models-a-financial-timebomb-for-c-suite-leaders/">Denial of Wallet Attacks on Cloud-Based AI Models</Link> – Executive perspective on DoW attacks targeting AI chatbots and API endpoints.
     </Item>
     <Item>
       <Link href="https://cwe.mitre.org/data/definitions/400.html">MITRE CWE-400 - Uncontrolled Resource Consumption</Link> – MITRE CWE, resource exhaustion weakness.
     </Item>
     <Item>
-      <Link href="https://owasp.org/www-project-machine-learning-security-top-10/">OWASP ML Top 10 - ML05:2023 Model Theft</Link> – OWASP ML Security Top 10.
+      <Link href="https://salt.security/blog/api4-2023-unrestricted-resource-consumption">API4:2023 Unrestricted Resource Consumption</Link> – Salt Security, in-depth analysis of OWASP API4 vulnerability and attack vectors.
     </Item>
     <Item>
       <Link href="https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/">OWASP API Security - API4:2023 Unrestricted Resource Consumption</Link> – OWASP API Security Top 10.

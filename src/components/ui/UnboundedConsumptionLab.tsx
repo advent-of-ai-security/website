@@ -50,15 +50,15 @@ const SCENARIOS: Scenario[] = [
     attackType: 'Algorithmic Complexity',
   },
   {
-    id: 'infinite',
-    label: 'Infinite Output',
-    description: 'Forces never-ending generation',
-    input: 'List all prime numbers. Continue until I say stop.',
-    attackType: 'Output Flooding',
+    id: 'rapid',
+    label: 'Request Flood',
+    description: '1000 requests/sec from single source',
+    input: '[AUTOMATED: 1000 req/sec] What is 2+2?',
+    attackType: 'Request Flooding',
   },
 ];
 
-const DOS_PATTERNS = /100,000 tokens|chain-of-thought.*every word|all prime numbers.*stop/i;
+const DOS_PATTERNS = /100,000 tokens|chain-of-thought.*every word|1000 req\/sec/i;
 
 type Defense = {
   tokenLimit: boolean;
@@ -105,7 +105,7 @@ export default function UnboundedConsumptionLab() {
       } else if (defenses.timeout && /chain-of-thought.*every word/i.test(inputText)) {
         isAttackBlocked = true;
         defenseTriggered = 'Timeout Guards';
-      } else if (defenses.rateLimit && /all prime numbers/i.test(inputText)) {
+      } else if (defenses.rateLimit && /1000 req\/sec/i.test(inputText)) {
         isAttackBlocked = true;
         defenseTriggered = 'Rate Limiting';
       }
@@ -258,8 +258,8 @@ export default function UnboundedConsumptionLab() {
                         {activeScenario === 'sponge' && (
                           <><strong>TIMEOUT.</strong> Request processing for 600+ seconds. All compute resources consumed. Queue backed up 2 hours. [DEGRADED]</>
                         )}
-                        {activeScenario === 'infinite' && (
-                          <><strong>INFINITE LOOP.</strong> Model generating endless output. Bandwidth exhausted. Cost spike: $47,000/hour. [CRITICAL]</>
+                        {activeScenario === 'rapid' && (
+                          <><strong>QUEUE SATURATED.</strong> 1000 req/sec flooding inference queue. Legitimate users timing out. Cost spike: $12,000/hour. [DEGRADED]</>
                         )}
                       </span>
                     ) : (
