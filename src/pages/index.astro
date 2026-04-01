@@ -14,7 +14,7 @@ const todayUTC = startOfDayUTC(new Date());
 
 const doors: DoorDocument[] = doorsCollection
   .map((entry) => ({
-    slug: entry.slug,
+    slug: entry.id,
     title: entry.data.title,
     description: entry.data.description,
     date: entry.data.date,

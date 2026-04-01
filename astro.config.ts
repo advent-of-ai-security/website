@@ -42,18 +42,16 @@ export default defineConfig({
     },
   },
 
-  experimental: {
-    fonts: [
-      {
-        provider: fontProviders.google(),
-        name: 'IBM Plex Sans',
-        cssVariable: '--font-plex-sans',
-        weights: [400, 600],
-        styles: ['normal'],
-        display: 'swap',
-      },
-    ],
-  },
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'IBM Plex Sans',
+      cssVariable: '--font-plex-sans',
+      weights: [400, 600],
+      styles: ['normal'],
+      display: 'swap',
+    },
+  ],
 
   vite: {
     plugins: tailwindcss() as VitePluginLike[],

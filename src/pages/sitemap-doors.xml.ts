@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ site, url }) => {
     .flatMap((entry) => {
       const date = entry.data.date;
       if (!(date instanceof Date)) return [];
-      return [{ slug: entry.slug, date }];
+      return [{ slug: entry.id, date }];
     })
     .filter((door) => startOfDayUTC(door.date) <= today)
     .sort((a, b) => slugCollator.compare(a.slug, b.slug));

@@ -1,6 +1,6 @@
 name = "advent-of-ai-security-website"
-main = "./dist/_worker.js"
-compatibility_date = "2025-10-11"
+main = "@astrojs/cloudflare/entrypoints/server"
+compatibility_date = "2026-03-29"
 compatibility_flags = ["nodejs_compat"]
 
 routes = [
