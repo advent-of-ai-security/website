@@ -100,7 +100,7 @@ const lock = '<rect x="6" y="12" width="16" height="12" rx="2"/><path d="M10 12V
   <section :class="five">
     <div :class="cx(s.tile(), span3, hero)">
       <h1 :class="s.display">Ten doors into how LLM apps break.</h1>
-      <p :class="s.lede">One OWASP LLM Top 10 risk a day, from 1 to 10 December. Every door ends in a lab against a small language model running in your own browser.</p>
+      <p :class="s.lede">One OWASP LLM Top 10 risk per door, a new one every two or three days from 1 December to Christmas Eve. Every door ends in a lab against a small language model running in your own browser.</p>
     </div>
     <div :class="cx(s.tile({ tone: 'screen' }), span2, readout)" aria-hidden="true">
       <template v-if="hover">
