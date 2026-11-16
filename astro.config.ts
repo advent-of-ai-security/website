@@ -1,7 +1,6 @@
 import { defineConfig, envField, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
-import astroD2 from 'astro-d2';
 import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 
@@ -13,7 +12,6 @@ export default defineConfig({
   integrations: [
     vue(),
     mdx(),
-    astroD2(),
     sitemap({
       filter(page) {
         if (page.includes('/2025/') || page.includes('/2026/') || page.includes('/doors/')) return false;
