@@ -1,50 +1,32 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import MonoAdvent from '@/components/MonoAdvent.tsx';
-import type { DoorDocument, DoorState } from '@/components/MonoAdvent.tsx';
+import ConsoleLayout from '@/layouts/ConsoleLayout.astro';
+import Keypad from '@/components/Keypad.vue';
 import { UNLOCK_ALL_DOORS } from 'astro:env/server';
-import { getCollection } from 'astro:content';
-import { startOfDayUTC, slugCollator } from '@/utils/dates';
+import { doors2026, doorState, longDate } from '@/data/editions';
 
 const siteName = 'Advent of AI Security';
-const title = `${siteName} 2025`;
-const description = 'A friendly, step-by-step Advent calendar of AI security risks and hands-on examples for practitioners and curious engineers.';
-const doorsCollection = await getCollection('doors');
-const todayUTC = startOfDayUTC(new Date());
+const description = 'An Advent calendar of the OWASP Top 10 for LLM Applications 2026: one risk a day, each with a lab against a real model running in your browser.';
+const now = new Date();
 
-const doors: DoorDocument[] = doorsCollection
-  .map((entry) => ({
-    slug: entry.id,
-    title: entry.data.title,
-    description: entry.data.description,
-    date: entry.data.date,
-  }))
-  .filter((d): d is { slug: string; title: string; description: string | undefined; date: Date } => {
-    return d.date instanceof Date && !Number.isNaN(d.date.getTime());
-  })
-  .sort((a, b) => slugCollator.compare(a.slug, b.slug))
-  .map((d, index): DoorDocument => {
-    const dateMidnight = startOfDayUTC(d.date);
-    let state: DoorState;
-    if (UNLOCK_ALL_DOORS) state = 'open';
-    else if (dateMidnight < todayUTC) state = 'open';
-    else if (dateMidnight.getTime() === todayUTC.getTime()) state = 'today';
-    else state = 'locked';
-    // Strip sensitive data for locked doors
-    const base = {
-      slug: state === 'locked' ? String(index + 1).padStart(2, '0') : d.slug,
-      title: state === 'locked' ? `Door ${index + 1}` : d.title,
-      date: d.date.toISOString(),
-      state,
-    };
-    return (state !== 'locked' && d.description !== undefined) ? { ...base, description: d.description } : base;
-  });
+const doors = doors2026.map((door) => {
+  const state = doorState(door.date, UNLOCK_ALL_DOORS, now);
+  const opens = `Opens ${longDate(door.date).replace(/ \d{4}$/, '')} at 00:00 UTC.`;
+  return state === 'locked'
+    ? { n: door.n, title: 'Locked', blurb: opens, glyph: '', state, href: `/2026/${door.n}` }
+    : { n: door.n, title: door.title, blurb: door.blurb, glyph: door.glyph, state, href: `/2026/${door.n}` };
+});
+
+const today = doors.find((d) => d.state === 'today');
+const lastOpen = doors.filter((d) => d.state === 'open').at(-1);
+const next = doors2026.find((door) => doorState(door.date, UNLOCK_ALL_DOORS, now) === 'locked');
+const featured = (today ?? lastOpen ?? doors[0]!).n;
 ---
 
-<BaseLayout
-  title={title}
+<ConsoleLayout
+  title={`${siteName} 2026`}
   description={description}
   canonicalPath="/"
+  edition="2026"
   jsonLd={{
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -53,6 +35,5 @@ const doors: DoorDocument[] = doorsCollection
     description,
   }}
 >
-  <div id="top"></div>
-  <MonoAdvent client:only="react" unlockAll={UNLOCK_ALL_DOORS} doors={doors} />
-</BaseLayout>
+  <Keypad client:load doors={doors} featured={featured} nextDoor={next?.n ?? null} nextAt={next?.date.toISOString() ?? null} now={now.toISOString()} />
+</ConsoleLayout>

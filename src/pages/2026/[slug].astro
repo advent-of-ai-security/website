@@ -1,0 +1,79 @@
+---
+import ConsoleLayout from '@/layouts/ConsoleLayout.astro';
+import DoorLayout from '@/layouts/DoorLayout.astro';
+import Notice from '@/components/Notice.astro';
+import Countdown from '@/components/Countdown.vue';
+import { getCollection, render } from 'astro:content';
+import { UNLOCK_ALL_DOORS } from 'astro:env/server';
+import { cx } from 'styled-system/css';
+import * as s from '@/console/styles';
+import { doors2026, doorState, longDate, recap2025 } from '@/data/editions';
+
+const slug = Astro.params.slug ?? '';
+const door = doors2026.find((d) => d.n === slug);
+if (!door) return new Response(null, { status: 404 });
+
+const now = new Date();
+const state = doorState(door.date, UNLOCK_ALL_DOORS, now);
+const entry = state === 'locked' ? undefined : (await getCollection('doors2026')).find((e) => e.id === slug);
+const rendered = entry ? await render(entry) : undefined;
+const opens = longDate(door.date).replace(/ \d{4}$/, '');
+const open = (d: (typeof doors2026)[number]) => doorState(d.date, UNLOCK_ALL_DOORS, now) !== 'locked';
+const current = doors2026.find((d) => doorState(d.date, UNLOCK_ALL_DOORS, now) === 'today') ?? doors2026.filter(open).at(-1);
+const former = recap2025.find((d) => d.now === Number(door.n));
+const index = doors2026.indexOf(door);
+const neighbour = (offset: number, label: string) => {
+  const other = doors2026[index + offset];
+  if (!other) return undefined;
+  return open(other)
+    ? { href: `/2026/${other.n}`, n: other.n, label, title: other.title }
+    : { href: `/2026/${other.n}`, n: other.n, label, title: `Opens ${longDate(other.date).replace(/ \d{4}$/, '')}`, locked: true };
+};
+const prev = neighbour(-1, 'Previous door');
+const next = neighbour(1, 'Next door');
+const actions = [
+  ...(current ? [{ href: `/2026/${current.n}`, label: `Door ${current.n}, ${current.title}`, hint: 'Open now', primary: true }] : []),
+  { href: '/', label: 'Back to the calendar', primary: !current },
+];
+---
+
+{
+  state === 'locked' ? (
+    <ConsoleLayout title={`Door ${door.n} is still shut`} description={`Door ${door.n} opens on ${opens}.`} canonicalPath={`/2026/${door.n}`} edition="2026" centered>
+      <Notice shut figure={door.n} title={`Door ${door.n} is still shut.`} text={`It opens on ${opens} at 00:00 UTC. The title stays hidden until then.`} actions={actions}>
+        <div class={cx(s.tile({ tone: 'screen' }), s.col)}>
+          <span data-label class={s.label}>Opens in</span>
+          <Countdown client:load at={door.date.toISOString()} now={now.toISOString()} />
+        </div>
+      </Notice>
+    </ConsoleLayout>
+  ) : !rendered ? (
+    <ConsoleLayout title={door.title} description={door.blurb} canonicalPath={`/2026/${door.n}`} edition="2026" centered>
+      <Notice figure={door.n} title={door.title} text="This door is open, but its text has not been published yet." actions={[{ href: '/', label: 'Back to the calendar', primary: true }]} />
+    </ConsoleLayout>
+  ) : (
+    <ConsoleLayout
+      title={`${door.title}, door ${door.n}`}
+      description={entry?.data.description ?? door.blurb}
+      canonicalPath={`/2026/${door.n}`}
+      type="article"
+      edition="2026"
+      publishedTime={door.date.toISOString()}
+    >
+      <DoorLayout
+        n={door.n}
+        title={door.title}
+        lede={entry?.data.description ?? door.blurb}
+        metas={[
+          { label: 'OWASP entry', value: `LLM${door.n}:2026` },
+          ...(former ? [{ label: 'In 2025', value: `${former.title}, LLM${former.n}`, href: `/2025/${former.n}` }] : []),
+          { label: 'Opened', value: longDate(door.date) },
+        ]}
+        {...(prev ? { prev } : {})}
+        {...(next ? { next } : {})}
+      >
+        <rendered.Content />
+      </DoorLayout>
+    </ConsoleLayout>
+  )
+}

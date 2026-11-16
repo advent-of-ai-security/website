@@ -3,33 +3,30 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro check && astro build",
+    "dev": "panda codegen && astro dev",
+    "build": "panda codegen && astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "cf:dev": "bun run build && wrangler dev",
-    "cf:deploy": "bun run build && wrangler deploy"
+    "cf:deploy": "bun run build && wrangler deploy",
+    "prepare": "panda codegen"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",
     "@astrojs/cloudflare": "^14.4.8",
     "@astrojs/mdx": "^8.1.6",
-    "@astrojs/react": "^7.1.9",
     "@astrojs/sitemap": "^3.7.5",
-    "@tabler/icons-react": "^3.52.0",
-    "@tailwindcss/vite": "^4.3.5",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
+    "@astrojs/vue": "^7.1.6",
     "astro": "^7.4.12",
     "astro-d2": "^0.14.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "tailwindcss": "^4.3.5",
-    "typescript": "^6"
+    "typescript": "^6",
+    "vue": "^3.5.45"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261115.1",
-    "@tailwindcss/typography": "^0.5.20",
+    "@pandacss/dev": "^2.5.0",
+    "@pandacss/preset-base": "^2.5.0",
+    "@pandacss/preset-panda": "^2.5.0",
     "wrangler": "^4.162.0"
   }
 }

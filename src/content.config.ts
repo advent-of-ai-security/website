@@ -12,4 +12,11 @@ const doors = defineCollection({
   }),
 });
 
-export const collections = { doors };
+const doors2026 = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/2026' }),
+  schema: z.object({
+    description: z.string().optional(),
+  }),
+});
+
+export const collections = { doors, doors2026 };

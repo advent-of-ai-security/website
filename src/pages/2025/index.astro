@@ -1,0 +1,88 @@
+---
+import ConsoleLayout from '@/layouts/ConsoleLayout.astro';
+import { css, cx } from 'styled-system/css';
+import * as s from '@/console/styles';
+import { pad2, recap2025 } from '@/data/editions';
+
+const description = 'The ten doors of the 2025 Advent of AI Security calendar, with where each OWASP LLM risk moved in the 2026 list.';
+const moved = recap2025.filter((door) => door.now !== Number(door.n)).length;
+const rows = css({ display: 'flex', flexDir: 'column', gap: '1px' });
+const row = css({
+  display: 'grid',
+  gridTemplateColumns: '84px minmax(0, 1fr) 167px 148px',
+  alignItems: 'center',
+  gap: '8px 28px',
+  p: '16px 24px 18px',
+  mdDown: { gridTemplateColumns: '72px minmax(0, 1fr)', p: '14px 18px 16px', '& > [data-wide]': { gridColumn: 2 } },
+});
+const rowNum = css({ fontSize: '56px', ml: '-3px' });
+const now = css({ display: 'grid', gridTemplateColumns: '58px 1fr', alignItems: 'center', gap: '10px', fontSize: '15px' });
+const move = css({ display: 'inline-flex', alignItems: 'center', gap: '6px' });
+const heroTile = css({ display: 'flex', flexDir: 'column', justifyContent: 'flex-end', gap: '20px', pt: '56px', pb: '34px', mdDown: { pt: '32px', pb: '22px' } });
+const statTile = css({ display: 'flex', flexDir: 'column', justifyContent: 'space-between', gap: '14px' });
+const stat = css({ fontSize: 'clamp(96px, 11vw, 152px)', ml: '-6px' });
+const statUnit = css({ fontSize: '18px', letterSpacing: 0, ml: '8px', fontWeight: 400 });
+const legend = css({ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'mute2' });
+const delta = (door: (typeof recap2025)[number]) => door.now - Number(door.n);
+---
+
+<ConsoleLayout title="2025 recap" description={description} canonicalPath="/2025" edition="2025" source="2025">
+  <section class={s.g3}>
+    <div class={cx(s.tile(), s.s2, heroTile)}>
+      <h1 class={s.display}>2025, in ten doors.</h1>
+      <p class={s.lede}>The first calendar followed the OWASP Top 10 for LLM Applications 2025. Every door is still open. The track on each row shows where that risk moved in the 2026 list.</p>
+    </div>
+    <div class={cx(s.tile({ tone: 'readout' }), statTile)}>
+      <span data-label class={s.label}>Changed position in 2026</span>
+      <span class={s.col}>
+        <span class={cx(s.num, stat)}>{moved}<span class={statUnit}>of 10</span></span>
+        <span class={legend}><span class={s.track} style="grid-template-columns: repeat(2, 14px);" aria-hidden="true"><i data-was></i><i data-now></i></span>Outlined is 2025, filled is 2026.</span>
+      </span>
+    </div>
+  </section>
+
+  <ol class={rows}>
+    {
+      recap2025.map((door) => (
+        <li>
+          <a href={`/2025/${door.n}`} data-key class={cx(s.key(), row)} style="display: grid;">
+            <span data-num class={cx(s.num, rowNum)}>{door.n}</span>
+            <span class={s.col}>
+              <span class={s.h3}>{door.title}</span>
+              <span class={s.small}>{door.blurb}</span>
+            </span>
+            <span data-wide class={s.track} aria-hidden="true">
+              {Array.from({ length: 10 }, (_, i) => (
+                <i data-now={i + 1 === door.now ? '' : undefined} data-was={i + 1 === Number(door.n) && i + 1 !== door.now ? '' : undefined} />
+              ))}
+            </span>
+            <span data-wide class={now}>
+              <span>LLM{pad2(door.now)}</span>
+              {delta(door) === 0 ? (
+                <span class={s.label}>Same place</span>
+              ) : (
+                <span class={move}>
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d={delta(door) > 0 ? 'M7 2v10M3 8l4 4 4-4' : 'M7 12V2M3 6l4-4 4 4'} />
+                  </svg>
+                  {delta(door) > 0 ? `Down ${delta(door)}` : `Up ${-delta(door)}`}
+                </span>
+              )}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <section class={s.g3}>
+    <div class={cx(s.tile({ tone: 'readout' }), s.s2, s.col)}>
+      <span class={s.h3}>The 2025 labs are simulations</span>
+      <span class={s.small}>They answer from fixed responses. The 2026 labs run a real model, so an attack works or fails on its own.</span>
+    </div>
+    <a href="/" data-key class={s.key({ pad: true, row: true, tone: 'today' })}>
+      <span class={s.h3}>Go to the 2026 calendar</span>
+      <svg data-arrow aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h12M10 4l5 5-5 5"></path></svg>
+    </a>
+  </section>
+</ConsoleLayout>

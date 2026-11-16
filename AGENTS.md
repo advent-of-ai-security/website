@@ -1,66 +1,41 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/pages/` – Astro routes (e.g., `index.astro`, `doors/[slug].astro`).
-- `src/layouts/` – shared layouts (e.g., `DoorLayout.astro`).
-- `src/components/` – UI components (React/TSX and `.astro`); `src/components/ui/` holds primitives.
-- `src/content/` – MDX content collections (`doors/*.mdx`) and `content/config.ts`.
-- `src/styles/` – global styles (`global.css`).
-- `src/utils/` – helpers (e.g., `anchorize.ts`, `dates.ts`).
-- `public/` – static assets served as‑is.
-- Root: `astro.config.ts` (Cloudflare adapter, env schema), `wrangler.toml` (Worker + routes).
+- `src/pages/` – Astro routes: `index.astro` (2026 calendar), `2026/[slug].astro`, `2025/index.astro` (recap), `2025/[slug].astro`, `doors/[slug].astro` (redirect to `/2025/NN`).
+- `src/layouts/` – `ConsoleLayout.astro` (page shell, header, footer) and `DoorLayout.astro` (door header, neighbours).
+- `src/console/styles.ts` – shared Panda CSS styles and recipes (`tile`, `key`, type styles).
+- `src/components/` – Vue components (`Keypad.vue`, `Countdown.vue`, labs) and Astro components (`Notice.astro`, `SEO.astro`); `src/components/content/` holds the MDX primitives.
+- `src/content/doors/` – 2025 door text (MDX); `src/content/2026/` – 2026 door text (MDX); `src/content.config.ts` defines both collections.
+- `src/data/editions.ts` – door metadata for both editions and the unlock logic.
+- `src/labs/sim2025.ts` – data for the ten scripted 2025 labs.
+- `panda.config.ts` – design tokens, keyframes, global CSS. `styled-system/` is generated (`panda codegen`) and not committed.
+- Root: `astro.config.ts` (Cloudflare adapter, env schema, fonts), `wrangler.toml`.
 
-## Component Architecture
+## Design System
+The site is a light "console" of keys. Rules:
+- One rounded outer frame per page (`well`); tiles and keys inside are square, separated by 1px `seam` lines.
+- `tile` tones: `read` (reading surface), `readout` (static label/value), `inert` (locked), `screen` (the one dark display).
+- `key` is anything pressable: flat face, moves 2px on press, no shadows. Tones: `plain`, `today` (yellow), `locked`, `shut`, `dark`.
+- Yellow marks the one key to press next on a screen. Do not use it elsewhere.
+- Buttons only: no knobs, sliders or drop shadows on controls.
+- Elements with `data-key` get the cursor-following highlight from the script in `ConsoleLayout.astro`.
 
-### ShellSection Pattern
-`ShellSection` (`src/components/ui/ShellSection.tsx`) is the base component for all content sections. It provides:
-- Rail with numbered badge (auto-incremented via CSS counter)
-- Header with title, optional meta badge, and anchor link
-- Body area for content
-
-All content UI components build on this pattern.
-
-### UI Primitives (`src/components/ui/`)
-| Component | Purpose |
-|-----------|---------|
-| `Section` | Wrapper using ShellSection with auto-generated anchor ID |
-| `Quote` | Blockquote with source attribution; supports `variant="minimal"` |
-| `Steps` / `Step` | Numbered step list (01, 02, etc.) |
-| `List` / `Item` | Bullet list with decorative line prefix |
-| `Link` | External link (`target="_blank"`, `rel="noreferrer noopener"`) |
-| `Chip` | Small badge/tag for metadata |
-| `MetaBar` | Displays metadata chips with separator line |
-
-### Lab Components
-Each door has an interactive lab in `src/components/ui/` (e.g., `PromptInjectionLab.tsx`). Labs follow a consistent pattern:
-- `SCENARIOS` array with test cases
-- `RULES` regex for risk detection
-- Defense toggles via local state
-
-### Lab-Common Components (`src/components/ui/lab-common/`)
-Reusable lab infrastructure:
-- `LabContainer` – Wrapper with gradient background
-- `StageHeader` – Pipeline stage title (supports `variant`: neutral/red/emerald)
-- `SecurityGate` – Toggle control with blocked/allowed state
-- `ScenarioSelector` – Generic scenario picker
-- `PipelineConnector` – Animated arrows between stages
-- `InfoBanner` – Usage instructions banner
-- `TooltipIcon` – Icon with hover tooltip
+## Components
+- Content primitives (`src/components/content/`): `Section`, `Quote`, `Steps`/`Step`, `List`/`Item`, `Link`. Server-rendered Vue, no client JavaScript.
+- `SimLab.vue` renders any 2025 lab from `sim2025` by door number.
+- 2026 labs are not in this repository yet. The repository is public, so door text and labs are added only when a door opens.
 
 ## Build, Run & Deploy
-- Install deps: `bun install`
-- Dev server: `bun run dev` (Astro + HMR)
-- Build: `bun run build` (outputs server bundle to `dist/` for Cloudflare Worker)
-- Preview built site: `bun run preview`
-- Cloudflare dev: `bun run cf:dev` (build then `wrangler dev`)
-- Cloudflare deploy: `bun run cf:deploy` (build then `wrangler deploy`)
+- Install deps: `bun install` (runs `panda codegen`)
+- Dev server: `bun run dev`
+- Build: `bun run build` (`panda codegen`, `astro check`, `astro build`)
+- Cloudflare dev: `bun run cf:dev`; deploy: `bun run cf:deploy`
 
 ## Coding Style & Naming Conventions
-- Language: TypeScript (strict). Indentation: 2 spaces; UTF‑8; LF.
-- Components: React components use PascalCase filenames and default exports.
-- Pages: `.astro` in `src/pages/` follow route naming (e.g., `[slug].astro`).
-- Imports: prefer path alias `@/*` (see `tsconfig.json`). Example: `import { anchorize } from '@/utils/anchorize'`.
-- Styling: Tailwind CSS v4 via Vite plugin; prefer utility classes in markup; keep global styles in `src/styles/global.css`.
+- Language: TypeScript (strict). Indentation: 2 spaces; UTF-8; LF.
+- Components: Vue single-file components with `<script setup lang="ts">`, PascalCase filenames.
+- Styling: Panda CSS. Use `css()`/`cva()` from `styled-system/css` with tokens from `panda.config.ts`; share styles through `src/console/styles.ts`. Do not combine two classes that set the same property with `cx`; add a recipe variant instead.
+- Imports: prefer path alias `@/*`.
 
 ### Comments Policy
 - Avoid inline comments in code. Favor clear names and small functions over explanatory comments.
@@ -70,81 +45,25 @@ Reusable lab infrastructure:
 
 ## Content Authoring (MDX)
 
-### Frontmatter Schema
-```yaml
----
-title: Door 01 - Prompt Injection  # Required
-description: SEO description text   # Optional
-date: 2025-12-01                    # Optional, controls unlock date
-meta:                               # Optional, displayed in MetaBar
-  - Door 01
-  - OWASP - LLM01:2025
----
-```
+### 2025 doors (`src/content/doors/NN.mdx`)
+Frontmatter: `title` (required), `description`, `date`, `meta`. The text is frozen; the lab is `<SimLab door="NN" client:load />`.
 
-### Available MDX Components
-Import at the top of each `.mdx` file:
+### 2026 doors (`src/content/2026/NN.mdx`)
+Title, date and blurb live in `src/data/editions.ts`. Frontmatter: `description` (optional lede). A door with no MDX file shows a "not published yet" notice once its date arrives.
+
 ```jsx
-import { Section, Quote, Steps, Step, List, Item, Link } from '@/components/ui';
-import PromptInjectionLab from '@/components/ui/PromptInjectionLab';
+import { Section, Quote, Steps, Step, List, Item, Link } from '@/components/content';
 ```
 
-### Content Structure Convention
-Each door follows this section order:
-1. `<Section title="TL;DR" meta="SUMMARY">` – Brief summary
-2. `<Section title="What is X?">` – Definition
-3. `<Section title="Real-World Impact">` – Examples with `<Quote>`
-4. `<Section title="Defense Strategies">` – Mitigations with `<Steps>`
-5. `<Section title="Interactive Lab">` – Lab component
-
-### Creating a New Door
-1. Create `src/content/doors/{NN}.mdx` (zero-padded number)
-2. Add frontmatter with `title`, `date`, and `meta`
-3. Import and use UI components
-4. Create corresponding lab component if needed
-
-## Layout System
-
-### Shell Grid CSS
-The layout uses a custom shell grid system defined in `src/styles/global.css`:
-- `.shell-grid` – Main container with vertical divider rail
-- `.shell-section` – Flexible section container
-- `.shell-section__card` – Card with border and shadow
-- `.shell-section__rail` – Side rail with numbered badge
-- `.shell-section__header` – Title row with anchor link
-- `.shell-section__body` – Content area
-
-### CSS Variables
-```css
---shell-rail-width: clamp(2.5rem, 5vw, 3.5rem);
---shell-header-height: 3.25rem;
---shell-gap: var(--shell-header-height);
---shell-badge-size: var(--shell-header-height);
---surface-color: #ffffff;
-```
-
-### Responsive Breakpoints
-- Mobile: `max-width: 768px` – Stacks layout vertically, hides rail
-- Desktop: Full shell grid with side rail
+Use `<Section title="...">` for each part and `<Section title="Lab: ..." noPadding>` around the lab.
 
 ## Door Unlock Logic
-Doors unlock based on UTC date comparison:
-- `locked` – Future date, redirects to homepage
-- `today` – Current date, accessible with "today" styling
-- `open` – Past date, fully accessible
-
-Override for development: Set `UNLOCK_ALL_DOORS=true` in `.env` or via `wrangler secret`.
+Doors unlock on UTC date comparison (`doorState` in `src/data/editions.ts`): `locked`, `today`, `open`. Locked 2026 doors hide their title and show a countdown. Override for development: `UNLOCK_ALL_DOORS=true` in `.env` or via `wrangler secret`.
 
 ## Utilities Reference
-
-### `anchorize(title: string): string`
-Converts titles to URL-safe anchor IDs. Normalizes unicode, removes accents, replaces spaces with hyphens.
-
-### `startOfDayUTC(date: Date): Date`
-Normalizes a date to midnight UTC for consistent date comparisons.
-
-### `slugCollator`
-Collator for sorting numeric slugs (01, 02, ..., 10) in correct order.
+- `anchorize(title)` – URL-safe anchor IDs.
+- `startOfDayUTC(date)` – midnight UTC for date comparisons.
+- `slugCollator` – numeric slug ordering.
 
 ## Testing Guidelines
 - No test runner is configured yet. If adding tests, prefer Vitest for unit tests and Playwright for E2E.

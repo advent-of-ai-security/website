@@ -1,52 +1,76 @@
 ---
-import '@/styles/global.css';
-import MetaBar from '@/components/ui/MetaBar.tsx';
-import FooterLinks from '@/components/FooterLinks.tsx';
-import SectionNav from '@/components/SectionNav.tsx';
+import { css, cx } from 'styled-system/css';
+import * as s from '@/console/styles';
+import ScrollRuler from '@/components/ScrollRuler.astro';
 
 export interface Props {
+  n: string;
   title: string;
-  description?: string;
-  meta?: string[];
+  lede?: string;
+  archive?: boolean;
+  metas: { label: string; value: string; href?: string }[];
+  prev?: { href: string; n: string; label: string; title: string; locked?: boolean };
+  next?: { href: string; n: string; label: string; title: string; locked?: boolean };
 }
 
-const { title, meta = [] } = Astro.props as Props;
+const { n, title, lede, archive = false, metas, prev, next } = Astro.props;
+const numeralTile = css({ display: 'flex', flexDir: 'column', justifyContent: 'space-between', gap: '12px' });
+const titleTile = css({ display: 'flex', flexDir: 'column', justifyContent: 'flex-end', gap: '16px', pt: '36px' });
+const navGrid = css({ display: 'grid', gap: '1px', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))' });
+const navNum = css({ fontSize: '44px' });
+const navInner = css({ display: 'flex', alignItems: 'center', gap: '18px' });
+const neighbours = [prev, next].filter((door) => door !== undefined);
 ---
 
-<main class="min-h-screen mx-auto w-full max-w-none 2xl:max-w-7xl p-[var(--shell-gap)] text-black [font-family:var(--font-plex-sans),'IBM_Plex_Sans',sans-serif] flex flex-col gap-[var(--shell-gap)]">
-  <div class="flex flex-col gap-[var(--shell-gap)]">
-    <header class="grid gap-[var(--shell-gap)]">
-      <h1 class="m-0 text-[1.55rem] uppercase tracking-[0.18em]">{title}</h1>
-    </header>
-    <div class="flex flex-wrap md:flex-nowrap items-center gap-[calc(var(--shell-gap)/2)]">
-      <a
-        href="/"
-        class="inline-flex h-[calc(var(--shell-gap)*1.5)] items-center border border-black bg-black px-[calc(var(--shell-gap)/2)] text-[12px] uppercase tracking-[0.25em] text-white hover:bg-black/90 shrink-0"
-      >
-        Back
-      </a>
-      <span class="hidden md:inline-block h-px w-[var(--shell-gap)] bg-black/60 shrink-0" aria-hidden="true" />
-      {meta.length > 0 && <MetaBar items={meta} />}
-    </div>
-    <div id="section-nav-sticky" class="hidden md:block sticky top-0 z-40 overflow-hidden relative transition-colors duration-150 pt-[var(--shell-gap)] pb-[var(--shell-gap)] bg-white -mx-[var(--shell-gap)] px-[var(--shell-gap)]">
-      <SectionNav client:only="react" />
-    </div>
-    <script>
-      const stickyEl = document.getElementById('section-nav-sticky');
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const e = entries[0];
-          if (e) stickyEl?.classList.toggle('is-stuck', e.intersectionRatio < 1);
-        },
-        { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
-      );
-      if (stickyEl) observer.observe(stickyEl);
-    </script>
-    <section class="shell-grid grid">
-      <slot />
-      <section class="grid gap-[var(--shell-gap)]">
-        <FooterLinks />
-      </section>
-    </section>
+<section class={s.g3}>
+  <div class={cx(s.tile({ tone: archive ? 'readout' : 'read' }), numeralTile)}>
+    <span data-label class={s.label}>{archive ? '2025 edition' : '2026 edition'}</span>
+    <span class={cx(s.digits, s.hugeNum)} aria-hidden="true">{n.split('').map((char) => <span>{char}</span>)}</span>
   </div>
-</main>
+  <div class={cx(s.tile(), s.s2, titleTile)}>
+    <h1 class={s.h1}>{title}</h1>
+    {lede && <p class={s.lede}>{lede}</p>}
+  </div>
+  {
+    metas.map((meta) =>
+      meta.href ? (
+        <a href={meta.href} data-key class={s.key({ pad: true, row: true })}>
+          <span class={s.col}>
+            <span data-label class={s.label}>{meta.label}</span>
+            <span class={s.val}>{meta.value}</span>
+          </span>
+          <svg data-arrow aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9h12M10 4l5 5-5 5" />
+          </svg>
+        </a>
+      ) : (
+        <div class={cx(s.tile({ tone: 'readout' }), s.col)}>
+          <span data-label class={s.label}>{meta.label}</span>
+          <span class={s.val}>{meta.value}</span>
+        </div>
+      )
+    )
+  }
+</section>
+
+<slot />
+
+<ScrollRuler />
+
+{
+  neighbours.length > 0 && (
+    <nav aria-label="Doors" class={navGrid}>
+      {neighbours.map((door) => (
+        <a href={door.href} data-key class={s.key({ pad: true, tone: door.locked ? 'locked' : door === next ? 'today' : 'plain' })}>
+          <span class={navInner}>
+            <span data-num class={cx(s.num, navNum)}>{door.n}</span>
+            <span class={s.col}>
+              <span data-label class={s.label}>{door.label}</span>
+              <span class={s.h3}>{door.title}</span>
+            </span>
+          </span>
+        </a>
+      ))}
+    </nav>
+  )
+}

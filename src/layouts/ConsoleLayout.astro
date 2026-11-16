@@ -1,0 +1,80 @@
+---
+import '@/styles/index.css';
+import SEO from '@/components/SEO.astro';
+import { Font } from 'astro:assets';
+import { cx } from 'styled-system/css';
+import * as s from '@/console/styles';
+
+export interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  jsonLd?: Record<string, unknown>;
+  edition?: '2026' | '2025';
+  centered?: boolean;
+  source?: '2026' | '2025';
+}
+
+const siteName = 'Advent of AI Security';
+const { title, description, canonicalPath, type = 'website', publishedTime, jsonLd, edition, centered = false, source = '2026' } = Astro.props;
+const pageTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+const sources = {
+  '2026': { href: 'https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/', name: 'OWASP Top 10 for LLM Applications 2026' },
+  '2025': { href: 'https://genai.owasp.org/llm-top-10/', name: 'OWASP Top 10 for LLM Applications 2025' },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-hanken" preload />
+    <SEO
+      title={title}
+      siteName={siteName}
+      type={type}
+      {...(description !== undefined ? { description } : {})}
+      {...(canonicalPath !== undefined ? { canonicalPath } : {})}
+      {...(publishedTime !== undefined ? { publishedTime } : {})}
+      {...(jsonLd !== undefined ? { jsonLd } : {})}
+    />
+  </head>
+  <body>
+    <div class={s.page}>
+      <div class={s.wrap}>
+        <header class={s.top}>
+          <a href="/" class={s.brand}>{siteName}</a>
+          <nav aria-label="Edition" class={s.segs}>
+            <a href="/" class={s.seg} aria-current={edition === '2026' ? 'page' : undefined}><span data-led class={s.led()} aria-hidden="true"></span>2026</a>
+            <a href="/2025" class={s.seg} aria-current={edition === '2025' ? 'page' : undefined}><span data-led class={s.led()} aria-hidden="true"></span>2025</a>
+          </nav>
+        </header>
+        <main class={cx(s.well, centered && s.mid)}>
+          <slot />
+        </main>
+        <footer class={s.foot}>
+          <span>Follows the <a class={s.link} href={sources[source].href}>{sources[source].name}</a>, CC BY-SA 4.0.</span>
+          <span>
+            <a class={s.link} href="https://github.com/advent-of-ai-security">GitHub</a>, <a class={s.link} href="https://icepuma.dev">icepuma.dev</a>, <a class={s.link} href="mailto:marketing@advent-of-ai-security.com">partner or sponsor</a>
+          </span>
+        </footer>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('mousemove', (event) => {
+        const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-key]') : null;
+        if (!target) return;
+        const box = target.getBoundingClientRect();
+        target.style.setProperty('--mx', `${event.clientX - box.left}px`);
+        target.style.setProperty('--my', `${event.clientY - box.top}px`);
+      });
+    </script>
+  </body>
+</html>

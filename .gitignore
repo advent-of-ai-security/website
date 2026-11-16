@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # generated diagrams
 public/d2/**/*.svg
+
+# panda css output
+styled-system/

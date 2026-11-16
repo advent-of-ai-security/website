@@ -1,0 +1,64 @@
+---
+import { css, cx } from 'styled-system/css';
+import * as s from '@/console/styles';
+
+export interface Props {
+  figure: string;
+  title: string;
+  text: string;
+  shut?: boolean;
+  actions: { href: string; label: string; hint?: string; primary?: boolean }[];
+}
+
+const { figure, title, text, shut = false, actions } = Astro.props;
+const slab = css({ minH: '300px', p: '26px 24px 28px', w: '100%' });
+const figureSize = css({ fontSize: 'clamp(110px, 13.5vw, 190px)', ml: '-8px' });
+const message = css({ flex: 1, display: 'flex', flexDir: 'column', justifyContent: 'flex-end', gap: '16px', pt: '36px' });
+const actionGrid = css({ display: 'grid', gap: '1px', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))' });
+---
+
+<div class={s.g3}>
+  {
+    shut ? (
+      <button type="button" data-key class={cx(s.key({ tone: 'shut', tall: true }), slab)}>
+        <span class={s.between}>
+          <span class={css({ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'ink2' })}>
+            <span class={s.led({ tone: 'red' })} aria-hidden="true" />
+            Locked
+          </span>
+          <span data-bar class={s.bar} aria-hidden="true" />
+        </span>
+        <span data-num class={cx(s.num, figureSize)}>{figure}</span>
+        <span class={css({ fontSize: '15px', color: 'ink2' })}>Press it. It will not move.</span>
+      </button>
+    ) : (
+      <div class={cx(s.tile({ tone: 'inert' }), css({ display: 'flex', alignItems: 'flex-end', minH: '300px' }))}>
+        <span class={cx(s.digits, s.num, figureSize, css({ color: 'lockNum' }))} aria-hidden="true">
+          {figure.split('').map((char) => <span>{char}</span>)}
+        </span>
+      </div>
+    )
+  }
+  <div class={cx(s.stack, s.s2)}>
+    <div class={cx(s.tile(), message)}>
+      <h1 class={s.h1}>{title}</h1>
+      <p class={s.lede}>{text}</p>
+    </div>
+    <slot />
+    <div class={actionGrid}>
+      {
+        actions.map((action) => (
+          <a href={action.href} data-key class={s.key({ tone: action.primary ? 'today' : 'plain', pad: true, row: true })}>
+            <span class={s.col}>
+              {action.hint && <span data-label class={s.label}>{action.hint}</span>}
+              <span class={s.h3}>{action.label}</span>
+            </span>
+            <svg data-arrow aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9h12M10 4l5 5-5 5" />
+            </svg>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</div>

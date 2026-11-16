@@ -21,7 +21,7 @@ export const GET: APIRoute = async ({ site, url }) => {
 
   const urls = doors
     .map((d) => {
-      const loc = new URL(`/doors/${d.slug}`, base).toString();
+      const loc = new URL(`/2025/${d.slug}`, base).toString();
       const lastmod = d.date.toISOString();
       return `\n  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>never</changefreq>\n    <priority>0.7</priority>\n  </url>`;
     })

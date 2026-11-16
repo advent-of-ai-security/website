@@ -2,15 +2,7 @@ import { defineConfig, envField, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import astroD2 from 'astro-d2';
-
-import tailwindcss from '@tailwindcss/vite';
-
-interface VitePluginLike {
-  name: string;
-}
-
-import react from '@astrojs/react';
-
+import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
@@ -19,14 +11,13 @@ export default defineConfig({
 
   adapter: cloudflare(),
   integrations: [
-    react(),
+    vue(),
     mdx(),
     astroD2(),
     sitemap({
-      // Exclude doors from the static sitemap; covered by runtime sitemap-doors.xml
       filter(page) {
-        if (page.startsWith('/doors/')) return false;
-        if (page === '/sitemap-doors.xml') return false;
+        if (page.includes('/2025/') || page.includes('/2026/') || page.includes('/doors/')) return false;
+        if (page.endsWith('/sitemap-doors.xml')) return false;
         return true;
       },
     }),
@@ -45,35 +36,11 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.google(),
-      name: 'IBM Plex Sans',
-      cssVariable: '--font-plex-sans',
-      weights: [400, 600],
+      name: 'Hanken Grotesk',
+      cssVariable: '--font-hanken',
+      weights: [300, 400, 500],
       styles: ['normal'],
       display: 'swap',
     },
   ],
-
-  vite: {
-    plugins: tailwindcss() as VitePluginLike[],
-    build: {
-      chunkSizeWarningLimit: 1500,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('@terrastruct/d2')) return 'd2';
-              if (id.includes('react')) return 'react';
-            }
-            return undefined;
-          },
-        },
-      },
-    },
-    optimizeDeps: {
-      include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
-    },
-    resolve: {
-      dedupe: ['react', 'react-dom'],
-    },
-  },
 });

@@ -1,0 +1,52 @@
+---
+import ConsoleLayout from '@/layouts/ConsoleLayout.astro';
+import DoorLayout from '@/layouts/DoorLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { doors2026, longDate, pad2, recap2025 } from '@/data/editions';
+
+const slug = Astro.params.slug ?? '';
+const entry = (await getCollection('doors')).find((e) => e.id === slug);
+const info = recap2025.find((door) => door.n === slug);
+if (!entry || !info) return new Response(null, { status: 404 });
+
+const { Content } = await render(entry);
+const { data } = entry;
+const title = data.title.replace(/^Door \d+ - /, '');
+const owasp = data.meta?.find((item) => item.includes('LLM'))?.replace('OWASP - ', '') ?? `LLM${slug}:2025`;
+const successor = doors2026[info.now - 1]!;
+const index = recap2025.indexOf(info);
+const neighbour = (offset: number, label: string) => {
+  const door = recap2025[index + offset];
+  return door ? { href: `/2025/${door.n}`, n: door.n, label, title: door.title } : undefined;
+};
+const metas = [
+  { label: 'OWASP entry', value: owasp },
+  ...(data.date ? [{ label: 'Opened', value: longDate(data.date) }] : []),
+  { label: `In 2026 this is LLM${pad2(info.now)}`, value: successor.title, href: `/2026/${successor.n}` },
+];
+const prev = neighbour(-1, 'Previous door');
+const next = neighbour(1, 'Next door');
+---
+
+<ConsoleLayout
+  title={`${title}, 2025 door ${slug}`}
+  {...(data.description !== undefined ? { description: data.description } : {})}
+  canonicalPath={`/2025/${slug}`}
+  type="article"
+  edition="2025"
+  source="2025"
+  {...(data.date ? { publishedTime: data.date.toISOString() } : {})}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    ...(data.description !== undefined ? { description: data.description } : {}),
+    datePublished: data.date?.toISOString(),
+    mainEntityOfPage: new URL(`/2025/${slug}`, Astro.site ?? Astro.url).toString(),
+    publisher: { '@type': 'Organization', name: 'Advent of AI Security' },
+  }}
+>
+  <DoorLayout n={slug} title={title} {...(data.description !== undefined ? { lede: data.description } : {})} archive metas={metas} {...(prev ? { prev } : {})} {...(next ? { next } : {})}>
+    <Content />
+  </DoorLayout>
+</ConsoleLayout>

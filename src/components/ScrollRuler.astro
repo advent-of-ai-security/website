@@ -1,0 +1,159 @@
+---
+import { css } from 'styled-system/css';
+
+const open = { visibility: 'visible', opacity: 1, transform: 'translate(0, -50%)' } as const;
+
+const rail = css({
+  '--tick': '10px',
+  '--edge': '4px',
+  '--over': '8px',
+  position: 'fixed',
+  zIndex: 10,
+  top: '50%',
+  right: 'max(0px, calc(50vw - 644px))',
+  transform: 'translateY(-50%)',
+  opacity: 0,
+  visibility: 'hidden',
+  transition: 'opacity .3s, visibility .3s',
+  '&[data-on]': { opacity: 1, visibility: 'visible' },
+  mdDown: { '--tick': '6px', '--edge': '3px', '--over': '2px' },
+  '& button': {
+    position: 'relative',
+    display: 'flex',
+    flexDir: 'column',
+    alignItems: 'flex-end',
+    gap: '8px',
+    w: '28px',
+    p: '12px var(--edge) 12px 0',
+    background: 'none',
+    border: 0,
+    cursor: 'pointer',
+  },
+  '& button i': { display: 'block', w: 'var(--tick)', h: '2px', background: 'led', transition: 'background .2s' },
+  '& button i[data-read]': { background: 'ink' },
+  '& [data-needle]': {
+    position: 'absolute',
+    inset: '12px var(--edge) 14px auto',
+    w: 'calc(var(--tick) + var(--over))',
+    transform: 'translateY(calc(var(--rail-p, 0) * 100%))',
+    pointerEvents: 'none',
+  },
+  '& [data-needle]::before': { content: '""', display: 'block', h: '2px', background: 'ink' },
+  '& ol': {
+    position: 'absolute',
+    top: '50%',
+    right: '100%',
+    m: 0,
+    p: '8px 0',
+    listStyle: 'none',
+    w: 'max-content',
+    maxW: 'min(340px, calc(100vw - 40px))',
+    maxH: 'calc(100dvh - 32px)',
+    overflowY: 'auto',
+    background: 'read',
+    border: '1px solid {colors.seam}',
+    visibility: 'hidden',
+    opacity: 0,
+    transform: 'translate(8px, -50%)',
+    transition: 'opacity .2s, transform .3s {easings.out}, visibility .3s',
+  },
+  '&:focus-within ol, &[data-open] ol': open,
+  '@media (hover: hover)': { '&:hover ol': open },
+  '& a': {
+    display: 'grid',
+    gridTemplateColumns: '28px minmax(0, 1fr)',
+    alignItems: 'center',
+    minH: '36px',
+    px: '16px',
+    fontSize: '15px',
+    lineHeight: '20px',
+    color: 'mute2',
+    textDecoration: 'none',
+    _hover: { background: 'readout', color: 'ink' },
+    _focusVisible: { outlineOffset: '-2px' },
+  },
+  '@media (pointer: coarse)': { '& a': { minH: '44px' } },
+  '& a[aria-current]': { background: 'readout', color: 'ink', fontWeight: 500 },
+  '& [data-n]': { fontSize: '13px', color: 'mute' },
+  '& [data-name]': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+});
+---
+
+<nav aria-label="Sections" class={rail} data-rail>
+  <ol></ol>
+  <button type="button" aria-label="Sections"><span data-needle></span></button>
+</nav>
+
+<style is:global>
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-rail]');
+  const list = nav?.querySelector('ol');
+  const button = nav?.querySelector('button');
+  const sections = [...document.querySelectorAll<HTMLElement>('main section[id]:has(h2)')];
+
+  if (nav && list && button && sections.length > 1) {
+    const total = sections.length;
+    const span = (key: string, text: string) => {
+      const el = document.createElement('span');
+      el.dataset[key] = '';
+      el.textContent = text;
+      return el;
+    };
+    const close = () => {
+      nav.removeAttribute('data-open');
+      (document.activeElement as HTMLElement | null)?.blur();
+    };
+
+    const links = sections.map((section, i) => {
+      const link = document.createElement('a');
+      link.href = `#${section.id}`;
+      link.append(span('n', String(i + 1).padStart(2, '0')), span('name', section.querySelector('h2')?.textContent?.trim() ?? ''));
+      link.addEventListener('click', close);
+      list.appendChild(document.createElement('li')).append(link);
+      return link;
+    });
+    const ticks = sections.map(() => button.appendChild(document.createElement('i')));
+
+    button.addEventListener('click', () => nav.toggleAttribute('data-open'));
+    addEventListener('pointerdown', (event) => nav.contains(event.target as Node) || nav.removeAttribute('data-open'));
+    addEventListener('keydown', (event) => event.key === 'Escape' && close());
+
+    const update = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+      const line = scrollY + innerHeight * 0.3;
+      const tops = sections.map((section) => section.getBoundingClientRect().top + scrollY);
+      const index = scrollY >= max - 2 ? total - 1 : Math.max(0, tops.findLastIndex((top) => top <= line));
+      const start = tops[index] ?? 0;
+      const end = tops[index + 1] ?? start;
+      const through = end > start ? Math.min(1, Math.max(0, (line - start) / (end - start))) : 0;
+      nav.style.setProperty('--rail-p', String((index + through) / (total - 1)));
+
+      links.forEach((link, i) => {
+        ticks[i]?.toggleAttribute('data-read', i <= index);
+        if (i === index) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      nav.toggleAttribute('data-on', line >= (tops[0] ?? 0) && sections[total - 1]!.getBoundingClientRect().bottom > innerHeight * 0.3);
+    };
+
+    let queued = false;
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
+    };
+    addEventListener('scroll', schedule, { passive: true });
+    new ResizeObserver(schedule).observe(document.body);
+    update();
+  }
+</script>
