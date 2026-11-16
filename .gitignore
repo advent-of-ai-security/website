@@ -29,3 +29,5 @@ pnpm-debug.log*
 
 # panda css output
 styled-system/
+.claude/
+.wrangler/
