@@ -13,7 +13,7 @@ const doors = defineCollection({
 });
 
 const doors2026 = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/2026' }),
+  loader: glob({ pattern: '**/*.mdx', base: '../content/2026' }),
   schema: z.object({
     description: z.string().optional(),
   }),

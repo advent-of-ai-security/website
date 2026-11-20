@@ -16,8 +16,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout website
         uses: actions/checkout@v7
+        with:
+          path: website
+
+      - name: Checkout content
+        uses: actions/checkout@v7
+        with:
+          repository: advent-of-ai-security/content
+          token: ${{ secrets.CONTENT_TOKEN }}
+          path: content
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -30,9 +39,11 @@ jobs:
           bun-version: latest
 
       - name: Install deps
+        working-directory: website
         run: bun install --frozen-lockfile
 
       - name: Build
+        working-directory: website
         run: bun run build
 
       - name: Deploy (Wrangler Action)
@@ -40,4 +51,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: website
           command: deploy
