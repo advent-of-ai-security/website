@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: advent-of-ai-security/content
-          token: ${{ secrets.CONTENT_TOKEN }}
+          ssh-key: ${{ secrets.CONTENT_DEPLOY_KEY }}
           path: content
 
       - name: Setup Node

@@ -32,7 +32,7 @@ The site is a light "console" of keys. Rules:
 - Dev server: `bun run dev`
 - Build: `bun run build` (`panda codegen`, `astro check`, `astro build`)
 - Cloudflare dev: `bun run cf:dev`; deploy: `bun run cf:deploy`
-- CI checks out both repos side by side (`CONTENT_TOKEN` secret: fine-grained PAT with read access to the content repo). Content changes need a redeploy (`workflow_dispatch`).
+- CI checks out both repos side by side (`CONTENT_DEPLOY_KEY` secret: private half of a read-only deploy key on the content repo). Content changes need a redeploy (`workflow_dispatch`).
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript (strict). Indentation: 2 spaces; UTF-8; LF.
