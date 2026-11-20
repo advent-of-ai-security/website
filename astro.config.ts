@@ -7,6 +7,7 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: 'https://advent-of-ai-security.com',
   output: 'server',
+  vite: { resolve: { dedupe: ['vue', '@mlc-ai/web-llm'] } },
 
   adapter: cloudflare(),
   integrations: [
